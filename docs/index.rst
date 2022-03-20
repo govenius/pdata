@@ -104,6 +104,20 @@ In many cases, you would next use code:`divide_into_sweeps` to plot your data ::
   ax.set_yscale('log')
   ax.legend();
 
+Data explorer
+-------------
+
+There are some helpers in :code:`pdata.analysis.dataexplorer` for quick visualization of data sets.
+
+You can use :code:`data_selector` in a Jupyter notebook to create an interactive element for easily selecting data sets from a given directory::
+
+  sel = dataexplorer.data_selector(data_root)
+  display(sel)
+
+Then use :code:`basic_plot` in a separate Jupyter notebook cell to actually generate a plot of S21 vs frequency for the selected data sets::
+
+  dataexplorer.basic_plot(data_root, sel.value, "frequency", "S21", ylog=True)
+
 Data format
 -----------
 
