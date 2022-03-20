@@ -54,9 +54,9 @@ Reading data in analysis scripts
 
 Here is how you read the data back from the above example using DataView::
 
-  from pdata.analysis.dataview import DataView, QcodesData
+  from pdata.analysis.dataview import DataView, PDataSingle
 
-  d = DataView([ QcodesData(data_path), ]) # <-- You could load in multiple data dirs here by adding them to the array
+  d = DataView([ PDataSingle(data_path), ]) # <-- You can concatenate multiple data dirs by adding multiple PDataSingle's to the array
 
   print('Instruments in the snapshot file:')
   print(d.settings()[0][1]['instruments'].keys())

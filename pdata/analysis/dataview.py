@@ -22,9 +22,9 @@ from collections import OrderedDict
 
 UNIX_EPOCH = datetime.datetime(1970, 1, 1, 0, 0, tzinfo = pytz.utc)
 
-class QcodesData():
-    ''' Helper for reading Qcodes data directories.
-        Can be passed to DataView. '''
+class PDataSingle():
+    ''' Class for reading in the contents of a single pdata data directory.
+        Almost always passed on to DataView for actual analysis. '''
 
     def __init__(self, path, convert_timestamps=True):
       self._path = path
@@ -94,8 +94,8 @@ class QcodesData():
           if rowno==0 and convert_timestamps:
             for i,c in enumerate(line.split('\t')):
               try:
-                QcodesData._parse_timestamp(c)
-                converters[i] = lambda x: QcodesData._parse_timestamp(x.decode('utf-8'))
+                PDataSingle._parse_timestamp(c)
+                converters[i] = lambda x: PDataSingle._parse_timestamp(x.decode('utf-8'))
                 logging.info('Column %s appears to contain timestamps. Converting them to seconds since Unix epoch. (Disable by setting convert_timestamps=False.)', i)
               except ValueError:
                 pass # Not a timestamp
@@ -105,7 +105,7 @@ class QcodesData():
 
         npoints = rowno
 
-        self._column_names, self._units = QcodesData._parse_columns_from_header(self._table_header)
+        self._column_names, self._units = PDataSingle._parse_columns_from_header(self._table_header)
         assert len(self._column_names) == ncols, "The number of columns in the header and data do not seem to match."
 
         self._column_name_to_index = dict((self._column_names[i], i) for i in range(len(self._column_names)) )

@@ -33,5 +33,5 @@ Analysis
 .. autoclass:: DataView
     :members:
 
-.. autoclass:: QcodesData
+.. autoclass:: PDataSingle
     :members:
