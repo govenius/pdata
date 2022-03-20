@@ -179,7 +179,7 @@ class PDataSingle():
     @staticmethod
     def _parse_columns_from_header(s):
       try:
-        # Try assuming the "Column name (unit)\t" format in qcodes/utils/procedural_data.py
+        # Try assuming the "Column name (unit)\t" format in pdata
         cols = []
         units = []
         for c in s.split('\t'):
@@ -188,7 +188,7 @@ class PDataSingle():
           units.append(m.group(2))
 
       except AttributeError:
-        # Try assuming qcodes/data/gnuplot_format.py
+        # Try assuming the legacy format used in QCoDeS (qcodes/data/gnuplot_format.py)
         s = s.split('\n')[-2] # Second to last header row contains the tab separated column names
         cols = [ c.strip().strip('"') for c in s.split('\t') ]
         units = [ '' for i in range(len(cols))]
