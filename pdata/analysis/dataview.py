@@ -105,7 +105,12 @@ class PDataSingle():
 
         npoints = rowno
 
-        self._column_names, self._units = PDataSingle._parse_columns_from_header(self._table_header)
+        if not hasattr(self, "_table_header"):
+          logging.warn(f"No header found in tabular data of {self._path}")
+          self._column_names, self._units = [], []
+        else:
+          self._column_names, self._units = PDataSingle._parse_columns_from_header(self._table_header)
+
         assert len(self._column_names) == ncols, "The number of columns in the header and data do not seem to match."
 
         self._column_name_to_index = dict((self._column_names[i], i) for i in range(len(self._column_names)) )
@@ -159,6 +164,7 @@ class PDataSingle():
     def name(self): return os.path.split(self._path)[-1]
     def filename(self): return self._path
     def dimension_names(self): return self._column_names
+    def dimension_units(self): return self._units
     def npoints(self): return len(self._data)
     def data(self): return self._data
 
@@ -217,6 +223,7 @@ class DataView():
                      * filename() # Specifies the path to the main datafile
                                       # (for identification/debugging purpose only)
                      * dimension_names() # List of all data column names
+                     * dimension_units() # List of all data column units
                      * npoints()  # Number of data points/rows.
                      * data()     # 2D ndarray containing all data rows and columns.
                      * comments()  # List of tuples (data_row_no, comment string),
@@ -241,6 +248,7 @@ class DataView():
         if isinstance(data, DataView): # clone
           # these private variables should be immutable so no need to deep copy
           self._dimensions = data._dimensions
+          self._units = data._units
           self._dimension_indices = data._dimension_indices
           self._source_col = data._source_col
           self._comments = data._comments
@@ -261,6 +269,7 @@ class DataView():
 
         try: # see if a single Data object
           self._dimensions = data.dimension_names()
+          self._units = dict(zip(data.dimension_names(), data.dimension_units()))
           unmasked = data.data().copy() if deep_copy else data.data()
           
           if source_column_name != None:
@@ -328,6 +337,9 @@ class DataView():
           # keep only dimensions that could be parsed from all files
           self._dimensions = unmasked.keys()
           unmasked = np.array([unmasked[k] for k in self._dimensions]).T
+
+          # take units from first data set
+          self._units = dict(zip(data[0].dimension_names(), data[0].dimension_units()))
 
           # concatenate comments, adjusting row numbers from Data object rows to the corresponding dataview rows
           lens = np.array(lens)
@@ -400,6 +412,12 @@ class DataView():
         Returns a list of all dimensions, both real and virtual.
         '''
         return list(itertools.chain(self._dimension_indices.keys(), self._virtual_dims.keys()))
+
+    def units(self, d):
+        '''
+        Returns the units for dimension d
+        '''
+        return self._units[d]
 
     def comments(self):
         '''
@@ -673,7 +691,7 @@ class DataView():
         return d
 
     non_numpy_array_warning_given = []
-    def add_virtual_dimension(self, name, fn=None, arr=None, comment_regex=None, from_set=None, dtype=np.float, preparser=None, cache_fn_values=True, return_result=False):
+    def add_virtual_dimension(self, name, units="", fn=None, arr=None, comment_regex=None, from_set=None, dtype=np.float, preparser=None, cache_fn_values=True, return_result=False):
         '''
         Makes a computed vector accessible as self[name].
         The computed vector depends on whether fn, arr or comment_regex is specified.
@@ -796,6 +814,7 @@ class DataView():
           return arr
         else:
           self._virtual_dims[name] = {'fn': fn, 'cached_array': arr}
+          self._units[name] = units
 
     def remove_virtual_dimension(self, name):
         if name in self._virtual_dims.keys():
