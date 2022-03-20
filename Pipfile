@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 numpy = "*"
 jsondiff = "*"
+ipywidgets = "*"
+matplotlib = "*"
 
 [dev-packages]
 

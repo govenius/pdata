@@ -17,7 +17,9 @@ Besides the measurement framework you plan to use (e.g., `QCoDeS
 
   * `NumPy <http://www.numpy.org/>`_
   * `jsondiff <https://pypi.org/project/jsondiff/>`_
-  * `Setuptools <https://setuptools.readthedocs.io/en/latest/>`_
+  * `ipywidgets <https://ipywidgets.readthedocs.io/en/latest/>`_ (for dataexplorer)
+  * `matplotlib <https://matplotlib.org/>`_ (for dataexplorer)
+  * `Setuptools <https://setuptools.readthedocs.io/en/latest/>`_ (for installation)
 
 You are probably using a `Conda environment
 <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_,
