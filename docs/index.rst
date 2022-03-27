@@ -178,10 +178,10 @@ binary package. Therefore the data format is:
 
 .. note::
   Nevertheless, you should *always* read in the data using
-  pdata.analysis.dataview, which provides plenty of useful functions for
+  :code:`pdata.analysis.dataview`, which provides plenty of useful functions for
   automatically parsing data not just from the tabular data stored with
-  add_points(), but also the instrument parameters stored in the JSON
-  files. Because of the latter, it is highly recommended to use dataview
+  :code:`add_points`, but also the instrument parameters stored in the JSON
+  files. Because of the latter, it is highly recommended to use :code:`dataview`
   as a preparser even if you use something else than Python for further
   analysis.
 
