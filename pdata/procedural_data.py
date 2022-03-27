@@ -62,23 +62,22 @@ def run_measurement(get_snapshot,
 class Measurement():
   '''
   Writes data to a data table with fixed columns defined during __init__().
-  These points are stored in tabular_data.dat.
 
-  In addition, the data directory contains the following:
+  The data directory contains the following:
 
-    - All instrument parameters as a JSON dict ("snapshot").
-      * snapshot.json -- parameter snapshot when begin() was called.
-      * snapshot.row-<n>.diff<m>.json -- (json)diff of parameter changes, recorded when the there were <n> data rows in tabular_dat.dat. <m> is a simple counter, in case multiple diffs are created for the same row.
-    - A log.txt file containing a copy of messages from the logging module.
-    - A copy of the Jupyter notebook (.ipynb), if any.
+    * :file:`tabular_data.dat` -- Data table with rows added using :code:`add_points`, and columns defined as arguments of :code:`run_measurement`.
+    * :file:`snapshot.json` -- Instrument parameter snapshot when :code:`run_measurement` started.
+    * :file:`snapshot.row-<n>.diff<m>.json` -- `jsondiff <https://pypi.org/project/jsondiff/>`_ of parameter changes, recorded when the there were <n> data rows in tabular_data.dat. <m> is a simple counter, in case multiple diffs are created for the same row.
+    * :file:`log.txt` -- copy of messages from the logging module.
+    * A copy of the Jupyter notebook (.ipynb) or other measurement script, if possible.
+
+  Optionally, the files may be compressed (.gz or .tar.gz).
 
   Although the format is human readable in the simplest cases, it is
   meant to be parsed programmatically, i.e., by the dataview module
   (analysis/dataview.py).
 
-  Optionally, the files may be compressed (.gz or .tar.gz).
-
-  For an example, see docs/examples/Procedural Data and DataView.ipynb.
+  For more information, see https://pdata.readthedocs.io/en/latest/
   '''
 
   def __init__(self, columns, target_dir=None, get_snapshot=None,

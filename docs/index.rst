@@ -145,8 +145,8 @@ sets::
 
 That will already create a plot similar to the above manually created
 one, but to also add VNA power in the legend, you can add a
-:code:`preprocessor` that adds VNA power as a virtual dimensions so that it
-can be used as a :code:`slowcoordinate` for the plot::
+:code:`preprocessor` that adds VNA power as a virtual dimensions so
+that it can be used as a :code:`slowcoordinate` for the plot::
 
   def add_vdims(dd):
     dd.add_virtual_dimension('VNA power', units="dBm",
@@ -187,12 +187,11 @@ binary package. Therefore the data format is:
 
 Concretely, a data directory contains the following files:
 
-  * :file:`tabular_data.dat` -- Point added with add_points().
-  * :file:`snapshot.json` -- Instrument parameter snapshot when begin() was called.
-  * :file:`snapshot.row-<n>.diff<m>.json` -- (json)diff of parameter changes, recorded when the there were <n> data rows in tabular_dat.dat. <m> is a simple counter, in case multiple diffs are created for the same row.
+  * :file:`tabular_data.dat` -- Data table with rows added using :code:`add_points`, and columns defined as arguments of :code:`run_measurement`.
+  * :file:`snapshot.json` -- Instrument parameter snapshot when :code:`run_measurement` started.
+  * :file:`snapshot.row-<n>.diff<m>.json` -- `jsondiff <https://pypi.org/project/jsondiff/>`_ of parameter changes, recorded when the there were <n> data rows in tabular_data.dat. <m> is a simple counter, in case multiple diffs are created for the same row.
   * :file:`log.txt` -- copy of messages from the logging module.
-  * A copy of the Jupyter notebook (.ipynb) or other measurement
-    script, if possible.
+  * A copy of the Jupyter notebook (.ipynb) or other measurement script, if possible.
 
   Optionally, the files may be compressed (.gz or .tar.gz).
 
