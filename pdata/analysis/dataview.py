@@ -358,7 +358,7 @@ class DataView():
           self._settings = list(itertools.chain.from_iterable(all_settings)) # flatten by one level
 
         self._data = unmasked
-        self._mask = np.zeros(len(unmasked), dtype=np.bool)
+        self._mask = np.zeros(len(unmasked), dtype=bool)
         self._mask_stack = []
 
         self._dimension_indices = dict([(n,i) for i,n in enumerate(self._dimensions)])
@@ -468,7 +468,7 @@ class DataView():
           else:
             self._mask[:] = False
         except:
-          m = np.zeros(len(self._mask), dtype=np.bool)
+          m = np.zeros(len(self._mask), dtype=bool)
           m[mask] = True
           self._mask = m
 
@@ -489,7 +489,7 @@ class DataView():
         #logging.debug("previously unmasked rows = %d" % n)
 
         # new mask for the previously unmasked rows
-        new_mask = np.empty(n, dtype=np.bool); new_mask[:] = unmask_instead
+        new_mask = np.empty(n, dtype=bool); new_mask[:] = unmask_instead
         new_mask[row_mask] = (not unmask_instead)
         #logging.debug("new_mask.sum() = %d" % new_mask.sum())
 
@@ -557,7 +557,7 @@ class DataView():
           self._virtual_dims[name] = { 'fn': dim['fn'], 'cached_array': cached_arr }
 
         # finally remove the obsolete mask(s)
-        self._mask = np.zeros(len(self._data), dtype=np.bool)
+        self._mask = np.zeros(len(self._data), dtype=bool)
         self._mask_stack = []
 
     def single_valued_parameter(self, param):
@@ -638,7 +638,7 @@ class DataView():
         unmask_instead -- unmask the specified sweeps instead, mask everything else
         '''
         sweeps = self.divide_into_sweeps(sweep_dimension)
-        row_mask = np.zeros(len(self[sweep_dimension]), dtype=np.bool)
+        row_mask = np.zeros(len(self[sweep_dimension]), dtype=bool)
         for start,stop in ([sweeps[sl]] if isinstance(sl, int) else sweeps[sl]):
             logging.debug("%smasking start: %d, stop %d" % ('un' if unmask_instead else '',start, stop))
             row_mask[start:stop] = True
@@ -691,7 +691,7 @@ class DataView():
         return d
 
     non_numpy_array_warning_given = []
-    def add_virtual_dimension(self, name, units="", fn=None, arr=None, comment_regex=None, from_set=None, dtype=np.float, preparser=None, cache_fn_values=True, return_result=False):
+    def add_virtual_dimension(self, name, units="", fn=None, arr=None, comment_regex=None, from_set=None, dtype=float, preparser=None, cache_fn_values=True, return_result=False):
         '''
         Makes a computed vector accessible as self[name].
         The computed vector depends on whether fn, arr or comment_regex is specified.
@@ -734,7 +734,7 @@ class DataView():
               if issubclass(dtype, str):
                 raise Exception('Do not store strings in numpy arrays (because it "works" but the behavior is unintuitive, i.e. only the first character is stored if you just specify dtype=str).')
               vals = np.zeros(len(self._mask), dtype=dtype)
-              if dtype == np.float: vals += np.nan # initialize to NaN instead of zeros
+              if dtype == float: vals += np.nan # initialize to NaN instead of zeros
             except:
               if not name in self.non_numpy_array_warning_given:
                 logging.warn("%s does not seem to be a numpy data type. The virtual column '%s' will be a native python array instead, which may be very slow." % (str(dtype), name))
