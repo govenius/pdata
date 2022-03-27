@@ -50,14 +50,15 @@ def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate
   It can be used to, e.g., add virtual columns.
   """
 
-  # Read data in
+  # Concatenate all specified data dirs into one DataView
   d = DataView([ PDataSingle(os.path.join(base_dir, n)) for n in data_dirs ])
 
-  # Preprocess data
+  # Preprocess data (e.g. add virtual dimensions)
   d = preprocessor(d)
 
-  assert x in d.dimensions(), "{x} is not a column in the data: {data_dirs}"
-  assert y in d.dimensions(), "{y} is not a column in the data: {data_dirs}"
+  assert x in d.dimensions(), f"{x} is not a column in the data: {data_dirs}"
+  assert y in d.dimensions(), f"{y} is not a column in the data: {data_dirs}"
+  if slowcoordinate!=None: assert slowcoordinate in d.dimensions(), f"{slowcoordinate} is not a column in the data: {data_dirs}"
 
   # Plot the results
   import matplotlib
@@ -68,7 +69,7 @@ def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate
   for s in d.divide_into_sweeps(x if slowcoordinate==None else slowcoordinate):
     dd = d.copy(); dd.mask_rows(s, unmask_instead=True)
     ax.plot(dd['frequency'], dd['S21'],
-            label = None if slowcoordinate==None else f"{dd.single_valued_parameter(slowcoordinate)} ({dd.units(slowcoordinate)})" )
+            label = None if slowcoordinate==None else f"{dd.single_valued_parameter(slowcoordinate)} {dd.units(slowcoordinate)}" )
 
   ax.set(xlabel=f'{x} ({dd.units(x)})', ylabel=f'{y} ({dd.units(y)})')
 

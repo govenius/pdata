@@ -800,7 +800,7 @@ class DataView():
             set_vals(up_to_row=len(vals), new_val=None)
             
 
-            return self.add_virtual_dimension(name, arr=vals, return_result=return_result)
+            return self.add_virtual_dimension(name, units=units, arr=vals, return_result=return_result)
 
         if cache_fn_values and arr is None:
             old_mask = self.mask().copy() # backup the mask
@@ -808,7 +808,7 @@ class DataView():
             vals = fn(self)
             self.mask_rows(old_mask) # restore the mask
 
-            return self.add_virtual_dimension(name, arr=vals, cache_fn_values=False, return_result=return_result)
+            return self.add_virtual_dimension(name, units=units, arr=vals, cache_fn_values=False, return_result=return_result)
 
         if return_result:
           return arr
