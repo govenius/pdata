@@ -103,6 +103,7 @@ Which outputs the following from the print statements::
 Often, you would next use :code:`divide_into_sweeps` to plot your data
 as sweeps using your favorite plotting library::
 
+  import matplotlib.pyplot as plt
   fig, ax = plt.subplots()
 
   for s in d.divide_into_sweeps('frequency'):
@@ -115,19 +116,53 @@ as sweeps using your favorite plotting library::
   ax.set_yscale('log')
   ax.legend();
 
+.. image:: ./_static/index_S21-example_manual.png
+   :alt: S21 vs frequency
+   :scale: 80 %
+
 Data explorer
 -------------
 
-There are some helpers in :code:`pdata.analysis.dataexplorer` for quick visualization of data sets.
+There are some helpers in :code:`pdata.analysis.dataexplorer` for
+quick visualization of data sets.
 
-You can use :code:`data_selector` in a Jupyter notebook to create an interactive element for easily selecting data sets from a given directory::
+You can use :code:`data_selector` in a Jupyter notebook to create an
+interactive element for easily selecting data sets from a given
+directory::
 
   sel = dataexplorer.data_selector(data_root)
   display(sel)
 
-Then use :code:`basic_plot` in a separate Jupyter notebook cell to actually generate a plot of S21 vs frequency for the selected data sets::
+.. image:: ./_static/index_dataset-selector.png
+   :alt: interactive data set selector
+   :scale: 100 %
+
+Then use :code:`basic_plot` in a separate Jupyter notebook cell to
+actually generate a plot of S21 vs frequency for the selected data
+sets::
 
   dataexplorer.basic_plot(data_root, sel.value, "frequency", "S21", ylog=True)
+
+That will already create a plot similar to the above manually created
+one, but to also add VNA power in the legend, you can add a
+:code:`preprocessor` that adds VNA power as a virtual dimensions so that it
+can be used as a :code:`slowcoordinate` for the plot::
+
+  def add_vdims(dd):
+    dd.add_virtual_dimension('VNA power', units="dBm",
+                              from_set=('instruments', 'vna',
+                                        'parameters', 'power', 'value'))
+    return dd
+
+  dataexplorer.basic_plot(data_root, sel.value,
+                          "frequency", "S21",
+                          slowcoordinate="VNA power",
+                          ylog=True,
+                          preprocessor=add_vdims)
+
+.. image:: ./_static/index_S21-example_dataexplorer.png
+   :alt: S21 vs frequency, produced with data explorer
+   :scale: 80 %
 
 Data format
 -----------
