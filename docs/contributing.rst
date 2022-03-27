@@ -17,5 +17,6 @@ maintainable in the long term:
 Testing
 -------
 
-Currently pdata does not include proper unit tests. Contributions
-adding tests are highly welcome.
+Currently pdata includes very limited automated testing (see
+:file:`test` subdirectory). Contributions adding tests are highly
+welcome.
