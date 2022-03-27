@@ -6,18 +6,25 @@
 pdata: Simple-to-understand and robust data storage for experimental data
 =========================================================================
 
-This procedural data storage package provides a self-contained
-interface for storing experimental data using an approach that is
-independent from intricasies of broader measurement frameworks. The
-main goals are to provide an interface that is:
+This *procedural* data storage package provides a self-contained
+interface **focused exclusively on storing and reading experimental
+data**, using an approach **independent of the specific measurement
+framework used for instrument control**.
 
-  * Maximizes the amount of automatically stored metadata, both at the start of a measurement but also changes to parameters **during** the measurement.
-  * "Procedural" rather than "functional" in terms of the API the experimenter sees, as procedural programming tends to be easier to understand for a typical experimental physicist who is not a thoroughly trained programmer.
+The main goals are to provide an interface that:
+
+  * Maximizes the amount of automatically stored metadata, without relying on the experimenter specifying which values are worthy of saving.
+  * Is "procedural" rather than "functional" in terms of the API the experimenter sees, as procedural programming tends to be easier to understand for a typical experimental physicist who is not a thoroughly trained programmer.
   * The API aims to be self-explanatory, wherever possible.
 
-In practice, this means that pdata has an explicit add_points(<new
-data points>) function that adds new points. In addition pdata saves a
-diff of instrument parameters each time add_points() is called.
+In practice, the experimenter calls an explicit :code:`add_points(<new
+data points>)` function to add rows to a traditional table of data
+points, with user-defined columns. In the background, **pdata
+automatically records all changes to instrument parameters**, each
+time :code:`add_points` is called.
+
+In addition, pdata provides useful helpers for reading back the
+automatically recorded instrument parameters.
 
 Saving data in measurement script
 ---------------------------------
