@@ -40,11 +40,14 @@ The essential part of running the measurement is::
   import qcodes.station
   get_qcodes_instrument_snapshot = lambda s=qcodes.station.Station.default: s.snapshot(update=True)
 
+  from pdata.procedural_data import run_measurement
+
   # Columns are specified as (<name>, <unit>), or just <name> if the quantity is dimensionless.
   with run_measurement(get_qcodes_instrument_snapshot,
                        columns = [("frequency", "Hz"),
                                   "S21"],
-                       name='power-sweep', data_base_dir=data_root) as m:
+                       name='power-sweep', # <-- arbitrary str descriptive of measurement type
+                       data_base_dir=data_root) as m:
 
     logging.warning('This test warning will (also) end up in log.txt within the data dir.')
 
@@ -97,7 +100,8 @@ Which outputs the following from the print statements::
 
   Sweeps based on a per-sweep-swept parameter: [slice(0, 41, None), slice(41, 82, None), slice(82, 123, None)]
 
-In many cases, you would next use code:`divide_into_sweeps` to plot your data ::
+Often, you would next use :code:`divide_into_sweeps` to plot your data
+as sweeps using your favorite plotting library::
 
   fig, ax = plt.subplots()
 
