@@ -17,6 +17,8 @@ Besides the measurement framework you plan to use (e.g., `QCoDeS
 
   * `NumPy <http://www.numpy.org/>`_
   * `jsondiff <https://pypi.org/project/jsondiff/>`_
+  * `pytz <https://pypi.org/project/pytz/>`_
+  *  `requests <https://pypi.org/project/requests/>`_, `ipykernel <https://pypi.org/project/ipykernel/>`_, `ipython <https://pypi.org/project/ipython/>`_, `notebook <https://pypi.org/project/notebook/>`_ (for storing .ipynb measurement scripts)
   * `ipywidgets <https://ipywidgets.readthedocs.io/en/latest/>`_ (for dataexplorer)
   * `matplotlib <https://matplotlib.org/>`_ (for dataexplorer)
   * `Setuptools <https://setuptools.readthedocs.io/en/latest/>`_ (for installation)
@@ -26,7 +28,3 @@ You are probably using a `Conda environment
 or some other way of managing the package dependencies for your
 broader measurement framework, so make sure those packages are in that
 environment.
-
-If not, in Ubuntu 20.04 you can do::
-
-  sudo apt-get install python3-numpy python3-jsondiff python3-setuptools
