@@ -21,5 +21,5 @@ time :code:`add_points` is called.
 In addition, pdata provides useful helpers for reading back the
 automatically recorded instrument parameters.
 
-See the `documentation <http://pdata.readthedocs.io>`_ at RTD (or the
-`docs subdirectory <docs>`_) for instructions on getting started.
+See the `documentation <http://pdata.readthedocs.io>`_ at RTD for
+instructions on getting started.
