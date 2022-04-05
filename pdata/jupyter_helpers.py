@@ -4,6 +4,8 @@ Joonas Govenius, 2019-2022
 Helper functions related to interacting with Jupyter.
 '''
 
+from pdata._metadata import __version__
+
 def get_notebook_name():
   """
   Return the full path of the Jupyter notebook, if this runs within Jupyter.

@@ -5,3 +5,5 @@ Reading data sets is handled by functions in pdata.analysis
 
 See https://pdata.readthedocs.io/ for documentation and examples.
 """
+
+from pdata._metadata import __version__

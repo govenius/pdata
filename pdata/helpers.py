@@ -4,6 +4,8 @@ Joonas Govenius, 2019-2022
 Short miscellaneous helpers.
 '''
 
+from pdata._metadata import __version__
+
 import json
 from typing import Any
 

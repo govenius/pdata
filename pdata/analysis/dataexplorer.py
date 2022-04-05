@@ -4,6 +4,8 @@ Module for quick data visualization helpers.
 Note that pdata is **not** meant to be a fully-featured plotting utility.
 '''
 
+from pdata._metadata import __version__
+
 import os
 import re
 from pdata.analysis.dataview import DataView, PDataSingle

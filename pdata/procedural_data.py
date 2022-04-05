@@ -2,6 +2,8 @@
 Class for storing measurement data.
 """
 
+from pdata._metadata import __version__
+
 import os
 import numpy as np
 import time

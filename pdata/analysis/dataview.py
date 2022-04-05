@@ -2,6 +2,8 @@
 Class for post-processing measurement data.
 '''
 
+from pdata._metadata import __version__
+
 import os
 import time
 import numpy as np
