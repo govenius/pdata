@@ -70,7 +70,7 @@ def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate
 
   for s in d.divide_into_sweeps(x if slowcoordinate==None else slowcoordinate):
     dd = d.copy(); dd.mask_rows(s, unmask_instead=True)
-    ax.plot(dd['frequency'], dd['S21'],
+    ax.plot(dd[x], dd[y],
             label = None if slowcoordinate==None else f"{dd.single_valued_parameter(slowcoordinate)} {dd.units(slowcoordinate)}" )
 
   ax.set(xlabel=f'{x} ({dd.units(x)})', ylabel=f'{y} ({dd.units(y)})')
