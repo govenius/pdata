@@ -52,6 +52,9 @@ def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate
   It can be used to, e.g., add virtual columns.
   """
 
+  # Also accept a single path as a string
+  if isinstance(data_dirs, str): data_dirs = [ data_dirs ]
+
   # Concatenate all specified data dirs into one DataView
   d = DataView([ PDataSingle(os.path.join(base_dir, n)) for n in data_dirs ])
 
