@@ -79,3 +79,5 @@ def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate
   if ylog: ax.set_yscale('log')
 
   if slowcoordinate!=None: ax.legend();
+
+  return fig
