@@ -621,7 +621,7 @@ class DataView():
           for i in range(len(change_in_sign)-1, 0, -1):
             if change_in_sign[i]-change_in_sign[i-1] == 1: del change_in_sign[i]
 
-          if len(change_in_sign) == 0: return np.array([[0, len(sdim)]])
+          if len(change_in_sign) == 0: return [ slice(0, len(sdim)) ]
 
           start_indices = np.concatenate(([0], change_in_sign))
           stop_indices  = np.concatenate((change_in_sign, [len(sdim)]))
@@ -629,7 +629,7 @@ class DataView():
           sweeps = np.concatenate((start_indices, stop_indices)).reshape((2,-1)).T
         else:
           change_in_sdim = 1 + np.array(np.where(dx != 0)).reshape((-1))
-          if len(change_in_sdim) == 0: return np.array([[0, len(sdim)]])
+          if len(change_in_sdim) == 0: return [ slice(0, len(sdim)) ]
 
           start_indices = np.concatenate(([0], change_in_sdim))
           stop_indices  = np.concatenate((change_in_sdim, [len(sdim)]))
