@@ -636,7 +636,7 @@ class DataView():
         
           sweeps = np.concatenate((start_indices, stop_indices)).reshape((2,-1)).T
 
-        return [ slice(s,e) for s,e in sweeps ]
+        return [ slice(max(s, 0), min(e, len(sdim))) for s,e in sweeps ]
 
     def mask_sweeps(self, sweep_dimension, sl, unmask_instead=False):
         '''
