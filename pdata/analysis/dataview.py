@@ -576,17 +576,24 @@ class DataView():
         return params
 
     def divide_into_sweeps(self, sweep_dimension, use_sweep_direction = None):
-        '''
-        Divide the rows into "sweeps" based on a changing value of column 'sweep_dimension'
-        or based on changing direction of 'sweep_dimension'. If use_sweep_direction is None,
-        the method tries to figure out which one is more reasonable.
+        '''Divide the rows into "sweeps" based on a monotonously increasing
+        or decreasing value of column "sweep_dimension", if use_sweep_direction==True.
 
-        Sequences of four or more points with a constant value of 'sweep_dimension' are also
-        considered a sweep.
-        
-        Returns a sequence of tuples indicating the start and end of each sweep.
+        If use_sweep_direction==False, sequences of points where
+        "sweep_dimension" stays constant are considered sweeps. This
+        is useful for splitting the data into sweeps based on a slowly
+        varying parameter, e.g. a gate voltage set point that is
+        changed between IV curve sweeps.
 
-        Note that the indices are relative to the currently _unmasked_ rows only.
+        If use_sweep_direction is None, this function tries to figure
+        out which one is more reasonable.
+
+        Returns a sequence of slices indicating the start and end of
+        each sweep.
+
+        Note that the indices are relative to the currently _unmasked_
+        rows only.
+
         '''
         sdim = self[sweep_dimension]
 
