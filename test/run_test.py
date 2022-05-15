@@ -51,6 +51,19 @@ class TestSavingAndAnalysis(unittest.TestCase):
         VNA_instrument._power = p  # <-- this new value gets automatically stored in the data since its in the snapshot
         m.add_points({'frequency': freqs, 'S21': VNA_instrument()})
 
+    with run_measurement(get_instrument_snapshot,
+                         columns = [("frequency", "Hz"),
+                                    "S21"],
+                         name='power-sweep',
+                         data_base_dir=self._data_root) as m:
+
+      self._single_row_datadir = m.path()
+      logging.info(f'This info message will (also) end up in log.txt within the data dir {m.path()}.')
+
+      for p in [-30]:
+        VNA_instrument._power = p  # <-- this new value gets automatically stored in the data since its in the snapshot
+        m.add_point({'frequency': freqs[0], 'S21': VNA_instrument()[0]})
+
   def tearDown(self):
     pass
     #import sys
@@ -85,7 +98,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
     # Test the graphical dataset selector
     sel = dataexplorer.data_selector(self._data_root)
-    self.assertTrue(len(sel.options) == 1)
+    self.assertTrue(len(sel.options) == 2)
     self.assertTrue(sel.options[0].endswith("power-sweep"))
     self.assertTrue(len(sel.value) == 1)
     self.assertTrue(sel.value[0].endswith("power-sweep"))
@@ -133,6 +146,16 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue(max(np.abs(d["VNA power"][:len(expected_freqs)] / expected_VNA_powers[0] - 1)) < 1e-10)
     self.assertTrue(max(np.abs(d["VNA power"][-len(expected_freqs):] / expected_VNA_powers[-1] - 1)) < 1e-10)
 
+  def test_004_reading_single_row_data(self):
+    """ Read back the data saved on disk using dataview. """
+    # Test reading the data using DataView
+    d = DataView([ PDataSingle(self._single_row_datadir), ])
+
+    # Check frequencies
+    expected_freqs = np.linspace(5.9e9, 6.1e9, 41)[:1]
+    self.assertTrue(len(d["frequency"]) == len(expected_freqs))
+    self.assertTrue(max(np.abs( np.unique(d["frequency"]) / expected_freqs - 1 )) < 1e-10)
+
   def test_003_divide_into_sweeps_and_masking(self):
     """ Read back the data saved on disk using dataview. """
     # Test reading the data using DataView
@@ -168,7 +191,6 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue(max(np.abs(d["frequency"] / expected_freqs[:1] - 1)) < 1e-10)
     check_correctness(d.divide_into_sweeps("frequency"), [ slice(0, 1, None) ])
     check_correctness(d.divide_into_sweeps("VNA power"), [ slice(0, 1, None) ])
-
 
 if __name__ == '__main__':
   unittest.main(exit=False)

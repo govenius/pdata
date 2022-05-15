@@ -125,6 +125,9 @@ class PDataSingle():
                                    converters=converters,
                                    dtype=float) # Assume all columns contain floats
 
+        # If the data contains just a single point, genfromtxt returns a 1D vector instead of a 2D array, so convert it to 2D
+        if len(self._data.shape) == 1: self._data = np.array([ self._data ])
+
         assert len(self._data) >= npoints, 'Unexcepted number of data rows: %s vs %s' % (len(self._data), npoints)
 
         if len(self._data) > 0:
