@@ -125,10 +125,10 @@ class PDataSingle():
                                    converters=converters,
                                    dtype=float) # Assume all columns contain floats
 
-        assert len(self._data) == npoints, 'Unexcepted number of data rows: %s vs %s' % (len(self._data), npoints)
+        assert len(self._data) >= npoints, 'Unexcepted number of data rows: %s vs %s' % (len(self._data), npoints)
 
         if len(self._data) > 0:
-          assert len(self._data[0]) == ncols, 'Unexcepted number of data columns: %s vs %s' % (len(self._data), npoints)
+          assert len(self._data[0]) == ncols, 'Unexcepted number of data columns: %s vs %s' % (len(self._data[0]), ncols)
 
 
       ###########################################################
