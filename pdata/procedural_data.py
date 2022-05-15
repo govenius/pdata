@@ -318,11 +318,14 @@ class Measurement():
 
   def _copy_jupyter_notebook(self):
     ''' Saves the current notebook (if any) and copies it to the data directory. '''
-    fname = pdata.jupyter_helpers.get_notebook_name()
-    if fname == None: return # Not running within Jupyter
+    try:
+      fname = pdata.jupyter_helpers.get_notebook_name()
+      if fname == None: return # Not running within Jupyter
 
-    pdata.jupyter_helpers.save_notebook()
-    shutil.copyfile(fname, os.path.join(self._target_dir, os.path.split(fname)[1]))
+      pdata.jupyter_helpers.save_notebook()
+      shutil.copyfile(fname, os.path.join(self._target_dir, os.path.split(fname)[1]))
+    except:
+      logging.exception(f"Failed to copy measurement Jupyter notebook to {self.path()}. Starting experiment anyway.")
 
   def _write_readme(self):
     '''
