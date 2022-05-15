@@ -487,7 +487,7 @@ class DataView():
           d.mask_rows(np.abs(d['I_source']) > 1e-6)
         '''
         old_mask = self._mask
-        n = (~old_mask).astype(np.int).sum() # no. of previously unmasked entries
+        n = (~old_mask).astype(int).sum() # no. of previously unmasked entries
         #logging.debug("previously unmasked rows = %d" % n)
 
         # new mask for the previously unmasked rows
@@ -499,7 +499,7 @@ class DataView():
         full_mask = old_mask.copy()
         full_mask[~old_mask] = new_mask
 
-        logging.debug("# of masked/unmasked rows = %d/%d" % (full_mask.astype(np.int).sum(), (~full_mask).astype(np.int).sum()))
+        logging.debug("# of masked/unmasked rows = %d/%d" % (full_mask.astype(int).sum(), (~full_mask).astype(int).sum()))
         self.set_mask(full_mask)
 
     def push_mask(self, mask, unmask_instead = False):
@@ -540,7 +540,7 @@ class DataView():
         self._data = self._data[~(self._mask),:]
         
         # but we have to also adjust the comment & settings line numbers
-        s = np.cumsum(self._mask.astype(np.int))
+        s = np.cumsum(self._mask.astype(int))
         def n_masked_before_line(lineno): return s[max(0, min(len(s)-1, lineno-1))]
         self._comments = [ (max(0,lineno-n_masked_before_line(lineno)), comment) for lineno,comment in self._comments ]
         self._settings = [ (max(0,lineno-n_masked_before_line(lineno)), setting) for lineno,setting in self._settings ]
@@ -604,7 +604,7 @@ class DataView():
           dx = np.sign(sdim[1:] - sdim[:-1])
 
         if use_sweep_direction == None:
-          use_sweep_direction = ( np.abs(dx).astype(np.int).sum() > len(dx)/4. )
+          use_sweep_direction = ( np.abs(dx).astype(int).sum() > len(dx)/4. )
 
         if use_sweep_direction:
           logging.info("Assuming '%s' is swept." % sweep_dimension)
@@ -614,7 +614,7 @@ class DataView():
         if use_sweep_direction:
           for i in range(1,len(dx)):
               if i+1 < len(dx) and dx[i] == 0: dx[i]=dx[i+1] # this is necessary to detect changes in direction, when the end point is repeated
-          change_in_sign = (2 + np.array(np.where(dx[1:] * dx[:-1] < 0),dtype=np.int).reshape((-1))).tolist()
+          change_in_sign = (2 + np.array(np.where(dx[1:] * dx[:-1] < 0),dtype=int).reshape((-1))).tolist()
 
           # the direction changing twice in a row means that sweeps are being done repeatedly
           # in the same direction.
