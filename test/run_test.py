@@ -12,22 +12,17 @@ from pdata.procedural_data import run_measurement
 from pdata.analysis.dataview import DataView, PDataSingle
 from pdata.analysis import dataexplorer
 
-_data_root = tempfile.mkdtemp(prefix='pdata_test_')
-_last_datadir = None
+lorenzian = lambda f,gamma,f0=6e9: 1/np.pi * (gamma**2 / ((f-f0)**2 + gamma**2))
 
-class TestExamples(unittest.TestCase):
+class TestSavingAndAnalysis(unittest.TestCase):
 
   def setUp(self):
-    pass
-
-  def tearDown(self):
-    pass
-
-  def test_000_saving_data(self):
     """ Create some fake data and save it on disk. """
 
+    self._data_root = tempfile.mkdtemp(prefix='pdata_test_')
+    self._last_datadir = None
+
     freqs = np.linspace(5.9e9, 6.1e9, 41)
-    lorenzian = lambda f,gamma,f0=6e9: 1/np.pi * (gamma**2 / ((f-f0)**2 + gamma**2))
 
     def VNA_instrument():
       """ Fake VNA "instrument" that retuns a list of |S21| that depends on a power parameter. """
@@ -47,18 +42,30 @@ class TestExamples(unittest.TestCase):
                          columns = [("frequency", "Hz"),
                                     "S21"],
                          name='power-sweep',
-                         data_base_dir=_data_root) as m:
+                         data_base_dir=self._data_root) as m:
 
-      _last_datadir = m.path()
+      self._last_datadir = m.path()
       logging.info(f'This info message will (also) end up in log.txt within the data dir {m.path()}.')
 
       for p in [-30, -20, -10]:
         VNA_instrument._power = p  # <-- this new value gets automatically stored in the data since its in the snapshot
         m.add_points({'frequency': freqs, 'S21': VNA_instrument()})
 
+  def tearDown(self):
+    pass
+    #import sys
+    #print ('\nTests finished.\nPress enter to delete the test data dir created '
+    #       f'in the process: {self._data_root}')
+    #sys.stdin.read(1)
+    #shutil.rmtree(self._data_root)
+
+  def test_000_dataset_files(self):
+    """ Check that the data set written on disk contains the expected files """
+    assert self._last_datadir!=None, "This test can only be ran after saving a data set on disk."
+
     original_dir = os.path.abspath('.')
     try:
-      os.chdir(_last_datadir)
+      os.chdir(self._last_datadir)
 
       # Check that we have the files we expect in the data dir
       files = os.listdir('.')
@@ -72,19 +79,21 @@ class TestExamples(unittest.TestCase):
     finally:
       os.chdir(original_dir)
 
-  #def test_001_reading_data(self):
-  #  """ Read back the data saved on disk. """
-    assert _last_datadir!=None, "This test can only be ran after running test_saving_data()."
+  def test_001_dataexplorer_selector(self):
+    """ Test that data_selector returns something reasonable. """
+    assert self._last_datadir!=None, "This test can only be ran after saving a data set on disk."
 
     # Test the graphical dataset selector
-    sel = dataexplorer.data_selector(_data_root)
+    sel = dataexplorer.data_selector(self._data_root)
     self.assertTrue(len(sel.options) == 1)
     self.assertTrue(sel.options[0].endswith("power-sweep"))
     self.assertTrue(len(sel.value) == 1)
     self.assertTrue(sel.value[0].endswith("power-sweep"))
 
+  def test_002_reading_data(self):
+    """ Read back the data saved on disk using dataview. """
     # Test reading the data using DataView
-    d = DataView([ PDataSingle(_last_datadir), ]) # <-- You can concatenate multiple data dirs by adding multiple PDataSingle's to the array
+    d = DataView([ PDataSingle(self._last_datadir), ])
 
     # Check sanity of initial snapshot
     self.assertTrue("VNA1" in d.settings()[0][1]['instruments'].keys())
@@ -126,9 +135,3 @@ class TestExamples(unittest.TestCase):
 
 if __name__ == '__main__':
   unittest.main(exit=False)
-
-  #import sys
-  #print ('\nTests finished.\nPress enter to delete the test data dir created '
-  #       f'in the process: {_data_root}')
-  #sys.stdin.read(1)
-  #shutil.rmtree(_data_root)
