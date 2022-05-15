@@ -20,7 +20,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
     """ Create some fake data and save it on disk. """
 
     self._data_root = tempfile.mkdtemp(prefix='pdata_test_')
-    self._last_datadir = None
+    self._typical_datadir = None
 
     freqs = np.linspace(5.9e9, 6.1e9, 41)
 
@@ -44,7 +44,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
                          name='power-sweep',
                          data_base_dir=self._data_root) as m:
 
-      self._last_datadir = m.path()
+      self._typical_datadir = m.path()
       logging.info(f'This info message will (also) end up in log.txt within the data dir {m.path()}.')
 
       for p in [-30, -20, -10]:
@@ -61,11 +61,11 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
   def test_000_dataset_files(self):
     """ Check that the data set written on disk contains the expected files """
-    assert self._last_datadir!=None, "This test can only be ran after saving a data set on disk."
+    assert self._typical_datadir!=None, "This test can only be ran after saving a data set on disk."
 
     original_dir = os.path.abspath('.')
     try:
-      os.chdir(self._last_datadir)
+      os.chdir(self._typical_datadir)
 
       # Check that we have the files we expect in the data dir
       files = os.listdir('.')
@@ -81,7 +81,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
   def test_001_dataexplorer_selector(self):
     """ Test that data_selector returns something reasonable. """
-    assert self._last_datadir!=None, "This test can only be ran after saving a data set on disk."
+    assert self._typical_datadir!=None, "This test can only be ran after saving a data set on disk."
 
     # Test the graphical dataset selector
     sel = dataexplorer.data_selector(self._data_root)
@@ -93,7 +93,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
   def test_002_reading_data(self):
     """ Read back the data saved on disk using dataview. """
     # Test reading the data using DataView
-    d = DataView([ PDataSingle(self._last_datadir), ])
+    d = DataView([ PDataSingle(self._typical_datadir), ])
 
     # Check sanity of initial snapshot
     self.assertTrue("VNA1" in d.settings()[0][1]['instruments'].keys())
@@ -136,7 +136,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
   def test_003_divide_into_sweeps_and_masking(self):
     """ Read back the data saved on disk using dataview. """
     # Test reading the data using DataView
-    d = DataView([ PDataSingle(self._last_datadir), ])
+    d = DataView([ PDataSingle(self._typical_datadir), ])
     d.add_virtual_dimension('VNA power', units="dBm", from_set=('instruments', 'VNA1', 'power'))
 
     def check_correctness(s, correct_sweeps=[slice(0, 41, None), slice(41, 82, None), slice(82, 123, None)]):
