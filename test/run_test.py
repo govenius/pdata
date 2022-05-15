@@ -133,5 +133,42 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue(max(np.abs(d["VNA power"][:len(expected_freqs)] / expected_VNA_powers[0] - 1)) < 1e-10)
     self.assertTrue(max(np.abs(d["VNA power"][-len(expected_freqs):] / expected_VNA_powers[-1] - 1)) < 1e-10)
 
+  def test_003_divide_into_sweeps_and_masking(self):
+    """ Read back the data saved on disk using dataview. """
+    # Test reading the data using DataView
+    d = DataView([ PDataSingle(self._last_datadir), ])
+    d.add_virtual_dimension('VNA power', units="dBm", from_set=('instruments', 'VNA1', 'power'))
+
+    def check_correctness(s, correct_sweeps=[slice(0, 41, None), slice(41, 82, None), slice(82, 123, None)]):
+      self.assertEqual(len(s), len(correct_sweeps))
+      #print(correct_sweeps)
+      #print(s)
+      self.assertTrue(all( sweep == sweep_correct for sweep, sweep_correct in zip(s, correct_sweeps) ))
+
+    check_correctness(d.divide_into_sweeps("frequency", use_sweep_direction=True))
+    check_correctness(d.divide_into_sweeps("VNA power", use_sweep_direction=False))
+
+    # Also test autodetection of use_sweep_direction
+    check_correctness(d.divide_into_sweeps("frequency"))
+    check_correctness(d.divide_into_sweeps("VNA power"))
+
+    # Test the corner case that we have only one sweep
+    d.mask_rows(slice(0, 41, None), unmask_instead=True)
+    check_correctness(d.divide_into_sweeps("frequency"), [ slice(0, 41, None) ])
+    check_correctness(d.divide_into_sweeps("VNA power"), [ slice(0, 41, None) ])
+
+    # Check that the frequencies are also what we expect, after masking
+    expected_freqs = np.linspace(5.9e9, 6.1e9, 41)
+    self.assertTrue(len(d["frequency"]) == len(expected_freqs))
+    self.assertTrue(max(np.abs(d["frequency"] / expected_freqs - 1)) < 1e-10)
+
+    # Test the corner case that we have only one point
+    d.mask_rows(slice(0, 1, None), unmask_instead=True)
+    self.assertTrue(len(d["frequency"]) == 1)
+    self.assertTrue(max(np.abs(d["frequency"] / expected_freqs[:1] - 1)) < 1e-10)
+    check_correctness(d.divide_into_sweeps("frequency"), [ slice(0, 1, None) ])
+    check_correctness(d.divide_into_sweeps("VNA power"), [ slice(0, 1, None) ])
+
+
 if __name__ == '__main__':
   unittest.main(exit=False)
