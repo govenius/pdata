@@ -149,8 +149,10 @@ class Measurement():
   def path(self): return self._target_dir
 
   def begin(self):
-    ''' Creates the data directory, initial snapshot, etc.
-        Must be called before add_points().'''
+    '''Creates the data directory, initial snapshot, etc.  Must be called
+        before add_points(). The run_measurement() context manager
+        calls this automatically.
+    '''
     if self._target_dir == None:
       self._target_dir = str(datetime.datetime.now()).replace(".", "_").replace(":", "-").replace(" ", "_")
 
@@ -182,6 +184,10 @@ class Measurement():
     self._dat_file.write("#\n")
 
   def end(self):
+    '''Ends the measurement, i.e. closes and compresses the data set
+        files. The run_measurement() context manager calls this
+        automatically.
+    '''
     self._close_dat_file()
     self._close_log_file()
 
@@ -224,7 +230,9 @@ class Measurement():
                     snap=snap)
 
   def write_snapshot(self, snap=None):
-    ''' Add a snapshot (delta) file to the data directory. '''
+    '''Add a snapshot (delta) file to the data directory. This is called
+automatically whenever you call add_points(), unless you disabled
+autosnapping.'''
     if snap==None:
       snap = self._get_snapshot()
 

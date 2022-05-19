@@ -15,7 +15,10 @@ Index
 
 
 Measurement
------------
+===========
+
+procedural_data
+---------------
 
 .. automodule:: pdata.procedural_data
 
@@ -26,6 +29,15 @@ Measurement
 
 
 Analysis
+===========
+
+dataexplorer
+------------
+
+.. automodule:: pdata.analysis.dataexplorer
+    :members:
+
+DataView
 --------
 
 .. automodule:: pdata.analysis.dataview
