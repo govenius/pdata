@@ -24,6 +24,8 @@ procedural_data
 
 .. autofunction:: run_measurement
 
+.. autofunction:: abort_measurements
+
 .. autoclass:: Measurement
     :members:
 

@@ -380,9 +380,9 @@ autosnapping.'''
 abort_signal_file = os.path.join(tempfile.gettempdir(),
                                  'pdata.abort-measurements.signal')
 def abort_measurements():
-  '''
-  Abort all measurements running on this machine. Can be called from
-  an independent process running on the same machine.
+  '''Abort all measurements running on this machine after their next
+  call to add_points(), which is presumably a safe time to abort. Can
+  be called from an independent process running on the same machine.
   '''
   with open(abort_signal_file, 'w') as f:
     f.write('Manual abort called for at %s\n' % datetime.datetime.now())

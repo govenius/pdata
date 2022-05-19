@@ -59,6 +59,21 @@ The essential part of running the measurement is::
       freqs, s21 = vna.acquire_S21()
       m.add_points({'frequency': freqs, 'S21': s21})
 
+
+Interrupting a measurement prematurely
+--------------------------------------
+
+You can call :code:`pdata.abort_measurements()` from any other Python
+kernel running on the same machine to controllably abort all ongoing
+measurements on the machine, after their next call to
+:code:`add_points()`.
+
+.. warning:: *Do not interrupt a measurement by restarting the Python
+  kernel*. This can lead to sporadic and difficult-to-debug
+  communication issues in case the kernel was in the middle of
+  communicating with an external measurement instrument. The external
+  instrument can be left waiting for an answer it never gets.
+
 Reading data in analysis scripts
 --------------------------------
 
