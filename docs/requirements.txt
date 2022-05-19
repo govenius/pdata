@@ -1,0 +1,13 @@
+# Specify the dependencies needed for builing the documentation
+# List the same dependencies here as in ../setup.cfg
+# (not sure if there's a more elegant way to read these directly from there)
+numpy
+jsondiff
+pytz
+requests
+ipykernel
+ipython
+ipympl
+notebook
+ipywidgets
+matplotlib
