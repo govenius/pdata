@@ -5,9 +5,6 @@ Most of the functionality is implemented in procedural_data.py and the Measureme
 
 Analysis side is implemented in dataview.py.
 
-Index
------
-
 :ref:`genindex`
 
 .. :ref:`modindex`
@@ -15,10 +12,10 @@ Index
 
 
 Measurement
-===========
+---------------
 
 procedural_data
----------------
++++++++++++++++
 
 .. automodule:: pdata.procedural_data
 
@@ -31,16 +28,16 @@ procedural_data
 
 
 Analysis
-===========
+---------------
 
 dataexplorer
-------------
+++++++++++++
 
 .. automodule:: pdata.analysis.dataexplorer
     :members:
 
 DataView
---------
+++++++++
 
 .. automodule:: pdata.analysis.dataview
 
