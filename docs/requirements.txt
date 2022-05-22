@@ -11,3 +11,4 @@ ipympl
 notebook
 ipywidgets
 matplotlib
+uncertainties
