@@ -749,7 +749,7 @@ class DataView():
               if dtype == float: vals += np.nan # initialize to NaN instead of zeros
             except:
               if not name in self.non_numpy_array_warning_given:
-                logging.warn("%s does not seem to be a numpy data type. The virtual column '%s' will be a native python array instead, which may be very slow." % (str(dtype), name))
+                logging.info("%s does not seem to be a numpy data type. The virtual column '%s' will be a native python array instead, which may be slow." % (str(dtype), name))
                 self.non_numpy_array_warning_given.append(name)
               vals = [None for jjj in range(len(self._mask))]
 
