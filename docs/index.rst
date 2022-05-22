@@ -135,6 +135,29 @@ as sweeps using your favorite plotting library::
    :alt: S21 vs frequency
    :scale: 80 %
 
+Analyzing with other tools (pandas, Matlab, etc.)
+-------------------------------------------------
+
+After you've used DataView to parse the data, you can easily export
+it, including virtual dimensions, to several other tools.
+
+Converting a DataView object :code:`d` to a `Pandas
+<https://pandas.pydata.org/>`_ data frame::
+
+  import pandas # Assumes you've installed pandas
+  dataframe = pandas.DataFrame({col: d[col] for col in d.dimensions()})
+
+You could further convert the Pandas dataframe to a CSV file, which
+can be read by many languages::
+
+  dataframe.to_csv("outputdata.csv")
+
+If you want to work with Matlab, you can use `savemat()
+<https://docs.scipy.org/doc/scipy/reference/generated/scipy.io.savemat.html>`_::
+
+  from scipy.io import savemat # Assumes you've installed scipy
+  savemat("outputdata.mat", {col: d[col] for col in d.dimensions()})
+
 Data explorer
 -------------
 
@@ -191,14 +214,14 @@ binary package. Therefore the data format is:
   * Includes a README file in each data directory.
   * Includes a copy of the measurement script, if possible.
 
-.. note::
-  Nevertheless, you should *always* read in the data using
-  :code:`pdata.analysis.dataview`, which provides plenty of useful functions for
-  automatically parsing data not just from the tabular data stored with
-  :code:`add_points`, but also the instrument parameters stored in the JSON
-  files. Because of the latter, it is highly recommended to use :code:`dataview`
-  as a preparser even if you use something else than Python for further
-  analysis.
+.. warning:: Despite being self-explanatory, you should **always read
+  in the data using** :code:`pdata.analysis.dataview`, which provides
+  plenty of useful functions for automatically parsing data not just
+  from the tabular data stored with :code:`add_points`, but also the
+  instrument parameters stored in the JSON files. Reimplementing these
+  features is almost never a wise use of time. If you want to work
+  with a language other than Python, export the parsed DataView object
+  to a suitable format (see Analyzing with other tools section above).
 
 Concretely, a data directory contains the following files:
 
