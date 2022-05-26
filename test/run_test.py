@@ -38,6 +38,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
         "voltage_source2": { "V": -1.234 },
       }}
 
+    # Create typical dataset
     with run_measurement(get_instrument_snapshot,
                          columns = [("frequency", "Hz"),
                                     "S21"],
@@ -51,6 +52,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
         VNA_instrument._power = p  # <-- this new value gets automatically stored in the data since its in the snapshot
         m.add_points({'frequency': freqs, 'S21': VNA_instrument()})
 
+    # Create dataset with a single row
     with run_measurement(get_instrument_snapshot,
                          columns = [("frequency", "Hz"),
                                     "S21"],
@@ -63,6 +65,25 @@ class TestSavingAndAnalysis(unittest.TestCase):
       for p in [-30]:
         VNA_instrument._power = p  # <-- this new value gets automatically stored in the data since its in the snapshot
         m.add_point({'frequency': freqs[0], 'S21': VNA_instrument()[0]})
+
+
+    # Create dataset with nonstandard/legacy .dat file name
+    with run_measurement(get_instrument_snapshot,
+                         columns = [("frequency", "Hz"),
+                                    "S21"],
+                         name='power-sweep',
+                         data_base_dir=self._data_root,
+                         compress=False) as m:
+
+      self._legacy_datadir = m.path()
+      logging.info(f'This info message will (also) end up in log.txt within the data dir {m.path()}.')
+
+      for p in [-30]:
+        VNA_instrument._power = p  # <-- this new value gets automatically stored in the data since its in the snapshot
+        m.add_points({'frequency': freqs, 'S21': VNA_instrument()})
+
+    shutil.move(os.path.join(self._legacy_datadir, 'tabular_data.dat'),
+                os.path.join(self._legacy_datadir, 'differently_named_data.dat'))
 
   def tearDown(self):
     pass
@@ -146,8 +167,18 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue(max(np.abs(d["VNA power"][:len(expected_freqs)] / expected_VNA_powers[0] - 1)) < 1e-10)
     self.assertTrue(max(np.abs(d["VNA power"][-len(expected_freqs):] / expected_VNA_powers[-1] - 1)) < 1e-10)
 
+  def test_006_reading_legacy_dat_file(self):
+    """ Read data from a .dat file with a nonstandard name. """
+    # Test reading the data using DataView
+    d = DataView([ PDataSingle(self._legacy_datadir), ])
+
+    # Check frequencies
+    expected_freqs = np.linspace(5.9e9, 6.1e9, 41)
+    self.assertTrue(len(d["frequency"]) == len(expected_freqs))
+    self.assertTrue(max(np.abs( np.unique(d["frequency"]) / expected_freqs - 1 )) < 1e-10)
+
   def test_004_reading_single_row_data(self):
-    """ Read back the data saved on disk using dataview. """
+    """ Read a data set containing just a single row. """
     # Test reading the data using DataView
     d = DataView([ PDataSingle(self._single_row_datadir), ])
 
@@ -157,7 +188,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue(max(np.abs( np.unique(d["frequency"]) / expected_freqs - 1 )) < 1e-10)
 
   def test_003_divide_into_sweeps_and_masking(self):
-    """ Read back the data saved on disk using dataview. """
+    """ Test divide_into_sweeps(). """
     # Test reading the data using DataView
     d = DataView([ PDataSingle(self._typical_datadir), ])
     d.add_virtual_dimension('VNA power', units="dBm", from_set=('instruments', 'VNA1', 'power'))

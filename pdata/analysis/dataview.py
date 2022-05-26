@@ -148,7 +148,11 @@ class PDataSingle():
           parse_tabular_data(f)
 
       else:
-        assert False, 'No .dat file found in %s' % os.path.abspath(path)
+        other_dat_files = [ pp for pp in os.scandir(path) if pp.name.endswith(".dat") ]
+        if len(other_dat_files) == 0: assert False, f'No .dat file found in {os.path.abspath(path)}'
+        logging.info(f"No tabular_data.dat(.gz) found in {path}. Using {other_dat_files[0].name} instead.")
+        with open(other_dat_files[0].path, 'r') as f:
+          parse_tabular_data(f)
 
       # Parse initial snapshot
       parse_initial_snapshot()
