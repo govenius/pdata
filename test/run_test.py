@@ -93,7 +93,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
     #sys.stdin.read(1)
     #shutil.rmtree(self._data_root)
 
-  def test_000_dataset_files(self):
+  def test_dataset_files(self):
     """ Check that the data set written on disk contains the expected files """
     assert self._typical_datadir!=None, "This test can only be ran after saving a data set on disk."
 
@@ -113,7 +113,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
     finally:
       os.chdir(original_dir)
 
-  def test_001_dataexplorer_selector(self):
+  def test_dataexplorer_selector(self):
     """ Test that data_selector returns something reasonable. """
     assert self._typical_datadir!=None, "This test can only be ran after saving a data set on disk."
 
@@ -124,7 +124,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue(len(sel.value) == 1)
     self.assertTrue(sel.value[0].endswith("power-sweep"))
 
-  def test_002_reading_data(self):
+  def test_reading_data(self):
     """ Read back the data saved on disk using dataview. """
     # Test reading the data using DataView
     d = DataView([ PDataSingle(self._typical_datadir), ])
@@ -167,7 +167,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue(max(np.abs(d["VNA power"][:len(expected_freqs)] / expected_VNA_powers[0] - 1)) < 1e-10)
     self.assertTrue(max(np.abs(d["VNA power"][-len(expected_freqs):] / expected_VNA_powers[-1] - 1)) < 1e-10)
 
-  def test_007_reading_data_with_comments(self):
+  def test_reading_data_with_comments(self):
     """ Check that parse_comments=True also works. """
     # Test reading the data with parse_comments=True. Not the best data set since it has no such comments...
     d = DataView([ PDataSingle(self._typical_datadir, parse_comments=True), ])
@@ -179,7 +179,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue(max(np.abs(d["frequency"][:len(expected_freqs)] / expected_freqs - 1)) < 1e-10)
     self.assertTrue(max(np.abs(d["frequency"][-len(expected_freqs):] / expected_freqs - 1)) < 1e-10)
 
-  def test_006_reading_legacy_dat_file(self):
+  def test_reading_legacy_dat_file(self):
     """ Read data from a .dat file with a nonstandard name. """
     # Test reading the data using DataView
     d = DataView([ PDataSingle(self._legacy_datadir), ])
@@ -189,7 +189,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue(len(d["frequency"]) == len(expected_freqs))
     self.assertTrue(max(np.abs( np.unique(d["frequency"]) / expected_freqs - 1 )) < 1e-10)
 
-  def test_004_reading_single_row_data(self):
+  def test_reading_single_row_data(self):
     """ Read a data set containing just a single row. """
     # Test reading the data using DataView
     d = DataView([ PDataSingle(self._single_row_datadir), ])
@@ -199,7 +199,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue(len(d["frequency"]) == len(expected_freqs))
     self.assertTrue(max(np.abs( np.unique(d["frequency"]) / expected_freqs - 1 )) < 1e-10)
 
-  def test_003_divide_into_sweeps_and_masking(self):
+  def test_divide_into_sweeps_and_masking(self):
     """ Test divide_into_sweeps(). """
     # Test reading the data using DataView
     d = DataView([ PDataSingle(self._typical_datadir), ])
@@ -235,7 +235,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
     check_correctness(d.divide_into_sweeps("frequency"), [ slice(0, 1, None) ])
     check_correctness(d.divide_into_sweeps("VNA power"), [ slice(0, 1, None) ])
 
-  def test_005_json_export(self):
+  def test_json_export(self):
     """ Test that exporting the dataview object to JSON works. """
     # Test reading the data using DataView
     d = DataView([ PDataSingle(self._typical_datadir), ])
