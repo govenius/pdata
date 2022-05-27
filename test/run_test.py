@@ -167,6 +167,18 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue(max(np.abs(d["VNA power"][:len(expected_freqs)] / expected_VNA_powers[0] - 1)) < 1e-10)
     self.assertTrue(max(np.abs(d["VNA power"][-len(expected_freqs):] / expected_VNA_powers[-1] - 1)) < 1e-10)
 
+  def test_007_reading_data_with_comments(self):
+    """ Check that parse_comments=True also works. """
+    # Test reading the data with parse_comments=True. Not the best data set since it has no such comments...
+    d = DataView([ PDataSingle(self._typical_datadir, parse_comments=True), ])
+
+    # Check frequencies
+    expected_freqs = np.linspace(5.9e9, 6.1e9, 41)
+    self.assertTrue(len(d["frequency"]) == 3*len(expected_freqs))
+    self.assertTrue(max(np.abs( np.unique(d["frequency"]) / expected_freqs - 1 )) < 1e-10)
+    self.assertTrue(max(np.abs(d["frequency"][:len(expected_freqs)] / expected_freqs - 1)) < 1e-10)
+    self.assertTrue(max(np.abs(d["frequency"][-len(expected_freqs):] / expected_freqs - 1)) < 1e-10)
+
   def test_006_reading_legacy_dat_file(self):
     """ Read data from a .dat file with a nonstandard name. """
     # Test reading the data using DataView

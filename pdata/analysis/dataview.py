@@ -28,7 +28,16 @@ class PDataSingle():
     ''' Class for reading in the contents of a single pdata data directory.
         Almost always passed on to DataView for actual analysis. '''
 
-    def __init__(self, path, convert_timestamps=True):
+    def __init__(self, path, convert_timestamps=True, parse_comments=False):
+      '''Parse data stored in the specified directory path.
+
+         convert_timestamps --> Convert values that look like time
+         stamps into seconds since Unix epoch.
+
+         parse_comments --> Parse comments placed between data
+         rows. In the current implementation, parsing the comments
+         requires a separate pass through the data.
+      '''
       self._path = path
 
       def parse_initial_snapshot():
@@ -105,7 +114,8 @@ class PDataSingle():
           rowno += 1
           comment = ""
 
-        npoints = rowno
+          # Done parsing the header. We can stop here if parsing comments is not needed.
+          if not parse_comments: break
 
         if not hasattr(self, "_table_header"):
           logging.warn(f"No header found in tabular data of {self._path}")
@@ -128,7 +138,10 @@ class PDataSingle():
         # If the data contains just a single point, genfromtxt returns a 1D vector instead of a 2D array, so convert it to 2D
         if len(self._data.shape) == 1: self._data = np.array([ self._data ])
 
-        assert len(self._data) >= npoints, 'Unexcepted number of data rows: %s vs %s' % (len(self._data), npoints)
+        if parse_comments:
+          # rowno should equal the number of data rows, if comments were parsed and
+          # no new data was added between the two passes through the file.
+          assert len(self._data) >= rowno, 'Unexcepted number of data rows: %s vs %s' % (len(self._data), rowno)
 
         if len(self._data) > 0:
           assert len(self._data[0]) == ncols, 'Unexcepted number of data columns: %s vs %s' % (len(self._data[0]), ncols)
