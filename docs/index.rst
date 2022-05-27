@@ -29,10 +29,10 @@ automatically recorded instrument parameters.
 Saving data in measurement script
 ---------------------------------
 
-You can find an example of running a measurement using `QCoDeS
-<https://github.com/QCoDeS/Qcodes>`_ for instrument control but pdata
-for data storage and regular python for loops etc. for flow control
-under the :code:`examples` directory.
+Under the :code:`examples` directory,
+you find an example of running a measurement using `QCoDeS
+<https://github.com/QCoDeS/Qcodes>`_ for instrument control, while using pdata
+for data storage and regular Python for flow control (for loops, etc.).
 
 The essential part of running the measurement is::
 
