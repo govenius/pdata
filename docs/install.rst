@@ -20,8 +20,7 @@ If you're not familiar with Conda already, familiarize yourself with
 <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_.
 
 If you're not use Conda, get the latest version from `qithub
-<https://github.com/govenius/pdata>`_, make sure you have the
-:ref:`required packages <requirements>`, and run::
+<https://github.com/govenius/pdata>`_ and run::
 
   pip install .
 
@@ -30,9 +29,12 @@ If you're not use Conda, get the latest version from `qithub
 Requirements
 ------------
 
+Required packages are listed in :file:`setup.cfg`. Here are some of them:
+
   * `NumPy <http://www.numpy.org/>`_
   * `jsondiff <https://pypi.org/project/jsondiff/>`_
   * `pytz <https://pypi.org/project/pytz/>`_
+  * `uncertainties <https://pythonhosted.org/uncertainties/>`_
   *  `requests <https://pypi.org/project/requests/>`_, `ipykernel <https://pypi.org/project/ipykernel/>`_, `ipython <https://pypi.org/project/ipython/>`_, `notebook <https://pypi.org/project/notebook/>`_ (for storing .ipynb measurement scripts)
   * `ipywidgets <https://ipywidgets.readthedocs.io/en/latest/>`_ (for dataexplorer)
   * `matplotlib <https://matplotlib.org/>`_ (for dataexplorer)
