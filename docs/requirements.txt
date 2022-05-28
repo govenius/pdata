@@ -4,6 +4,7 @@
 numpy
 jsondiff
 pytz
+python-dateutil
 requests
 ipykernel
 ipython
