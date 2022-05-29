@@ -8,32 +8,31 @@ from pdata._metadata import __version__
 
 import os
 import re
+import time
 from pdata.analysis.dataview import DataView, PDataSingle
 
-def data_selector(base_dir, name_filter=".", age_filter=None, max_entries=30, sort_order='chronological'):
+def data_selector(base_dir, name_filter=".", age_filter=None, max_entries=30, sort_order='chronological', return_widget=True):
   """
   Create an interactive Jupyter selector widget listing all pdata data directories in base_dir,
   with directory name satisfying the regular expression name_filter.
+
+  If return_widget==False, return a list instead.
   """
 
   # Get list of data dirs
-  def is_valid_pdata_dir(n):
-    return any( os.path.isfile(os.path.join(base_dir, n, f)) for f in ["tabular_data.dat", "tabular_data.dat.gz"] )
+  datadirs = [ n for n in os.listdir(base_dir) if re.search(name_filter, n)!=None and is_valid_pdata_dir(base_dir, n) ]
 
-  datadirs = [ n for n in os.listdir(base_dir) if re.search(name_filter, n)!=None and is_valid_pdata_dir(n) ]
+  # Exclude data dirs that were not recently modified
+  if age_filter is not None: datadirs = [ n for n in datadirs if time.time() - get_data_mtime(base_dir, n) < age_filter ]
 
   # Sort by inverse chronological order
   assert sort_order in ['chronological', 'alphabetical'], f"Unknown sort order: {sort_order}"
 
-  def get_last_mtime(n):
-    for f in ["tabular_data.dat", "tabular_data.dat.gz"]:
-      try: return os.path.getmtime( os.path.join(base_dir, n, f) )
-      except FileNotFoundError: continue
-    return 0
-
   if sort_order=='alphabetical': datadirs = sorted(datadirs)[::-1]
-  if sort_order=='chronological': datadirs = sorted(datadirs, key=get_last_mtime)[::-1]
- 
+  if sort_order=='chronological': datadirs = sorted(datadirs, key=lambda n: get_data_mtime(base_dir, n))[::-1]
+
+  if not return_widget: return datadirs # Return simple list
+
   # create the selector widget (to be shown in a Jupyter notebook)
   import ipywidgets
   dataset_selector = ipywidgets.SelectMultiple(options=datadirs, value=datadirs[:1], rows=min(max_entries, len(datadirs)), description="data set")
@@ -84,3 +83,16 @@ def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate
   if slowcoordinate!=None: ax.legend();
 
   return fig
+
+def is_valid_pdata_dir(base_dir, data_dir):
+  """ Check whether <base_dir>/<data_dir> is a pdata data set. """
+  return any( os.path.isfile(os.path.join(base_dir, data_dir, f)) for f in ["tabular_data.dat", "tabular_data.dat.gz"] )
+
+def get_data_mtime(base_dir, data_dir, fallback_value=0):
+  """Get last modification time of data set in
+     <base_dir>/<data_dir>. If the directory appears invalid, return
+     fallback_value."""
+  for f in ["tabular_data.dat", "tabular_data.dat.gz"]:
+    try: return os.path.getmtime( os.path.join(base_dir, data_dir, f) )
+    except FileNotFoundError: continue
+  return fallback_value
