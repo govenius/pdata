@@ -9,7 +9,16 @@ from pdata._metadata import __version__
 import os
 import re
 import time
+import itertools
+import logging
+import numpy as np
+
 from pdata.analysis.dataview import DataView, PDataSingle
+
+from IPython import display
+
+import matplotlib
+import matplotlib.pyplot as plt
 
 def data_selector(base_dir, name_filter=".", age_filter=None, max_entries=30, sort_order='chronological', return_widget=True):
   """
@@ -39,9 +48,12 @@ def data_selector(base_dir, name_filter=".", age_filter=None, max_entries=30, so
   dataset_selector.layout.width = "90%"
   return dataset_selector
 
-def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate=None, preprocessor=lambda x: x):
+def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate=None, preprocessor=lambda x: x, figure=None):
   """
-  Convenience function for quickly plotting y vs x in each of the pdata data directories, given as strings.
+  Convenience function for quickly plotting y vs x in each of the pdata data directories.
+
+  data_dirs should be an array of PDataSingle objects or paths, given as strings relative to base_dir.
+  data_dirs can also be a single string or single PDataSingle object.
 
   x, y and slowcoordinate are a column names, specified as strings.
 
@@ -49,26 +61,28 @@ def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate
 
   preprocessor is an optional function applied to the DataView object before plotting.
   It can be used to, e.g., add virtual columns.
+
+  An existing pyplot figure can be optionally specified. It is first cleared.
+
+  Returns the create/reused figure object.
   """
 
   # Also accept a single path as a string
-  if isinstance(data_dirs, str): data_dirs = [ data_dirs ]
+  if isinstance(data_dirs, str) or isinstance(data_dirs, PDataSingle):
+    data_dirs = [ data_dirs ]
 
   # Concatenate all specified data dirs into one DataView
-  d = DataView([ PDataSingle(os.path.join(base_dir, n)) for n in data_dirs ])
+  d = DataView([ PDataSingle(os.path.join(base_dir, n)) if isinstance(n, str) else n for n in data_dirs ])
 
   # Preprocess data (e.g. add virtual dimensions)
-  d = preprocessor(d)
+  if preprocessor is not None: d = preprocessor(d)
 
   assert x in d.dimensions(), f"{x} is not a column in the data: {data_dirs}"
   assert y in d.dimensions(), f"{y} is not a column in the data: {data_dirs}"
   if slowcoordinate!=None: assert slowcoordinate in d.dimensions(), f"{slowcoordinate} is not a column in the data: {data_dirs}"
 
   # Plot the results
-  import matplotlib
-  import matplotlib.pyplot as plt
-  
-  fig, ax = plt.subplots()
+  fig, ax = plt.subplots(num=figure, clear=True)
 
   for s in d.divide_into_sweeps(x if slowcoordinate==None else slowcoordinate):
     dd = d.copy(); dd.mask_rows(s, unmask_instead=True)
@@ -83,6 +97,71 @@ def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate
   if slowcoordinate!=None: ax.legend();
 
   return fig
+
+def monitor_dir(base_dir, x, y,
+                name_filter='.', age_filter=None,
+                xlog=False, ylog=False, slowcoordinate=None, preprocessor=lambda x: x,
+                selector=data_selector, plotter=basic_plot,
+                ref_data_dirs=[],
+                poll_period=3):
+  """Monitor base_dir for new data matching selector(base_dir,
+     name_filter, age_filter), until interrupted by
+     KeyboardInterrupt.
+
+     If new data is found, plot y vs x using plotter(<array of
+     PDataSingle>, x, y, xlog, ylog, slowcoordinate, preprocessor).
+
+     The default selector and plotter functions can be overriden. They
+     should accept the same arguments as data_selector() and
+     basic_plot(), respectively.
+
+     ref_data_dirs can be used to specify data sets that are always
+     plotted. These should be given as full paths (not relative to
+     base_dir), or as PDataSingle objects.
+
+     poll_period specifies how often base_dir is checked for changes.
+     Specified in seconds.
+  """
+  fig = plt.figure()
+
+  try:
+    # Convert all reference data dirs to PDataSingle objects
+    ref_data_dirs = [ PDataSingle(n) if isinstance(n, str) else n for n in ref_data_dirs ]
+
+    pdata_objects = {}
+    last_mtimes = {}
+    while True:
+      data_dirs = selector(base_dir, name_filter=name_filter, age_filter=age_filter, return_widget=False)[::-1]
+
+      # Load data from modified data dirs to PDataSingle objects
+      no_changes = True
+      for dd in data_dirs:
+        mtime = get_data_mtime(base_dir, dd)
+        if last_mtimes.get(dd, np.nan) != mtime:
+          last_mtimes[dd] = mtime
+          pdata_objects[dd] = PDataSingle(os.path.join(base_dir, dd))
+          no_changes = False
+
+      # Release data objects (--> memory) that are no longer going to be plotted
+      for dd in pdata_objects.keys():
+        if dd not in data_dirs: del pdata_objects[dd]
+
+      # Replot
+      if not no_changes:
+        display.clear_output(wait=True)
+        all_data = list(itertools.chain(ref_data_dirs, [ pdata_objects[dd] for dd in data_dirs ] ))
+        plotter(None, all_data, x, y, xlog=xlog, ylog=ylog,
+                         slowcoordinate=slowcoordinate,
+                         preprocessor=preprocessor, figure=fig)
+        display.display(fig)
+        print(f"Monitoring {base_dir} for data directories. Stop by sending a KeybordInterrupt (in Jupyter, Kernel --> Interrupt kernel).")
+
+      time.sleep(poll_period)
+
+  except KeyboardInterrupt:
+    pass
+  finally:
+    plt.close(fig)
 
 def is_valid_pdata_dir(base_dir, data_dir):
   """ Check whether <base_dir>/<data_dir> is a pdata data set. """

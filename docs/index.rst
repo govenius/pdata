@@ -164,6 +164,9 @@ Data explorer
 There are some helpers in :code:`pdata.analysis.dataexplorer` for
 quick visualization of data sets.
 
+Interactive data set selector
+*****************************
+
 You can use :code:`data_selector` in a Jupyter notebook to create an
 interactive element for easily selecting data sets from a given
 directory::
@@ -175,16 +178,20 @@ directory::
    :alt: interactive data set selector
    :scale: 100 %
 
-Then use :code:`basic_plot` in a separate Jupyter notebook cell to
-actually generate a plot of S21 vs frequency for the selected data
-sets::
+Basic plots (one liners)
+************************
+
+You can combine the interactive selector above with
+:code:`basic_plot`, in a separate Jupyter notebook cell, to actually
+generate a plot of S21 vs frequency for the selected data sets::
 
   dataexplorer.basic_plot(data_root, sel.value, "frequency", "S21", ylog=True)
 
 That will already create a plot similar to the above manually created
 one, but to also add VNA power in the legend, you can add a
-:code:`preprocessor` that adds VNA power as a virtual dimensions so
-that it can be used as a :code:`slowcoordinate` for the plot::
+:code:`preprocessor`. In this example, the preprocessor adds VNA power
+as a virtual dimensions so that it can be used as a
+:code:`slowcoordinate` for the plot::
 
   def add_vdims(dd):
     dd.add_virtual_dimension('VNA power', units="dBm",
@@ -201,6 +208,31 @@ that it can be used as a :code:`slowcoordinate` for the plot::
 .. image:: ./_static/index_S21-example_dataexplorer.png
    :alt: S21 vs frequency, produced with data explorer
    :scale: 80 %
+
+Live plotting
+*************
+
+:code:`monitor_dir` can be used to create the same plot as above. The
+difference is that we don't manually select the data sets. Instead the
+plot will keep updating with new data, until you send an interrupt
+signal to the kernel::
+
+  # Plot data directories that were modified < 600 s ago,
+  # and include "power-sweep" in the directory name.
+  # The cell runs indefinitely, until an interrupt is sent to the Python kernel.
+  dataexplorer.monitor_dir(data_root, name_filter="power-sweep", age_filter=600,
+			  x="frequency", y="S21", ylog=True,
+			  slowcoordinate="VNA power",
+			  preprocessor=add_vdims);
+
+.. note:: By default, :code:`monitor_dir` uses :code:`data_selector`
+          for choosing which data directories to plot, and
+          :code:`basic_plot` for plotting them. You can, however,
+          override them by specifying custom :code:`selector` and
+          :code:`plotter` arguments to :code:`monitor_dir`, for easy
+          creation of arbitrarily complex live plots. The custom
+          functions just need to take the same arguments as
+          :code:`data_selector` and :code:`basic_plot` do.
 
 Data format
 -----------
