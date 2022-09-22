@@ -13,19 +13,22 @@ import numbers
 import collections
 from typing import Any
 
-def filter_timestamps(snap):
+def preprocess_snapshot(snap, delete_timestamps=True):
   '''
-  Helper that deletes timestamp entries from a snapshot dict,
+  Helper that preprocesses snapshots so that they are compatible with pdata/jsondiff.
+  In particular converts numpy arrays to regular Python lists.
+  Also, optionally, deletes QCodes timestamp entries from a snapshot dict,
   i.e. dict entries of the form "ts": <str>.
   '''
 
-  def del_ts(d):
+  def preprocesss_dict(d):
     ''' Recursive helper. '''
     for k in list(d.keys()):
-      if k == "ts" and isinstance(d[k], str): del d[k]
-      elif isinstance(d[k], dict): del_ts(d[k])
+      if isinstance(d[k], dict): preprocesss_dict(d[k])
+      elif isinstance(d[k], np.ndarray): d[k] = d[k].tolist() # jsondiff doesn't handle ndarrays
+      elif delete_timestamps and k=="ts" and isinstance(d[k], str): del d[k] # QCodes updates these very often
 
-  del_ts(snap)
+  preprocesss_dict(snap)
   return snap
 
 class NumpyJSONEncoder(json.JSONEncoder):

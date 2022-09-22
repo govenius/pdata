@@ -18,7 +18,7 @@ import jsondiff
 import tempfile
 import random
 
-from pdata.helpers import NumpyJSONEncoder, filter_timestamps
+from pdata.helpers import NumpyJSONEncoder, preprocess_snapshot
 import pdata.jupyter_helpers
 
 @contextlib.contextmanager
@@ -26,7 +26,7 @@ def run_measurement(get_snapshot,
                     columns, name,
                     data_base_dir='.',
                     dir_name_generator=lambda n: datetime.datetime.now().strftime(f"%Y-%m-%d_%H-%M-%S_{int(1e3*random.random())}") + f"_{n}",
-                    autosnap=True, snap_diff_filter=filter_timestamps,
+                    autosnap=True, snap_diff_filter=preprocess_snapshot,
                     compress=True):
   '''
   A simple context manager that runs begin() and end()
