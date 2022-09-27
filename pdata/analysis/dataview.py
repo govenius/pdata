@@ -53,7 +53,7 @@ class PDataSingle():
         # Deep copy the last snapshot -> VERY inefficient but easy & safe
         snap = json.loads(json.dumps(self._snapshots[-1][-1]))
         # Add the new copy with the changes
-        self._snapshots.append((row, jsondiff.patch(snap, json.load(f))))
+        self._snapshots.append((row, jsondiff.patch(snap, json.load(f), marshal=True)))
 
       def parse_snapshot_diff_names(fnames):
         """ Given a list of filenames, filter and sort the snapshot diffs. """

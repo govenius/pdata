@@ -246,7 +246,7 @@ autosnapping.'''
     else:
 
       if self._snap_diff_filter != None: snap = self._snap_diff_filter(snap)
-      d = jsondiff.diff(self._last_snapshot, snap, cls=PdataJSONDiffer)
+      d = jsondiff.diff(self._last_snapshot, snap, cls=PdataJSONDiffer, marshal=True)
 
       if len(d.keys()) == 0: return
 
