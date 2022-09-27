@@ -18,7 +18,7 @@ import jsondiff
 import tempfile
 import random
 
-from pdata.helpers import NumpyJSONEncoder, preprocess_snapshot
+from pdata.helpers import NumpyJSONEncoder, preprocess_snapshot, PdataJSONDiffer
 import pdata.jupyter_helpers
 
 @contextlib.contextmanager
@@ -246,7 +246,7 @@ autosnapping.'''
     else:
 
       if self._snap_diff_filter != None: snap = self._snap_diff_filter(snap)
-      d = jsondiff.diff(self._last_snapshot, snap)
+      d = jsondiff.diff(self._last_snapshot, snap, cls=PdataJSONDiffer)
 
       if len(d.keys()) == 0: return
 

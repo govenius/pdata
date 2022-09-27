@@ -13,7 +13,7 @@ import numbers
 import collections
 from typing import Any
 
-def preprocess_snapshot(snap, delete_timestamps=True):
+def preprocess_snapshot(snap, delete_timestamps=True, convert_ndarrays=False):
   '''
   Helper that preprocesses snapshots so that they are compatible with pdata/jsondiff.
   In particular converts numpy arrays to regular Python lists.
@@ -25,11 +25,42 @@ def preprocess_snapshot(snap, delete_timestamps=True):
     ''' Recursive helper. '''
     for k in list(d.keys()):
       if isinstance(d[k], dict): preprocesss_dict(d[k])
-      elif isinstance(d[k], np.ndarray): d[k] = d[k].tolist() # jsondiff doesn't handle ndarrays
+      elif convert_ndarrays and isinstance(d[k], np.ndarray): d[k] = d[k].tolist() # jsondiff doesn't handle ndarrays, unless you use PdataJSONDiffer
       elif delete_timestamps and k=="ts" and isinstance(d[k], str): del d[k] # QCodes updates these very often
 
   preprocesss_dict(snap)
   return snap
+
+
+from jsondiff import JsonDiffer
+class PdataJSONDiffer(JsonDiffer):
+  """Custom JSON diff creator that handles Numpy ndarrays and lists of
+     only (scalars) as complete blocks. That is, does not create diffs
+     at element level within ndarrays. This is much faster than the
+     default jsondiff list diff creation, and becomes important if the
+     snapshots contain e.g. AWG patterns that can be long vectors.
+  """
+
+  def _obj_diff(self, a, b):
+
+    if a is b: return self.options.syntax.emit_value_diff(a, b, 1.0), 1.0
+
+    def is_vector(x): return isinstance(x, (list,tuple)) and all(np.isscalar(xi) for xi in x)
+
+    # Check whether a or b is an ndarray or a list of only scalars.
+    a_is_ndarray = isinstance(a, np.ndarray)
+    b_is_ndarray = isinstance(b, np.ndarray)
+    if a_is_ndarray or b_is_ndarray or is_vector(a) or is_vector(b):
+
+      if np.array_equal(a,b): return self.options.syntax.emit_value_diff(a, b, 1.0), 1.0 # The ndarrays/lists are equal
+
+      # Otherwise they differ, emit a diff for the complete
+      # ndarray/list, instead of drilling down to element level diffs.
+      return self.options.syntax.emit_value_diff(a.tolist() if a_is_ndarray else a,
+                                                 b.tolist() if b_is_ndarray else b, 0.0), 0.0
+
+    # Otherwise process as usual.
+    return super()._obj_diff(a, b)
 
 class NumpyJSONEncoder(json.JSONEncoder):
     """This JSON encoder adds support for serializing types that the built-in
