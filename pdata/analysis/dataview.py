@@ -117,13 +117,16 @@ class PDataSingle():
           # Done parsing the header. We can stop here if parsing comments is not needed.
           if not parse_comments: break
 
+        if rowno==0: self._table_header = comment
+
         if not hasattr(self, "_table_header"):
           logging.warning(f"No header found in tabular data of {self._path}")
           self._column_names, self._units = [], []
         else:
           self._column_names, self._units = PDataSingle._parse_columns_from_header(self._table_header)
 
-        assert len(self._column_names) == ncols, "The number of columns in the header and data do not seem to match."
+        if rowno > 0:
+          assert len(self._column_names) == ncols, "The number of columns in the header and data do not seem to match."
 
         self._column_name_to_index = dict((self._column_names[i], i) for i in range(len(self._column_names)) )
 
@@ -136,7 +139,7 @@ class PDataSingle():
                                    dtype=float) # Assume all columns contain floats
 
         # If the data contains just a single point, genfromtxt returns a 1D vector instead of a 2D array, so convert it to 2D
-        if len(self._data.shape) == 1: self._data = np.array([ self._data ])
+        if rowno>0 and len(self._data.shape) == 1: self._data = np.array([ self._data ])
 
         if parse_comments:
           # rowno should equal the number of data rows, if comments were parsed and
@@ -324,7 +327,7 @@ class DataView():
 
               n_rows = dat.npoints()
               if n_rows == 0:
-                logging.warning("%s seems to contain zero rows. Skipping it..." % (dat.filename()))
+                logging.info("%s seems to contain zero rows. Skipping it..." % (dat.filename()))
                 break
 
               try:
@@ -344,8 +347,8 @@ class DataView():
 
             # concatenate rows from all files
             if dim in unmasked.keys():
-              unmasked[dim] = np.concatenate(unmasked[dim])
-          
+              unmasked[dim] = np.concatenate(unmasked[dim]) if len(unmasked[dim])>0 else np.array([])
+
           # add a column that specifies the source data file
           lens = [ dat.npoints() for dat in data ]
           if source_column_name != None:

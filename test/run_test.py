@@ -79,12 +79,20 @@ class TestSavingAndAnalysis(unittest.TestCase):
                          data_base_dir=cls._data_root) as m:
 
       cls._single_row_datadir = m.path()
-      logging.info(f'This info message will (also) end up in log.txt within the data dir {m.path()}.')
 
       for p in [-30]:
         VNA_instrument._power = p  # <-- this new value gets automatically stored in the data since its in the snapshot
         m.add_point({'frequency': freqs[0], 'S21': VNA_instrument()[0]})
 
+
+    # Create dataset with no data rows
+    with run_measurement(get_instrument_snapshot,
+                         columns = [("frequency", "Hz"),
+                                    "S21"],
+                         name='power-sweep',
+                         data_base_dir=cls._data_root) as m:
+
+      cls._no_rows_datadir = m.path()
 
     # Create dataset with nonstandard/legacy .dat file name
     with run_measurement(get_instrument_snapshot,
@@ -95,7 +103,6 @@ class TestSavingAndAnalysis(unittest.TestCase):
                          compress=False) as m:
 
       cls._legacy_datadir = m.path()
-      logging.info(f'This info message will (also) end up in log.txt within the data dir {m.path()}.')
 
       for p in [-30]:
         VNA_instrument._power = p  # <-- this new value gets automatically stored in the data since its in the snapshot
@@ -133,10 +140,11 @@ class TestSavingAndAnalysis(unittest.TestCase):
   def test_dataexplorer_selector(self):
     # Test the graphical dataset selector
     sel = dataexplorer.data_selector(self._data_root)
-    self.assertTrue(len(sel.options) == 2)
+    self.assertTrue(len(sel.options) == 3)
     self.assertTrue(sel.options[0].endswith("power-sweep"))
-    self.assertTrue(sel.options[0] == os.path.split(self._single_row_datadir)[-1])
-    self.assertTrue(sel.options[1] == os.path.split(self._typical_datadir)[-1])
+    self.assertTrue(sel.options[0] == os.path.split(self._no_rows_datadir)[-1])
+    self.assertTrue(sel.options[1] == os.path.split(self._single_row_datadir)[-1])
+    self.assertTrue(sel.options[2] == os.path.split(self._typical_datadir)[-1])
     self.assertTrue(len(sel.value) == 1)
     self.assertTrue(sel.value[0].endswith("power-sweep"))
 
@@ -144,8 +152,9 @@ class TestSavingAndAnalysis(unittest.TestCase):
     sel = dataexplorer.data_selector(self._data_root,
                                      age_filter=time.time() - self._timestamp_between_typical_and_single_row_datadirs,
                                      return_widget=False)
-    self.assertTrue(len(sel) == 1)
-    self.assertTrue(sel[0] == os.path.split(self._single_row_datadir)[-1])
+    self.assertTrue(len(sel) == 2)
+    self.assertTrue(sel[0] == os.path.split(self._no_rows_datadir)[-1])
+    self.assertTrue(sel[1] == os.path.split(self._single_row_datadir)[-1])
 
   def test_reading_data(self):
     """ Read back the data saved on disk using dataview. """
@@ -221,6 +230,11 @@ class TestSavingAndAnalysis(unittest.TestCase):
     expected_freqs = np.linspace(5.9e9, 6.1e9, 41)[:1]
     self.assertTrue(len(d["frequency"]) == len(expected_freqs))
     self.assertTrue(max(np.abs( np.unique(d["frequency"]) / expected_freqs - 1 )) < 1e-10)
+
+  def test_reading_no_rows_data(self):
+    """ Read a data set containing no data rows. """
+    d = DataView([ PDataSingle(self._no_rows_datadir), ])
+    self.assertTrue(len(d["frequency"]) == 0)
 
   def test_divide_into_sweeps_and_masking(self):
     """ Test divide_into_sweeps(). """
