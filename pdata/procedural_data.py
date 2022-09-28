@@ -179,9 +179,11 @@ class Measurement():
     self._dat_file = open(os.path.join(self._target_dir, 'tabular_data.dat'), 'w')
 
     # Write a header, to some extent compatible with the "legacy" QCoDeS format.
-    self._dat_file.write("#\n")
-    self._dat_file.write("# " + "\t".join("%s (%s)" % (c,u) for c,u in zip(self._columns, self._units)) + "\n")
-    self._dat_file.write("#\n")
+    header =  "#\n"
+    header += "# " + "\t".join("%s (%s)" % (c,u) for c,u in zip(self._columns, self._units)) + "\n"
+    header +=  "#\n"
+    try:     self._dat_file.write(header)
+    finally: self._dat_file.flush()
 
   def end(self):
     '''Ends the measurement, i.e. closes and compresses the data set
@@ -215,11 +217,16 @@ class Measurement():
 
     if snap or (snap == None and self._autosnap): self.write_snapshot()
 
-    for i in range(npts):
-      self._dat_file.write("\t".join(f(data[c][i]) for c,f in zip(self._columns, self._formatters)))
-      self._dat_file.write("\n")
+    # Prepare in memory
+    rows = "\n".join(
+      "\t".join(f(data[c][i]) for c,f in zip(self._columns, self._formatters))
+      for i in range(npts) )
+    rows += "\n"
 
-    self._dat_file.flush()
+    # And write atomically
+    try:     self._dat_file.write(rows)
+    finally: self._dat_file.flush()
+
     self._npoints_total += npts
 
     self._check_for_manual_abort()
