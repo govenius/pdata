@@ -118,7 +118,7 @@ class PDataSingle():
           if not parse_comments: break
 
         if not hasattr(self, "_table_header"):
-          logging.warn(f"No header found in tabular data of {self._path}")
+          logging.warning(f"No header found in tabular data of {self._path}")
           self._column_names, self._units = [], []
         else:
           self._column_names, self._units = PDataSingle._parse_columns_from_header(self._table_header)
@@ -319,12 +319,12 @@ class DataView():
             unmasked[dim] = []
             for dat in data:
               if len(dat.dimension_names()) == 0:
-                logging.warn("Data object '%s' seems to contain zero columns. Skipping it..." % (str(dat)))
+                logging.warning("%s seems to contain zero columns. Skipping it..." % (dat.filename()))
                 break
 
               n_rows = dat.npoints()
               if n_rows == 0:
-                logging.warn("Data object '%s' seems to contain zero rows. Skipping it..." % (str(dat)))
+                logging.warning("%s seems to contain zero rows. Skipping it..." % (dat.filename()))
                 break
 
               try:
@@ -335,12 +335,12 @@ class DataView():
                   # ignore dimensions that don't exist in all data objects
                   del unmasked[dim]
                   msg += ' Omitting the dimension.'
-                  logging.warn(msg)
+                  logging.warning(msg)
                   break
                 else:
                   unmasked[dim].append(fill_value + np.zeros(n_rows, dtype=type(fill_value)))
                   msg += ' Using fill_value = %s (for %d rows)' % (str(fill_value), len(unmasked[dim][-1]))
-                  logging.warn(msg)
+                  logging.warning(msg)
 
             # concatenate rows from all files
             if dim in unmasked.keys():
@@ -819,7 +819,7 @@ class DataView():
                 #logging.debug('Match on row %d: "%s"' % (rowno, commentstr))
 
                 if len(m.groups()) != 1:
-                  logging.warn('Did not get a unique match (%s) in comment (%d): %s'
+                  logging.warning('Did not get a unique match (%s) in comment (%d): %s'
                                % (str(groups), rowno, commentstr))
                 new_val = m.group(1)
 
@@ -849,7 +849,7 @@ class DataView():
         if name in self._virtual_dims.keys():
             del self._virtual_dims[name]
         else:
-            logging.warn('Virtual dimension "%s" does not exist.' % name)
+            logging.warning('Virtual dimension "%s" does not exist.' % name)
 
     def remove_virtual_dimensions(self):
         self._virtual_dims = {}
