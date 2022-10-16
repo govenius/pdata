@@ -14,7 +14,7 @@ framework used for instrument control**.
 The main goals are to provide an interface that:
 
   * Maximizes the amount of automatically stored metadata, without relying on the experimenter specifying which values are worthy of saving.
-  * Is "procedural" rather than "functional" in terms of the API the experimenter sees, as procedural programming tends to be easier to understand for a typical experimental physicist who is not a thoroughly trained programmer.
+  * Is "procedural" rather than "functional" in terms of the API the experimenter sees, as procedural programming tends to be easier to understand for a typical experimental physicist.
   * The API aims to be self-explanatory, wherever possible.
 
 In practice, the experimenter calls an explicit :code:`add_points(<new
@@ -25,6 +25,15 @@ time :code:`add_points` is called.
 
 In addition, pdata provides useful helpers for reading back the
 automatically recorded instrument parameters.
+
+.. note:: The only requirement for the framework used to control the
+          instruments is that the framework needs to be able to return
+          instrument parameters as a python dict object. Or more
+          specifically, a dict compatible with `json
+          <https://docs.python.org/3/library/json.html>`_ and
+          `jsondiff <https://pypi.org/project/jsondiff/>`_. In `QCoDeS
+          <https://github.com/QCoDeS/Qcodes>`_ for example, you would
+          use :code:`qcodes.station.Station.default.snapshot()`.
 
 Saving data in measurement script
 ---------------------------------
