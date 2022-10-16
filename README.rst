@@ -9,7 +9,7 @@ framework used for instrument control**.
 The main goals are to provide an interface that:
 
   * Maximizes the amount of automatically stored metadata, without relying on the experimenter specifying which values are worthy of saving.
-  * Is "procedural" rather than "functional" in terms of the API the experimenter sees, as procedural programming tends to be easier to understand for a typical experimental physicist who is not a thoroughly trained programmer.
+  * Is "procedural" rather than "functional" in terms of the API the experimenter sees, as procedural programming tends to be easier to understand for a typical experimental physicist.
   * The API aims to be self-explanatory, wherever possible.
 
 In practice, the experimenter calls an explicit :code:`add_points(<new
