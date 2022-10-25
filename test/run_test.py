@@ -48,6 +48,8 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
       if get_instrument_snapshot.counter % 2 == 0: snap["key_that_gets_removed"] = "value_for_key_that_gets_removed"
 
+      if get_instrument_snapshot.counter > 0: snap["key_that_gets_added"] = "value_for_key_that_gets_added"
+
       get_instrument_snapshot.counter += 1
       return snap
 
@@ -198,6 +200,13 @@ class TestSavingAndAnalysis(unittest.TestCase):
     expected_VNA_powers = [-30, -20, -10]
     self.assertTrue(max(np.abs(d["VNA power"][:len(expected_freqs)] / expected_VNA_powers[0] - 1)) < 1e-10)
     self.assertTrue(max(np.abs(d["VNA power"][-len(expected_freqs):] / expected_VNA_powers[-1] - 1)) < 1e-10)
+
+    # Check that we can parse "key_that_gets_added". It's not there in
+    # the initial snapshot that's created when run_measurement() is
+    # callled, but is added by the time add_points() is first called.
+    d.add_virtual_dimension('key that gets added', dtype=str, from_set=('key_that_gets_added',))
+    self.assertTrue(d['key that gets added'][0] == "value_for_key_that_gets_added")
+    self.assertTrue(all(v == d['key that gets added'][0] for v in d['key that gets added'] ))
 
   def test_reading_data_with_comments(self):
     """ Check that parse_comments=True also works. """

@@ -382,6 +382,12 @@ class DataView():
               all_settings.append([ (rowno + lens[:jj].sum(), sett) for rowno,sett in settings ])
           self._settings = list(itertools.chain.from_iterable(all_settings)) # flatten by one level
 
+        # Check for existence of multiple settings dicts for a single
+        # data row. If they exist, we only care about the last one. --> Remove others.
+        for i in range(len(self._settings)-1,0,-1):
+          if self._settings[i][0] == self._settings[i-1][0]: del self._settings[i-1]
+
+        # Initialize masks
         self._data = unmasked
         self._mask = np.zeros(len(unmasked), dtype=bool)
         self._mask_stack = []
