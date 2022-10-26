@@ -8,7 +8,8 @@ from pdata._metadata import __version__
 
 def get_notebook_name():
   """
-  Return the full path of the Jupyter notebook, if this runs within Jupyter.
+  Attempt to return the full path of the Jupyter notebook.
+  This is expected to work if the notebook runs locally within Jupyter Notebook or Lab.
   Otherwise returns None.
 
   From https://github.com/jupyter/notebook/issues/1000#issuecomment-359875246
@@ -21,22 +22,29 @@ def get_notebook_name():
 
   from requests.compat import urljoin
 
-  from notebook.notebookapp import list_running_servers
-
   try:
     kernel_id = re.search('kernel-(.*).json',
                             ipykernel.connect.get_connection_file()).group(1)
   except RuntimeError:
     return None
-      
-  servers = list_running_servers()
+
+  try:
+    from jupyter_server.serverapp import list_running_servers # Works in JupyterLab
+    servers = list(list_running_servers())
+    if len(servers)==0: raise ImportError # Probably running in a Notebook then
+  except ImportError:
+    from notebook.notebookapp import list_running_servers # Works in Jupyter Notebook
+    servers = list_running_servers()
+
   for ss in servers:
     response = requests.get(urljoin(ss['url'], 'api/sessions'),
                             params={'token': ss.get('token', '')})
     for nn in json.loads(response.text):
       if nn['kernel']['id'] == kernel_id:
         relative_path = nn['notebook']['path']
-        return os.path.join(ss['notebook_dir'], relative_path)
+        full_path = os.path.join(ss['notebook_dir'] if 'notebook_dir' in ss else os.path.abspath(""),
+                                 relative_path)
+        if os.path.isfile(full_path): return full_path
 
 
 def save_notebook():
