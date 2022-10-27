@@ -5,6 +5,16 @@ Helper functions related to interacting with Jupyter.
 '''
 
 from pdata._metadata import __version__
+import time
+
+def in_jupyterlab():
+  """ Attempt to determine whether this is being run in JupyterLab (as opposed to Notebook or console). """
+  try:
+    from jupyter_server.serverapp import list_running_servers # Works in JupyterLab
+    servers = list(list_running_servers())
+    return len(servers) > 0 # Probably running in a Notebook if no servers returned
+  except ImportError:
+    return False
 
 def get_notebook_name():
   """
@@ -49,20 +59,28 @@ def get_notebook_name():
 
 def save_notebook():
   """
-  Saves the Jupyter notebook, if this runs from Jupyter.
+  Saves the Jupyter notebook, if this runs from Jupyter Notebook or JupyterLab.
 
   Based on https://stackoverflow.com/questions/44961557/how-can-i-save-a-jupyter-notebook-ipython-notebook-programmatically?rq=1
   """
-  from IPython.display import Javascript
-  from IPython.core.display import display
-  import time
 
-  display(Javascript('''
-    require(["base/js/namespace"],function(Jupyter) {
-        Jupyter.notebook.save_checkpoint();
-    });
-    '''))
+  try:
+    # This works in JupyterLab
+    from ipylab import JupyterFrontEnd
+    JupyterFrontEnd().commands.execute('docmanager:save')
+    if not in_jupyterlab(): raise ImportError # Fall back to Notebook code
+
+  except ImportError:
+    # This works in Jupyter Notebook
+    from IPython.display import Javascript
+    from IPython.core.display import display
+
+    display(Javascript('''
+      require(["base/js/namespace"],function(Jupyter) {
+          Jupyter.notebook.save_checkpoint();
+      });
+      '''))
 
   # We should wait until the save has actually been completed.
   # TODO: This is not the best way...
-  time.sleep(1.)
+  time.sleep(0.5)
