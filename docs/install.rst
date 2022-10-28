@@ -19,8 +19,9 @@ If you're not familiar with Conda already, familiarize yourself with
 `Conda environments
 <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_.
 
-If you're not use Conda, get the latest version from `qithub
-<https://github.com/govenius/pdata>`_ and run::
+If you're not using Conda, download the latest version from `qithub
+<https://github.com/govenius/pdata>`_ and install with pip. That is,
+run this in the root folder where :file:`setup.cfg` is::
 
   pip install .
 
@@ -35,7 +36,7 @@ Required packages are listed in :file:`setup.cfg`. Here are some of them:
   * `jsondiff <https://pypi.org/project/jsondiff/>`_
   * `pytz <https://pypi.org/project/pytz/>`_
   * `uncertainties <https://pythonhosted.org/uncertainties/>`_
-  *  `requests <https://pypi.org/project/requests/>`_, `ipykernel <https://pypi.org/project/ipykernel/>`_, `ipython <https://pypi.org/project/ipython/>`_, `notebook <https://pypi.org/project/notebook/>`_ (for storing .ipynb measurement scripts)
+  *  `requests <https://pypi.org/project/requests/>`_, `ipykernel <https://pypi.org/project/ipykernel/>`_, `ipython <https://pypi.org/project/ipython/>`_, `notebook <https://pypi.org/project/notebook/>`_, `ipylab <https://github.com/jtpio/ipylab>`_ (for storing .ipynb measurement scripts)
   * `ipywidgets <https://ipywidgets.readthedocs.io/en/latest/>`_ (for dataexplorer)
   * `matplotlib <https://matplotlib.org/>`_ (for dataexplorer)
   * `Setuptools <https://setuptools.readthedocs.io/en/latest/>`_ (for installation)
