@@ -69,8 +69,7 @@ class PDataSingle():
         return diff_names
 
       def parse_tabular_data(f):
-        # First read comments in the data file
-        # and determine the number of data rows and columns
+        # First analyze the first data row and the header rows preceding it.
         self._comments = []
         converters = {}
         rowno = 0
@@ -83,18 +82,18 @@ class PDataSingle():
           line = line.strip()
           if len(line) == 0: continue # empty line
 
-          if line.startswith('#'):
+          if line.startswith('#'): # comment line
             comment += line[1:].strip() + '\n'
             continue
 
           # Otherwise this is a data row
           comment = comment.strip()
           if len(comment) > 0:
+            # Store comment(s) preceding this data row
             self._comments.append((rowno, comment))
 
-          # The second to last comment row preceding the first data row is the table header
-          # that defines the column names
-          # Parse the columns
+          # The comment rows preceding the first data row contain the table header
+          # that defines the column names. Store it for later parsing.
           if rowno==0: self._table_header = comment
 
           # Determine the number of columns from the first data row
@@ -114,11 +113,13 @@ class PDataSingle():
           rowno += 1
           comment = ""
 
-          # Done parsing the header. We can stop here if parsing comments is not needed.
+          # Done parsing the header. We can stop here if parsing comments after first data row is not requested.
           if not parse_comments: break
 
+        # Store header even if there were zero data rows
         if rowno==0: self._table_header = comment
 
+        # Now parse the stored header
         if not hasattr(self, "_table_header"):
           logging.warning(f"No header found in tabular data of {self._path}")
           self._column_names, self._units = [], []
