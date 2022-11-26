@@ -233,6 +233,7 @@ class Measurement():
 
   def add_point(self, data, snap=None):
     ''' Same as add_points but takes scalar inputs for the column values. '''
+    for k in data.keys(): assert np.isscalar(data[k]), f'data[{k}] seems to contain more than one value ({data[k]}). Did you mean to call add_point*s* instead?'
     self.add_points(dict( (k, [ data[k] ]) for k in data.keys() ),
                     snap=snap)
 
