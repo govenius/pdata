@@ -73,7 +73,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
     cls._timestamp_between_typical_and_single_row_datadirs = time.time()
     time.sleep(1)
 
-    # Create dataset with a single row
+    # Create test dataset with a single row
     with run_measurement(get_instrument_snapshot,
                          columns = [("frequency", "Hz"),
                                     "S21"],
@@ -83,11 +83,11 @@ class TestSavingAndAnalysis(unittest.TestCase):
       cls._single_row_datadir = m.path()
 
       for p in [-30]:
-        VNA_instrument._power = p  # <-- this new value gets automatically stored in the data since its in the snapshot
+        VNA_instrument._power = p
         m.add_point({'frequency': freqs[0], 'S21': VNA_instrument()[0]})
 
 
-    # Create dataset with no data rows
+    # Create test dataset with no data rows
     with run_measurement(get_instrument_snapshot,
                          columns = [("frequency", "Hz"),
                                     "S21"],
@@ -96,7 +96,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
       cls._no_rows_datadir = m.path()
 
-    # Create dataset with nonstandard/legacy .dat file name
+    # Create test dataset with nonstandard/legacy .dat file name
     with run_measurement(get_instrument_snapshot,
                          columns = [("frequency", "Hz"),
                                     "S21"],
@@ -107,11 +107,23 @@ class TestSavingAndAnalysis(unittest.TestCase):
       cls._legacy_datadir = m.path()
 
       for p in [-30]:
-        VNA_instrument._power = p  # <-- this new value gets automatically stored in the data since its in the snapshot
+        VNA_instrument._power = p
         m.add_points({'frequency': freqs, 'S21': VNA_instrument()})
 
     shutil.move(os.path.join(cls._legacy_datadir, 'tabular_data.dat'),
                 os.path.join(cls._legacy_datadir, 'differently_named_data.dat'))
+
+    # Create test dataset with a single column
+    with run_measurement(get_instrument_snapshot,
+                         columns = [("frequency", "Hz")],
+                         name='single-col',
+                         data_base_dir=cls._data_root) as m:
+
+      cls._single_column_datadir = m.path()
+
+      for p in [-30]:
+        VNA_instrument._power = p
+        m.add_points({'frequency': freqs})
 
   @classmethod
   def tearDownClass(cls):
@@ -142,21 +154,29 @@ class TestSavingAndAnalysis(unittest.TestCase):
   def test_dataexplorer_selector(self):
     # Test the graphical dataset selector
     sel = dataexplorer.data_selector(self._data_root)
-    self.assertTrue(len(sel.options) == 3)
-    self.assertTrue(sel.options[0].endswith("power-sweep"))
-    self.assertTrue(sel.options[0] == os.path.split(self._no_rows_datadir)[-1])
-    self.assertTrue(sel.options[1] == os.path.split(self._single_row_datadir)[-1])
-    self.assertTrue(sel.options[2] == os.path.split(self._typical_datadir)[-1])
+    self.assertTrue(len(sel.options) == 4)
+    self.assertTrue(sel.options[0] == os.path.split(self._single_column_datadir)[-1])
+    self.assertTrue(sel.options[1] == os.path.split(self._no_rows_datadir)[-1])
+    self.assertTrue(sel.options[2] == os.path.split(self._single_row_datadir)[-1])
+    self.assertTrue(sel.options[3] == os.path.split(self._typical_datadir)[-1])
+    self.assertTrue(sel.options[3].endswith("power-sweep"))
     self.assertTrue(len(sel.value) == 1)
-    self.assertTrue(sel.value[0].endswith("power-sweep"))
+    self.assertTrue(sel.value[0].endswith("single-col"))
 
     # Test age_filter
     sel = dataexplorer.data_selector(self._data_root,
                                      age_filter=time.time() - self._timestamp_between_typical_and_single_row_datadirs,
                                      return_widget=False)
-    self.assertTrue(len(sel) == 2)
-    self.assertTrue(sel[0] == os.path.split(self._no_rows_datadir)[-1])
-    self.assertTrue(sel[1] == os.path.split(self._single_row_datadir)[-1])
+    self.assertEqual(len(sel), 3)
+    self.assertTrue(sel[0] == os.path.split(self._single_column_datadir)[-1])
+    self.assertTrue(sel[1] == os.path.split(self._no_rows_datadir)[-1])
+    self.assertTrue(sel[2] == os.path.split(self._single_row_datadir)[-1])
+
+    # Test name_filter
+    sel = dataexplorer.data_selector(self._data_root,
+                                     name_filter="power-sweep",
+                                     return_widget=False)
+    self.assertEqual(len(sel), 3)
 
   def test_reading_data(self):
     """ Read back the data saved on disk using dataview. """
@@ -237,6 +257,17 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
     # Check frequencies
     expected_freqs = np.linspace(5.9e9, 6.1e9, 41)[:1]
+    self.assertTrue(len(d["frequency"]) == len(expected_freqs))
+    self.assertTrue(max(np.abs( np.unique(d["frequency"]) / expected_freqs - 1 )) < 1e-10)
+
+  def test_reading_single_column_data(self):
+    """ Read a data set containing just a single column. """
+    # Test reading the data using DataView
+    d = DataView([ PDataSingle(self._single_column_datadir), ])
+
+    # Check frequencies
+    expected_freqs = np.linspace(5.9e9, 6.1e9, 41)
+    #time.sleep(2); print(d["frequency"])
     self.assertTrue(len(d["frequency"]) == len(expected_freqs))
     self.assertTrue(max(np.abs( np.unique(d["frequency"]) / expected_freqs - 1 )) < 1e-10)
 

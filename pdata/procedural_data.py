@@ -208,7 +208,7 @@ class Measurement():
 
     for k in data.keys(): assert k in self._columns, '"%s" is not a column in the data table.' % k
 
-    for k in self._columns: assert k in data.keys(), 'You need to pass "%s" as a keyword argument to append_data.' % k
+    for k in self._columns: assert k in data.keys(), f'data must contain "{k}" as a key.'
 
     npts = len(data[self._columns[0]])
     assert all(len(data[k]) == npts for k in data.keys()), 'All appended data columns must be vectors of the same length.'

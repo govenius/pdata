@@ -139,8 +139,10 @@ class PDataSingle():
                                    converters=converters,
                                    dtype=float) # Assume all columns contain floats
 
-        # If the data contains just a single point, genfromtxt returns a 1D vector instead of a 2D array, so convert it to 2D
-        if rowno>0 and len(self._data.shape) == 1: self._data = np.array([ self._data ])
+        # If the data contains just a single row or a single column,
+        # genfromtxt returns a 1D vector instead of a 2D array, so convert it to 2D.
+        # Note: In Numpy >= 1.23.0, setting ndmin=2 for genfromtxt might also solve this but that remains untested.
+        if rowno>0 and len(self._data.shape) == 1: self._data = self._data.reshape((-1, ncols))
 
         if parse_comments:
           # rowno should equal the number of data rows, if comments were parsed and
