@@ -223,9 +223,13 @@ class PDataSingle():
 
       except AttributeError:
         # Try assuming the legacy format used in QCoDeS (qcodes/data/gnuplot_format.py)
-        s = s.split('\n')[-2] # Second to last header row contains the tab separated column names
-        cols = [ c.strip().strip('"') for c in s.split('\t') ]
-        units = [ '' for i in range(len(cols))]
+        try:
+          s = s.split('\n')[-2] # Second to last header row contains the tab separated column names
+          cols = [ c.strip().strip('"') for c in s.split('\t') ]
+          units = [ '' for i in range(len(cols))]
+        except IndexError:
+          logging.warning(f"Could not parse tabular data header. Header: {s}")
+          raise
 
       return cols, units
 
