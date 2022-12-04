@@ -24,6 +24,9 @@ from collections import OrderedDict
 
 UNIX_EPOCH = datetime.datetime(1970, 1, 1, 0, 0, tzinfo = pytz.utc)
 
+column_name_regex = r"[\w\d\s]+"
+column_unit_regex = r"[\w\d\s]*"
+
 class PDataSingle():
     ''' Class for reading in the contents of a single pdata data directory.
         Almost always passed on to DataView for actual analysis. '''
@@ -217,7 +220,7 @@ class PDataSingle():
         cols = []
         units = []
         for c in s.split('\t'):
-          m = re.match(r'([\w\d\s]+)\s+\(([\w\d\s]*)\)', c.strip())
+          m = re.match(f'({column_name_regex})\s+\(({column_unit_regex})\)', c.strip())
           cols.append(m.group(1))
           units.append(m.group(2))
 

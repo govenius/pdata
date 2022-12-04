@@ -17,6 +17,7 @@ import json
 import jsondiff
 import tempfile
 import random
+import re
 
 from pdata.helpers import NumpyJSONEncoder, preprocess_snapshot, PdataJSONDiffer
 import pdata.jupyter_helpers
@@ -138,6 +139,10 @@ class Measurement():
         c,u,f = x
       else:
         raise Exception('Did not understand column specification: %s' % x)
+
+      from pdata.analysis.dataview import column_name_regex, column_unit_regex
+      assert re.match(f"^{column_name_regex}$", c) != None, f"Column name '{c}' contains unexpected characters. It does not match the regular expression '^{column_name_regex}$'."
+      assert re.match(f"^{column_unit_regex}$", u) != None, f"Unit '{u}' for column '{c}' contains unexpected characters. It does not match the regular expression '^{column_unit_regex}$'."
 
       self._columns.append(c)
       self._units.append(u)
