@@ -24,8 +24,8 @@ from collections import OrderedDict
 
 UNIX_EPOCH = datetime.datetime(1970, 1, 1, 0, 0, tzinfo = pytz.utc)
 
-column_name_regex = r"[\w\d\s]+"
-column_unit_regex = r"[\w\d\s]*"
+column_name_regex = r"[\w\d\s\-+%=/*&]+"
+column_unit_regex = r"[\w\d\s\-+%=/*&]*"
 
 class PDataSingle():
     ''' Class for reading in the contents of a single pdata data directory.

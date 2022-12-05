@@ -58,7 +58,8 @@ class TestSavingAndAnalysis(unittest.TestCase):
     # Create typical dataset
     with run_measurement(get_instrument_snapshot,
                          columns = [("frequency", "Hz"),
-                                    "S21"],
+                                    "S21",
+                                    ("col +with_-=special/symbols*%", "-&+=%*&/")],
                          name='power-sweep',
                          data_base_dir=cls._data_root) as m:
 
@@ -67,7 +68,8 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
       for p in [-30, -20, -10]:
         VNA_instrument._power = p  # <-- this new value gets automatically stored in the data since its in the snapshot
-        m.add_points({'frequency': freqs, 'S21': VNA_instrument()})
+        m.add_points({'frequency': freqs, 'S21': VNA_instrument(),
+                      'col +with_-=special/symbols*%': np.random.randn(len(freqs))})
 
     time.sleep(0.5)
     cls._timestamp_between_typical_and_single_row_datadirs = time.time()
