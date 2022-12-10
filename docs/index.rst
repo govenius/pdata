@@ -162,6 +162,12 @@ Analyzing with other tools (pandas, Matlab, etc.)
 After you've used DataView to parse the data, you can easily export
 it, including virtual dimensions, to several other tools.
 
+A convience function for conversion to `xarray
+<https://docs.xarray.dev/en/stable/index.html>`_ is included::
+
+  # Assuming the DataView d from example above:
+  xa = d.to_xarray("S21", coords=[ "frequency", "VNA power" ])
+
 Converting a DataView object :code:`d` to a `Pandas
 <https://pandas.pydata.org/>`_ data frame::
 

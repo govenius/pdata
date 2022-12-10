@@ -230,6 +230,22 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue(d['key that gets added'][0] == "value_for_key_that_gets_added")
     self.assertTrue(all(v == d['key that gets added'][0] for v in d['key that gets added'] ))
 
+    # Check conversion to xarray
+    xa = d.to_xarray("S21", coords=[ "frequency", "VNA power" ])
+    self.assertTrue(all(xa.coords["frequency"] == expected_freqs))
+    self.assertTrue(all(xa.coords["VNA_power"] == [-30., -20., -10.]))
+    self.assertTrue(all(xa.sel(VNA_power=-30) == d["S21"][:len(expected_freqs)] ))
+    self.assertTrue(all(xa.sel(VNA_power=-10) == d["S21"][-len(expected_freqs):] ))
+    self.assertTrue(xa.attrs["data_source"].strip(')').endswith(self._typical_datadir))
+
+    # Check coarse grained xarray
+    xa = d.to_xarray("S21", coords=[ "frequency", "VNA power" ], coarse_graining={"frequency": 11e6})
+    self.assertTrue(all(xa.coords["frequency"] == expected_freqs[::3]))
+    self.assertTrue(all(xa.coords["VNA_power"] == [-30., -20., -10.]))
+    self.assertTrue(all(xa.sel(VNA_power=-30)[:-1] == d["S21"][2:len(expected_freqs):3] ))
+    self.assertTrue(all(xa.sel(VNA_power=-10)[:-1] == d["S21"][-(len(expected_freqs)-2)::3] ))
+    self.assertTrue(xa.attrs["data_source"].strip(')').endswith(self._typical_datadir))
+
   def test_reading_data_with_comments(self):
     """ Check that parse_comments=True also works. """
     # Test reading the data with parse_comments=True. Not the best data set since it has no such comments...

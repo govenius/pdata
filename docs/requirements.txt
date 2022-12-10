@@ -14,3 +14,4 @@ notebook
 ipywidgets
 matplotlib
 uncertainties
+xarray

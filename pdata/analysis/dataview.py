@@ -872,3 +872,80 @@ class DataView():
 
     def remove_virtual_dimensions(self):
         self._virtual_dims = {}
+
+    def to_xarray(self, value, coords, fill_value=np.nan,
+                  coarse_graining={}, include_single_valued_params=True):
+        """Create an N-dimensional xarray out of self[value], where N is equal
+           to the number of coordinates. Coordinates are specified as
+           a list of dimension names. Entries of the xarray
+           corresponding to coordinate combinations that don't exist
+           in this data set are filled with fill_value.
+
+           This is well-suited for N-dimensional parameter/coordinate
+           sweeps that were executed with nested for loops in which
+           the looped coordinate values in each loop were selected
+           mostly independent of other coordinates. Otherwise there
+           will be lots of fill_value's.
+
+           The coordinates should generally be setpoints. If a
+           coordinate c is instead a measured value, you probably want
+           to specify coarse graining with coarse_graining={c:
+           <Delta>}, which causes coordinates differing by at most
+           <Delta> to be interpreted as the same coordinate.
+
+           If include_single_valued_params is True, all single valued
+           parameters will be included as attributes of the xarray.
+
+           Spaces in coordinate names are replaced by underscores, as
+           spaces don't work well with xarray syntax.
+        """
+        # Get unique coordinate values for each coordinate
+        coords = OrderedDict((c, np.unique(self[c])) for c in coords )
+
+        # Mappings from unique coordinate values to coordinate index
+        coord_to_i = dict( (c, dict( (cc,i) for i,cc in enumerate(coords[c]) ))
+                           for c in coords.keys() )
+
+        # Merge similar coordinates
+        for c,delta in coarse_graining.items():
+          coords[c] = list(coords[c]) # since ndarray elements cannot be deleted
+          i = 1
+          while i < len(coords[c]):
+            if coords[c][i] - coords[c][i-1] <= delta:
+              # Map the two coordinates to the same index
+              coord_to_i[c][coords[c][i]] = coord_to_i[c][coords[c][i-1]]
+
+              # Must also decrement all larger index mappings by one
+              for cc in coord_to_i[c].keys():
+                if cc > coords[c][i]: coord_to_i[c][cc] -= 1
+
+              # Delete the nearly identical coordinate
+              del coords[c][i]
+            else:
+              i +=1
+          coords[c] = np.array(coords[c])
+
+        # Initialize all values as fill_value
+        value_matrix = np.zeros(tuple(len(v) for v in coords.values()), dtype=self[value].dtype) + fill_value
+
+        # Copy values from self[value] to the correct index in the value_matrix.
+        for i,v in enumerate(self[value]):
+          value_matrix[tuple(coord_to_i[c][self[c][i]] for c in coords.keys())] = v
+
+        # Attributes
+        attrs = { "units": self.units(value),
+                  "coord_units": dict((c, self.units(c)) for c in coords.keys()) }
+
+        if include_single_valued_params:
+          for p,v in self.all_single_valued_parameters().items(): attrs[p] = v
+
+        # space --> underscore in coordinate names
+        dims = list(coords.keys())
+        for i,c in enumerate(dims):
+          if " " in c:
+            new_c = c.replace(" ", "_")
+            assert new_c not in dims, f"{new_c} already exists in coords: {dims}"
+            dims[i] = new_c
+
+        import xarray
+        return xarray.DataArray(value_matrix, coords=coords.values(), dims=dims, attrs=attrs)
