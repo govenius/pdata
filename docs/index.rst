@@ -174,7 +174,7 @@ A convience function for conversion to `xarray
           independent of other coordinates. More precisely, xarray
           will be an efficient representation if the measured
           coordinates (x,y,...,z) span most of X⊗Y...⊗Z, where X (Y)
-          [Z] is a set of all unique x (y) [Z] found in the data set.
+          [Z] is a set of all unique x (y) [z] found in the data set.
           Otherwise there will be lots of empty values in the xarray,
           which are filled with :code:`fill_value` (:code:`np.nan` by
           default).
