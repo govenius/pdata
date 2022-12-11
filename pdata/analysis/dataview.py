@@ -896,8 +896,10 @@ class DataView():
            If include_single_valued_params is True, all single valued
            parameters will be included as attributes of the xarray.
 
-           Spaces in coordinate names are replaced by underscores, as
-           spaces don't work well with xarray syntax.
+           Spaces, dashes and other special characters in coordinate
+           names are replaced automatically by underscores, as spaces
+           don't work well with xarray syntax.
+
         """
         # Get unique coordinate values for each coordinate
         coords = OrderedDict((c, np.unique(self[c])) for c in coords )
@@ -939,11 +941,12 @@ class DataView():
         if include_single_valued_params:
           for p,v in self.all_single_valued_parameters().items(): attrs[p] = v
 
-        # space --> underscore in coordinate names
+        # special characters to underscores in coordinate names
+        special_chars = r"[\s\-+%=/*&]"
         dims = list(coords.keys())
         for i,c in enumerate(dims):
-          if " " in c:
-            new_c = c.replace(" ", "_")
+          if re.search(special_chars, c) is not None:
+            new_c = re.sub(special_chars, "_", c, count=len(c))
             assert new_c not in dims, f"{new_c} already exists in coords: {dims}"
             dims[i] = new_c
 
