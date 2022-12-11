@@ -12,6 +12,7 @@ import time
 import itertools
 import logging
 import numpy as np
+import numbers
 
 from pdata.analysis.dataview import DataView, PDataSingle
 
@@ -175,3 +176,55 @@ def get_data_mtime(base_dir, data_dir, fallback_value=0):
     try: return os.path.getmtime( os.path.join(base_dir, data_dir, f) )
     except FileNotFoundError: continue
   return fallback_value
+
+def snapshot_explorer(d, max_depth=10):
+  """Graphical dropdown-menu-based helper for creating virtual dimension
+     specifications for DataView d. max_depth controls the number of
+     dropdown menus.
+  """
+
+  assert max_depth >= 2
+  assert len(d.settings()) > 0, 'No snapshots in DataView.'
+  snap = d.settings()[0][1]
+
+  def update_path_selectors():
+    """ Update dropdown options. """
+    kwargs = _widget.kwargs_widgets
+    subsnap = snap
+    return_val = None
+    for i in range(1, max_depth):
+      prev_key = kwargs[i-1].value
+      #print(f"prev_key = {prev_key}")
+      try:
+        subsnap = subsnap.get(prev_key, subsnap[list(subsnap.keys())[0]])
+        kwargs[i].options = subsnap.keys()
+      except (TypeError,AttributeError,IndexError):
+        # subsnap is no longer subscriptable, or is an empty list
+        if subsnap is not None: return_val = subsnap
+        kwargs[i].options = []
+        subsnap = None
+        continue
+    return return_val
+
+  def dtype_spec(val):
+    """ Construct dtype specification. """
+    if val is None: return ""
+    if isinstance(val, numbers.Number): return ", dtype=float"
+    return ", dtype=str"
+
+  def construct_vdim_spec(**kwargs):
+    """ Print out a .add_virtual_dimension(...) template based on the values in the dropdown menus. """
+    val = update_path_selectors()
+    print('d.add_virtual_dimension(<name>, units=<units>, from_set=['
+          + ", ".join(v for v in kwargs.values() if v is not None)
+          + dtype_spec(val)
+          + "))")
+    print(f"Value = {val}  @row==0")
+
+  # Specify the number of dropdown menus, and populate options for the first one.
+  # The rest of the dropdowns will be populated when first displayed.
+  path_selectors = dict( (f"path{i}", snap.keys() if i==0 else []) for i in range(max_depth) )
+
+  from ipywidgets import interactive
+  _widget = interactive(construct_vdim_spec, **path_selectors)
+  return _widget
