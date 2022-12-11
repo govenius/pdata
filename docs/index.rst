@@ -193,7 +193,7 @@ A convience function for conversion to `xarray
           the repetition number.
 
 .. note:: Spaces, dashes and other special characters in coordinate
-          names are replaced automatically by underscores, as spaces
+          names are replaced automatically by underscores, as these
           don't work well with xarray syntax.
 
 Converting a DataView object :code:`d` to a `Pandas

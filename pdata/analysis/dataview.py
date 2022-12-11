@@ -904,9 +904,8 @@ class DataView():
            parameters will be included as attributes of the xarray.
 
            Spaces, dashes and other special characters in coordinate
-           names are replaced automatically by underscores, as spaces
+           names are replaced automatically by underscores, as these
            don't work well with xarray syntax.
-
         """
         # Get unique coordinate values for each coordinate
         coords = OrderedDict((c, np.unique(self[c])) for c in coords )
