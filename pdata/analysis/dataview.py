@@ -887,11 +887,18 @@ class DataView():
            mostly independent of other coordinates. Otherwise there
            will be lots of fill_value's.
 
-           The coordinates should generally be setpoints. If a
-           coordinate c is instead a measured value, you probably want
-           to specify coarse graining with coarse_graining={c:
-           <Delta>}, which causes coordinates differing by at most
-           <Delta> to be interpreted as the same coordinate.
+           Usually, you'll want to use setpoints, rather than measured
+           values, as coordinates. If a coordinate c is instead a
+           measured value, you probably want to specify coarse
+           graining with coarse_graining={c: <Delta>}, which causes
+           coordinates differing by at most <Delta> to be interpreted
+           as the same coordinate.
+
+           Note that if the same coordinate combination is repeated
+           more than once in the data set, only the last measured
+           value will appear in the output xarray. If you want to
+           preserve information about repetitions, add another
+           coordinate for the repetition number.
 
            If include_single_valued_params is True, all single valued
            parameters will be included as attributes of the xarray.

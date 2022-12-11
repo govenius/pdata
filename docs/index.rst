@@ -156,8 +156,8 @@ as sweeps using your favorite plotting library::
    :alt: S21 vs frequency
    :scale: 80 %
 
-Analyzing with other tools (pandas, Matlab, etc.)
--------------------------------------------------
+Analyzing with other tools (xarray, pandas, Matlab, etc.)
+---------------------------------------------------------
 
 After you've used DataView to parse the data, you can easily export
 it, including virtual dimensions, to several other tools.
@@ -167,6 +167,34 @@ A convience function for conversion to `xarray
 
   # Assuming the DataView d from example above:
   xa = d.to_xarray("S21", coords=[ "frequency", "VNA power" ])
+
+.. note:: Xarray is well-suited for N-dimensional parameter/coordinate
+          sweeps that were executed with nested for loops in which the
+          looped coordinate values in each loop were selected mostly
+          independent of other coordinates. More precisely, xarray
+          will be an efficient representation if the measured
+          coordinates (x,y,...,z) span most of X⊗Y...⊗Z, where X (Y)
+          is a vector of all unique x (y) in the data set, etc.
+          Otherwise there will be lots of empty values in the xarray,
+          which are filled with :code:`fill_value` (:code:`np.nan` by
+          default).
+
+.. note:: Usually, you'll want to use setpoints, rather than measured
+          values, as coordinates in an xarray. If a coordinate
+          :code:`c` is instead a measured value, you probably want to
+          specify coarse graining with :code:`coarse_graining={c:
+          <Delta>}`, which causes coordinates differing by at most
+          :code:`<Delta>` to be interpreted as the same coordinate.
+
+.. note:: Note that if the same coordinate combination is repeated
+          more than once in the data set, only the last measured value
+          will appear in the output xarray. If you want to preserve
+          information about repetitions, add another coordinate for
+          the repetition number.
+
+.. note:: Spaces, dashes and other special characters in coordinate
+          names are replaced automatically by underscores, as spaces
+          don't work well with xarray syntax.
 
 Converting a DataView object :code:`d` to a `Pandas
 <https://pandas.pydata.org/>`_ data frame::
