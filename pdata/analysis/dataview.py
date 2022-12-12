@@ -873,13 +873,18 @@ class DataView():
     def remove_virtual_dimensions(self):
         self._virtual_dims = {}
 
-    def to_xarray(self, value, coords, fill_value=np.nan,
+    def to_xarray(self, values, coords, fill_value=np.nan,
                   coarse_graining={}, include_single_valued_params=True):
-        """Create an N-dimensional xarray out of self[value], where N is equal
-           to the number of coordinates. Coordinates are specified as
-           a list of dimension names. Entries of the xarray
-           corresponding to coordinate combinations that don't exist
-           in this data set are filled with fill_value.
+        """Create an N-dimensional xarray DataSet out of values, where N is
+           equal to the number of coordinates and values are specified
+           as a list of dataview dimension names, or (<data variable
+           name>, f, <units>) tuples where f(self) returns a vector of
+           length equal to the number of unmasked rows in this
+           DataView. Alternatively, values can be a single dimension
+           name. Coordinates are specified as a list of dimension
+           names. Entries of the xarray corresponding to coordinate
+           combinations that don't exist in this data set are filled
+           with fill_value.
 
            This is well-suited for N-dimensional parameter/coordinate
            sweeps that were executed with nested for loops in which
@@ -933,21 +938,7 @@ class DataView():
               i +=1
           coords[c] = np.array(coords[c])
 
-        # Initialize all values as fill_value
-        value_matrix = np.zeros(tuple(len(v) for v in coords.values()), dtype=self[value].dtype) + fill_value
-
-        # Copy values from self[value] to the correct index in the value_matrix.
-        for i,v in enumerate(self[value]):
-          value_matrix[tuple(coord_to_i[c][self[c][i]] for c in coords.keys())] = v
-
-        # Attributes
-        attrs = { "units": self.units(value),
-                  "coord_units": dict((c, self.units(c)) for c in coords.keys()) }
-
-        if include_single_valued_params:
-          for p,v in self.all_single_valued_parameters().items(): attrs[p] = v
-
-        # special characters to underscores in coordinate names
+        # Special characters to underscores in coordinate names
         special_chars = r"[\s\-+%=/*&]"
         dims = list(coords.keys())
         for i,c in enumerate(dims):
@@ -956,5 +947,39 @@ class DataView():
             assert new_c not in dims, f"{new_c} already exists in coords: {dims}"
             dims[i] = new_c
 
+        # Create the xarrays
+
+        # Also accept a single dimension name as input
+        if isinstance(values, str): values = [ values ]
+
         import xarray
-        return xarray.DataArray(value_matrix, coords=coords.values(), dims=dims, attrs=attrs)
+        arrays = OrderedDict()
+        if include_single_valued_params: single_valued_params = self.all_single_valued_parameters()
+
+        for value in values:
+          if isinstance(value, str):
+            val_name = value
+            val_vector = self[value]
+            units = self.units(value)
+          else:
+            val_name = value[0]
+            val_vector = value[1](self)
+            units = value[2]
+
+          # Initialize all values as fill_value
+          value_matrix = np.zeros(tuple(len(v) for v in coords.values()), dtype=val_vector.dtype) + fill_value
+
+          # Copy values from self[value] to the correct index in the value_matrix.
+          for i,v in enumerate(val_vector):
+            value_matrix[tuple(coord_to_i[c][self[c][i]] for c in coords.keys())] = v
+
+          # Attributes
+          attrs = { "units": units,
+                    "coord_units": dict((c, self.units(c)) for c in coords.keys()) }
+
+          if include_single_valued_params:
+            for p,v in single_valued_params.items(): attrs[p] = v
+
+          arrays[val_name] = xarray.DataArray(value_matrix, coords=coords.values(), dims=dims, attrs=attrs)
+
+        return xarray.Dataset(arrays)

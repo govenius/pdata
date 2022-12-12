@@ -236,15 +236,23 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue(all(xa.coords["VNA_power"] == [-30., -20., -10.]))
     self.assertTrue(all(xa.sel(VNA_power=-30) == d["S21"][:len(expected_freqs)] ))
     self.assertTrue(all(xa.sel(VNA_power=-10) == d["S21"][-len(expected_freqs):] ))
-    self.assertTrue(xa.attrs["data_source"].strip(')').endswith(self._typical_datadir))
+    self.assertTrue(xa.S21.attrs["data_source"].strip(')').endswith(self._typical_datadir))
 
     # Check coarse grained xarray
     xa = d.to_xarray("S21", coords=[ "frequency", "VNA power" ], coarse_graining={"frequency": 11e6})
     self.assertTrue(all(xa.coords["frequency"] == expected_freqs[::3]))
     self.assertTrue(all(xa.coords["VNA_power"] == [-30., -20., -10.]))
-    self.assertTrue(all(xa.sel(VNA_power=-30)[:-1] == d["S21"][2:len(expected_freqs):3] ))
-    self.assertTrue(all(xa.sel(VNA_power=-10)[:-1] == d["S21"][-(len(expected_freqs)-2)::3] ))
-    self.assertTrue(xa.attrs["data_source"].strip(')').endswith(self._typical_datadir))
+    self.assertTrue(all(xa.S21.sel(VNA_power=-30)[:-1] == d["S21"][2:len(expected_freqs):3] ))
+    self.assertTrue(all(xa.S21.sel(VNA_power=-10)[:-1] == d["S21"][-(len(expected_freqs)-2)::3] ))
+    self.assertTrue(xa.S21.attrs["data_source"].strip(')').endswith(self._typical_datadir))
+
+    # Check conversion to xarray with function spec
+    xa = d.to_xarray(("S21", ("scaled_S21", lambda dd: 10*dd["S21"], '')), coords=[ "frequency", "VNA power" ])
+    self.assertTrue(all(xa.coords["frequency"] == expected_freqs))
+    self.assertTrue(all(xa.coords["VNA_power"] == [-30., -20., -10.]))
+    self.assertTrue(all(xa.scaled_S21.sel(VNA_power=-30) == 10*d["S21"][:len(expected_freqs)] ))
+    self.assertTrue(all(xa.scaled_S21.sel(VNA_power=-10) == 10*d["S21"][-len(expected_freqs):] ))
+    self.assertTrue(xa.scaled_S21.attrs["data_source"].strip(')').endswith(self._typical_datadir))
 
   def test_reading_data_with_comments(self):
     """ Check that parse_comments=True also works. """
