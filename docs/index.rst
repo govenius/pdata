@@ -71,8 +71,8 @@ The essential part of running the measurement is::
 
 .. note:: By default, floats in the data table will be serialized to
           strings using the format code :code:`%.12e`, i.e. with 13
-          significant figures. Other data types are be converted to
-          string by calling :code:`str()`. The defaults serializers
+          significant figures. Other data types are converted to
+          string by calling :code:`str()`. The default serializers
           are inferred from the data types in the first data row
           passed to :code:`add_points()`. You can override the default
           serialization for any column with a column specification
