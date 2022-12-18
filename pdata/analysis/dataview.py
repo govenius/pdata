@@ -768,7 +768,7 @@ class DataView():
         assert (fn != None) + (arr is not None) + (comment_regex != None) + (from_set != None) == 1, 'You must specify exactly one of "fn", "arr", or "comment_regex".'
 
         if arr is not None:
-          assert len(arr) == len(self._mask), '"arr" must be a vector of the same length as the real data columns. If you want to do something fancier, specify your own fn.'
+          assert len(arr) == len(self._mask), f'len(arr)={len(arr)} must be the same as the length of the existing data columns ({len(self._mask)}).'
 
         if from_set != None:
             assert self._settings != None, 'snapshot files were not successfully parsed during dataview initialization.'
