@@ -129,23 +129,27 @@ class PDataSingle():
         else:
           self._column_names, self._units = PDataSingle._parse_columns_from_header(self._table_header)
 
+        self._column_name_to_index = dict( (n, i) for i,n in enumerate(self._column_names) )
+
         if rowno > 0:
           assert len(self._column_names) == ncols, "The number of columns in the header and data do not seem to match."
 
-        self._column_name_to_index = dict((self._column_names[i], i) for i in range(len(self._column_names)) )
+          # Parse the actual numerical data
+          f.seek(0)
+          self._data = np.genfromtxt(f,
+                                     delimiter="\t",
+                                     comments="#",
+                                     converters=converters,
+                                     dtype=float) # Assume all columns contain floats
 
-        # Parse the actual numerical data
-        f.seek(0)
-        self._data = np.genfromtxt(f,
-                                   delimiter="\t",
-                                   comments="#",
-                                   converters=converters,
-                                   dtype=float) # Assume all columns contain floats
+          # If the data contains just a single row or a single column,
+          # genfromtxt returns a 1D vector instead of a 2D array, so convert it to 2D.
+          # Note: In Numpy >= 1.23.0, setting ndmin=2 for genfromtxt might also solve this but that remains untested.
+          if len(self._data.shape) == 1: self._data = self._data.reshape((-1, ncols))
 
-        # If the data contains just a single row or a single column,
-        # genfromtxt returns a 1D vector instead of a 2D array, so convert it to 2D.
-        # Note: In Numpy >= 1.23.0, setting ndmin=2 for genfromtxt might also solve this but that remains untested.
-        if rowno>0 and len(self._data.shape) == 1: self._data = self._data.reshape((-1, ncols))
+        else:
+          logging.warning(f"No data rows in tabular_data of {self._path}")
+          self._data = np.zeros((0,len(self._column_names)))
 
         if parse_comments:
           # rowno should equal the number of data rows, if comments were parsed and
