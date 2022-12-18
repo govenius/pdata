@@ -326,19 +326,19 @@ class DataView():
 
         except Exception as e: # probably a sequence of Data objects then
           self._dimensions = set(itertools.chain( *(dd.dimension_names() for dd in data) ))
-          
+
           unmasked = {}
           for dim in self._dimensions:
             unmasked[dim] = []
             for dat in data:
               if len(dat.dimension_names()) == 0:
                 logging.warning("%s seems to contain zero columns. Skipping it..." % (dat.filename()))
-                break
+                continue
 
               n_rows = dat.npoints()
               if n_rows == 0:
                 logging.info("%s seems to contain zero rows. Skipping it..." % (dat.filename()))
-                break
+                continue
 
               try:
                 unmasked[dim].append(dat[dim])
