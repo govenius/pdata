@@ -122,21 +122,26 @@ class Measurement():
     self._columns = list()
     self._units = list()
     self._formatters = list()
+    self._dtypes = list()
 
     self._check_for_manual_abort()
 
     # Parse columns and units.
     # Units are optional.
     # The formatter is an optional function used for conversion to str.
+    # The data type is an optional data type spec saved as metadata in tabular_data
     for x in columns:
       u = ""
       f = None
+      dt = None
       if isinstance(x, str):
         c = x
       elif len(x) == 2:
         c,u = x
       elif len(x) == 3:
         c,u,f = x
+      elif len(x) == 4:
+        c,u,f,dt = x
       else:
         raise Exception('Did not understand column specification: %s' % x)
 
@@ -147,6 +152,7 @@ class Measurement():
       self._columns.append(c)
       self._units.append(u)
       self._formatters.append(f)
+      self._dtypes.append(dt)
 
       assert len(self._columns) == len(self._units)
       assert len(self._columns) == len(self._formatters)
@@ -185,6 +191,7 @@ class Measurement():
 
     # Write a header, to some extent compatible with the "legacy" QCoDeS format.
     header =  "#\n"
+    header += "# Column dtypes: " + "\t".join(str(dt) for dt in self._dtypes) + "\n"
     header += "# " + "\t".join("%s (%s)" % (c,u) for c,u in zip(self._columns, self._units)) + "\n"
     header +=  "#\n"
     try:     self._dat_file.write(header)
@@ -275,10 +282,13 @@ autosnapping.'''
 
   def _guess_missing_formatters(self, data):
     '''Given the first points added to the data file, assign reasonable
-        formatters for columns that didn't have one manually specified.
+       formatters for columns that didn't have one manually specified.
+
+       Also record data type of each column.
     '''
 
     for i,c in enumerate(self._columns):
+      if self._dtypes[i] != None: self._dtypes[i] = type(data[c][0])
       if self._formatters[i] != None: continue
 
       if isinstance(data[c][0], float):
