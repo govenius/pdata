@@ -251,8 +251,9 @@ class Measurement():
 
   def write_snapshot(self, snap=None):
     '''Add a snapshot (delta) file to the data directory. This is called
-automatically whenever you call add_points(), unless you disabled
-autosnapping.'''
+       automatically whenever you call add_points(), unless you
+       disabled autosnapping.
+    '''
     if snap==None:
       snap = self._get_snapshot()
 
@@ -276,7 +277,7 @@ autosnapping.'''
                              'snapshot.row-%u.diff%u.json' % (self._npoints_total, i))
         if not os.path.exists(fname): break
 
-      with open(fname, 'w') as fsnap: Measurement._dump_json(d, fsnap, is_diff=True)
+      with open(fname, 'w') as fsnap: Measurement._dump_json(d, fsnap)
 
     self._last_snapshot = snap
 
@@ -388,7 +389,7 @@ autosnapping.'''
     if t != self._abort_signal_initial_mtime: raise Exception('Measurement aborted manually.')
 
   @staticmethod
-  def _dump_json(snap, fhandle, is_diff=False):
+  def _dump_json(snap, fhandle):
     json.dump(snap, fhandle, sort_keys=False,
               indent=2, ensure_ascii=False, cls=NumpyJSONEncoder)
 
