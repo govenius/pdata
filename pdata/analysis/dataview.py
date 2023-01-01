@@ -220,10 +220,15 @@ class PDataSingle():
     @staticmethod
     def _parse_columns_from_header(s):
       try:
-        # Try assuming the "Column name (unit)\t" format in pdata
+        # Try assuming the "Column name (unit)\t" format in pdata,
+        # encoded on last non-empty comment line
+
+        # Pick last non-empty line
+        column_names_and_units = [ l for l in s.split('\n') if len(l.strip())>0 ][-1]
+
         cols = []
         units = []
-        for c in s.split('\t'):
+        for c in column_names_and_units.split('\t'):
           m = re.match(f'({column_name_regex})\s+\(({column_unit_regex})\)', c.strip())
           cols.append(m.group(1))
           units.append(m.group(2))
