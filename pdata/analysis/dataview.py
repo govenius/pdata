@@ -681,7 +681,7 @@ class DataView():
         # we must copy it here!
         old_dims = self._virtual_dims
         self._virtual_dims = {}
-        for name, dim in old_dims.iteritems():
+        for name, dim in old_dims.items():
           cached_arr = dim['cached_array']
           if isinstance(cached_arr, np.ndarray):
             cached_arr = cached_arr[~(self._mask)]

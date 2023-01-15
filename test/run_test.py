@@ -349,6 +349,13 @@ class TestSavingAndAnalysis(unittest.TestCase):
     check_correctness(d.divide_into_sweeps("frequency"), [ slice(0, 1, None) ])
     check_correctness(d.divide_into_sweeps("VNA power"), [ slice(0, 1, None) ])
 
+    # Test removing rows permanently
+    d.remove_masked_rows_permanently()
+    self.assertTrue(len(d["frequency"]) == 1)
+    self.assertTrue(max(np.abs(d["frequency"] / expected_freqs[:1] - 1)) < 1e-10)
+    check_correctness(d.divide_into_sweeps("frequency"), [ slice(0, 1, None) ])
+    check_correctness(d.divide_into_sweeps("VNA power"), [ slice(0, 1, None) ])
+
   def test_json_export(self):
     """ Test that exporting the dataview object to JSON works. """
     # Test reading the data using DataView
