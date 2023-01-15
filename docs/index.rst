@@ -69,17 +69,21 @@ The essential part of running the measurement is::
       m.add_points({'frequency': freqs, 'S21': s21})
 
 
-.. note:: By default, floats in the data table will be serialized to
-          strings using the format code :code:`%.12e`, i.e. with 13
-          significant figures. Other data types are converted to
-          string by calling :code:`str()`. The default serializers
-          are inferred from the data types in the first data row
-          passed to :code:`add_points()`. You can override the default
-          serialization for any column with a column specification
-          like this: :code:`(<column name>, <unit>, <formatter>)`,
+.. note:: By default, floats and complex numbers will be serialized to
+          strings with 16 significant figures, corresponding to the
+          precision of 64-bit floats. Other data types are converted
+          to string by calling :code:`str()`, and replacing tabs and
+          new lines with spaces. The default serializers and data
+          types are inferred from the data types in the first data row
+          passed to :code:`add_points()`. You can override the
+          defaults for any column with a column specification like
+          this: :code:`(<column name>, <unit>, <formatter>, <dtype>)`,
           where :code:`<formatter>` is a single-argument function that
           converts the argument to a string (e.g.  :code:`lambda x:
-          "%.15e"%x`).
+          f"{x:.3e}"` if you wanted to optimize the file size).
+          :code:`<dtype>` is an optional data type class that is
+          stored in the tabular data header as metadata, and later
+          helps parse the data correctly.
 
 Interrupting a measurement prematurely
 --------------------------------------

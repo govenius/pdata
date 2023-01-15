@@ -14,7 +14,11 @@ from pdata.procedural_data import run_measurement
 from pdata.analysis.dataview import DataView, PDataSingle
 from pdata.analysis import dataexplorer
 
-lorenzian = lambda f,gamma,f0=6e9: 1/np.pi * (gamma**2 / ((f-f0)**2 + gamma**2))
+def resonator_response(f, pwr, Qc=1e3, f0=6e9):
+  """ Generate fake resonator S21 data, given a list of frequencies and a measurement power. """
+  Qi = 0.5e3 * 2**(pwr/10.)
+  Q = 1/(1/Qc + 1/Qi)
+  return 1 - Q/Qc / (1 + 2j*Q*(f-f0)/f0)
 
 class TestSavingAndAnalysis(unittest.TestCase):
 
@@ -29,7 +33,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
     def VNA_instrument():
       """ Fake VNA "instrument" that retuns a list of |S21| that depends on a power parameter. """
-      return lorenzian(freqs, 10e6 * 2**(VNA_instrument._power/10.))
+      return resonator_response(freqs, VNA_instrument._power)
 
     VNA_instrument._power = 10. # Initial value
 
@@ -210,10 +214,10 @@ class TestSavingAndAnalysis(unittest.TestCase):
     # Check S21
     self.assertTrue(len(d["S21"]) == len(d["frequency"]))
 
-    expected_S21 = lorenzian(expected_freqs, 10e6 * 2**(-30/10.))
+    expected_S21 = resonator_response(expected_freqs, -30)
     self.assertTrue(max(np.abs(d["S21"][:len(expected_freqs)] / expected_S21 - 1)) < 1e-10)
 
-    expected_S21 = lorenzian(expected_freqs, 10e6 * 2**(-10/10.))
+    expected_S21 = resonator_response(expected_freqs, -10)
     self.assertTrue(max(np.abs(d["S21"][-len(expected_freqs):] / expected_S21 - 1)) < 1e-10)
 
     # Check VNA power virtual column
@@ -293,7 +297,6 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
     # Check frequencies
     expected_freqs = np.linspace(5.9e9, 6.1e9, 41)
-    #time.sleep(2); print(d["frequency"])
     self.assertTrue(len(d["frequency"]) == len(expected_freqs))
     self.assertTrue(max(np.abs( np.unique(d["frequency"]) / expected_freqs - 1 )) < 1e-10)
 
@@ -301,6 +304,16 @@ class TestSavingAndAnalysis(unittest.TestCase):
     """ Read a data set containing no data rows. """
     d = DataView([ PDataSingle(self._no_rows_datadir), ])
     self.assertTrue(len(d["frequency"]) == 0)
+
+  def test_reading_data_with_different_columns(self):
+    """ Read a data set containing just a single column. """
+    # Test reading the data using DataView
+    d = DataView([ PDataSingle(self._typical_datadir), PDataSingle(self._single_column_datadir) ])
+
+    # Check frequencies
+    expected_freqs = np.linspace(5.9e9, 6.1e9, 41)
+    self.assertTrue(len(d["frequency"]) == 4*len(expected_freqs))
+    self.assertTrue(max(np.abs( np.unique(d["frequency"][:41]) / expected_freqs - 1 )) < 1e-10)
 
   def test_divide_into_sweeps_and_masking(self):
     """ Test divide_into_sweeps(). """
@@ -310,8 +323,6 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
     def check_correctness(s, correct_sweeps=[slice(0, 41, None), slice(41, 82, None), slice(82, 123, None)]):
       self.assertEqual(len(s), len(correct_sweeps))
-      #print(correct_sweeps)
-      #print(s)
       self.assertTrue(all( sweep == sweep_correct for sweep, sweep_correct in zip(s, correct_sweeps) ))
 
     check_correctness(d.divide_into_sweeps("frequency", use_sweep_direction=True))
@@ -345,6 +356,51 @@ class TestSavingAndAnalysis(unittest.TestCase):
     import json
     from pdata.helpers import NumpyJSONEncoder
     json.dumps({col: d[col] for col in d.dimensions()}, cls=NumpyJSONEncoder)
+
+  def test_tabular_data_header_parsing(self):
+    """Test that parsing tabular data header works as expected, also for
+       legacy formats."""
+
+    self.assertTrue(isinstance(PDataSingle._parse_timestamp('2017-12-06 09:15:40.123'), float))
+
+    header_qcodes_legacy = """
+frequency	S21	col +with_-=special/symbols*%
+"""
+
+    header_pre_v1 = """
+frequency (Hz)	S21 ()	col +with_-=special/symbols*% (-&+=%*&/)
+"""
+
+    header_v1_0_0 = """
+ondisk_format_version = 1.0.0
+pdata_version = 1.3.0
+jsondiff_version = 2.0.0
+numpy_version = 1.22.4
+MMeasurement started at 2023-01-14 16:02:29
+Column dtypes: numpy.float64	numpy.float64	numpy.float64
+
+frequency (Hz)	S21 ()	col +with_-=special/symbols*% (-&+=%*&/)
+"""
+    expected_name = [ "frequency", "S21", "col +with_-=special/symbols*%" ]
+    expected_units = [ "Hz", "",  "-&+=%*&/"]
+    expected_dtype = [ numpy.float64, numpy.float64,  numpy.float64]
+
+    for h in [ header_qcodes_legacy, header_pre_v1, header_v1_0_0 ]:
+      column_names, units = PDataSingle._parse_columns_from_header(h)
+      dtypes, converters = PDataSingle._parse_dtypes_from_header(h, convert_timestamps=True)
+
+      for i in range(3):
+        self.assertEqual(expected_name[i], column_names[i])
+        if h is not header_qcodes_legacy:
+          self.assertEqual(expected_units[i], units[i])
+        if h in [ header_v1_0_0 ]:
+          self.assertEqual(expected_dtype[i], dtypes[i])
+
+    # Also test inference from data
+    first_data_row = "5.900000000000000e+09	4.972814969282779e-05	-1.777020521195576e+00"
+
+    inferred_dtypes, inferred_converters = PDataSingle._infer_dtypes_from_first_data_row(first_data_row,
+                                                                                         convert_timestamps=True)
 
 if __name__ == '__main__':
   unittest.main(exit=False)

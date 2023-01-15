@@ -22,6 +22,10 @@ import re
 from pdata.helpers import NumpyJSONEncoder, preprocess_snapshot, PdataJSONDiffer
 import pdata.jupyter_helpers
 
+# Version number of the data format written to disk, following Semantic Versioning (https://semver.org/).
+# This version number should increase much more slowly than the pdata package/release versions.
+ondisk_format_version = (1, 0, 0)
+
 @contextlib.contextmanager
 def run_measurement(get_snapshot,
                     columns, name,
@@ -86,13 +90,15 @@ class Measurement():
   def __init__(self, columns, target_dir=None, get_snapshot=None,
                autosnap=True, snap_diff_filter=None, omit_readme=False,
                compress=True):
-    '''
-    Args:
+    '''Args:
 
-      columns: a list of strings (column names) or tuples
-               (<column name>, <units> [optional], <formatter> [optional]).
-               Formatter should be a function that takes in a data point
-               and turns it into a str written to the data file.
+      columns: a list of strings (column names) or tuples (<column
+               name>, <units> [optional], <formatter> [optional],
+               <dtype> [optional]).  Formatter should be a function
+               that takes in a data point and turns it into a str
+               written to the data file.  Dtype should be a data type
+               class (e.g. float). analysis.dataview.PDataSingle will
+               use it as a hint while reading the data.
 
       target_dir: full path to where the data directory is to be created.
 
@@ -117,7 +123,7 @@ class Measurement():
 
     self._npoints_total = 0
     self._last_snapshot = None
-
+    self._snapshot_diff_rows = []
 
     self._columns = list()
     self._units = list()
@@ -164,6 +170,8 @@ class Measurement():
         before add_points(). The run_measurement() context manager
         calls this automatically.
     '''
+    assert not hasattr(self, "_start_time"), "begin() must be called only once."
+
     if self._target_dir == None:
       self._target_dir = str(datetime.datetime.now()).replace(".", "_").replace(":", "-").replace(" ", "_")
 
@@ -189,19 +197,47 @@ class Measurement():
 
     self._dat_file = open(os.path.join(self._target_dir, 'tabular_data.dat'), 'w')
 
-    # Write a header, to some extent compatible with the "legacy" QCoDeS format.
+    self._start_time = datetime.datetime.now()
+
+  def _write_tabular_data_header(self):
+    """Write a header in tabular_data.dat.
+
+       The format is to some extent compatible with the "legacy"
+       QCoDeS format, but adds some more metadata.
+
+       This is invoked automatically during the first call to
+       add_points(), rather than during begin(), since we want to
+       infer the column dtypes from the first added points.
+
+    """
     header =  "#\n"
-    header += "# Column dtypes: " + "\t".join(str(dt) for dt in self._dtypes) + "\n"
-    header += "# " + "\t".join("%s (%s)" % (c,u) for c,u in zip(self._columns, self._units)) + "\n"
-    header +=  "#\n"
+    header += f"# ondisk_format_version = {'.'.join(map(str, ondisk_format_version))}\n"
+    header += f"# pdata_version = {pdata.__version__}\n"
+    header += f"# jsondiff_version = {jsondiff.__version__}\n"
+    header += f"# numpy_version = {np.__version__}\n"
+    header += "# Measurement started at " + self._start_time.strftime("%Y-%m-%d %H:%M:%S\n")
+    header += "# Column dtypes: " + "\t".join(Measurement._dtype_to_str(dt)
+                                              for dt in self._dtypes) + "\n"
+    header += "#\n"
+    header += "# " + "\t".join(Measurement._replace_disallowed_tabular_data_chars(f"{c} ({u})")
+                               for c,u in zip(self._columns, self._units)) + "\n"
+    header += "#\n"
     try:     self._dat_file.write(header)
     finally: self._dat_file.flush()
 
   def end(self):
-    '''Ends the measurement, i.e. closes and compresses the data set
-        files. The run_measurement() context manager calls this
-        automatically.
+    '''Ends the measurement. Adds final metadata and closes and compresses
+       the data set files. The run_measurement() context manager calls
+       this automatically.
     '''
+    if self._npoints_total == 0: self._write_tabular_data_header()
+
+    footer =  "#\n"
+    footer += "# Measurement ended at " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S\n")
+    footer += f"# Snapshot diffs preceding rows (0-based index): {','.join(map(str, self._snapshot_diff_rows))}\n"
+    try:     self._dat_file.write(footer)
+    finally: self._dat_file.flush()
+
     self._close_dat_file()
     self._close_log_file()
 
@@ -225,17 +261,20 @@ class Measurement():
     npts = len(data[self._columns[0]])
     assert all(len(data[k]) == npts for k in data.keys()), 'All appended data columns must be vectors of the same length.'
 
-    if self._npoints_total == 0 and npts>0: self._guess_missing_formatters(data)
+    if self._npoints_total == 0 and npts>0:
+      self._guess_missing_formatters(data)
+      self._write_tabular_data_header()
 
     if snap or (snap == None and self._autosnap): self.write_snapshot()
 
     # Prepare in memory
     rows = "\n".join(
-      "\t".join(f(data[c][i]) for c,f in zip(self._columns, self._formatters))
+      "\t".join(Measurement._replace_disallowed_tabular_data_chars(f(data[c][i]))
+                for c,f in zip(self._columns, self._formatters))
       for i in range(npts) )
     rows += "\n"
 
-    # And write atomically
+    # And write to disk as atomically as possible
     try:     self._dat_file.write(rows)
     finally: self._dat_file.flush()
 
@@ -277,6 +316,7 @@ class Measurement():
                              'snapshot.row-%u.diff%u.json' % (self._npoints_total, i))
         if not os.path.exists(fname): break
 
+      self._snapshot_diff_rows.append(self._npoints_total)
       with open(fname, 'w') as fsnap: Measurement._dump_json(d, fsnap)
 
     self._last_snapshot = snap
@@ -285,17 +325,22 @@ class Measurement():
     '''Given the first points added to the data file, assign reasonable
        formatters for columns that didn't have one manually specified.
 
-       Also record data type of each column.
+       Also record original data type of each column.
     '''
-
     for i,c in enumerate(self._columns):
-      if self._dtypes[i] != None: self._dtypes[i] = type(data[c][0])
-      if self._formatters[i] != None: continue
+      if self._dtypes[i] == None:
+        self._dtypes[i] = type(data[c][0])
 
-      if isinstance(data[c][0], float):
-        self._formatters[i] = lambda x: "%.12e" % x
-      else:
-        self._formatters[i] = str
+      if self._formatters[i] == None:
+        # Infer appropriate formatter
+        if isinstance(data[c][0], float):
+          self._formatters[i] = lambda x: f"{x:.15e}"
+        elif isinstance(data[c][0], complex):
+          self._formatters[i] = lambda x: f"{x.real:.15e}{x.imag:+.15e}j"
+        elif isinstance(data[c][0], datetime.datetime):
+          self._formatters[i] = lambda x: x.strftime('%Y-%m-%d %H:%M:%S.%f')
+        else:
+          self._formatters[i] = str
 
   def _open_log_file(self):
     ''' Open a secondary log file in the data directory. '''
@@ -397,6 +442,15 @@ class Measurement():
   def _path_friendly_str(s):
     def acceptable_char(x): return x.isalnum() or x in ['#', '-', '=']
     return "".join(x if acceptable_char(x) else '_' for x in s)
+
+  @staticmethod
+  def _replace_disallowed_tabular_data_chars(s): return s.replace("\t","    ").replace("\n", " ")
+
+  @staticmethod
+  def _dtype_to_str(dt):
+    """Convert datatype dt to str."""
+    return Measurement._replace_disallowed_tabular_data_chars(
+      f"{dt.__module__}.{dt.__name__}" if hasattr(dt, "__module__") and hasattr(dt, "__name__") else str(dt) )
 
 
 # A bit of a hack allowing controllably aborting a measurement

@@ -74,7 +74,6 @@ class PDataSingle():
       def parse_tabular_data(f):
         # First analyze the first data row and the header rows preceding it.
         self._comments = []
-        converters = {}
         rowno = 0
         comment = ""
         while True:
@@ -95,23 +94,12 @@ class PDataSingle():
             # Store comment(s) preceding this data row
             self._comments.append((rowno, comment))
 
-          # The comment rows preceding the first data row contain the table header
-          # that defines the column names. Store it for later parsing.
-          if rowno==0: self._table_header = comment
-
-          # Determine the number of columns from the first data row
-          if rowno==0: ncols = len(line.split('\t'))
-
-          # Determine, based on the first data row, whether any columns contain
-          # time stamps. Convert them into seconds since Unix epoch.
-          if rowno==0 and convert_timestamps:
-            for i,c in enumerate(line.split('\t')):
-              try:
-                PDataSingle._parse_timestamp(c)
-                converters[i] = lambda x: PDataSingle._parse_timestamp(x.decode('utf-8'))
-                logging.info('Column %s appears to contain timestamps. Converting them to seconds since Unix epoch. (Disable by setting convert_timestamps=False.)', i)
-              except ValueError:
-                pass # Not a timestamp
+          # The comment rows preceding the first data row contain the
+          # table header that defines the column names. Store the
+          # header and the first data row for later parsing.
+          if rowno==0:
+              self._table_header = comment
+              self._first_data_row = line
 
           rowno += 1
           comment = ""
@@ -120,36 +108,71 @@ class PDataSingle():
           if not parse_comments: break
 
         # Store header even if there were zero data rows
-        if rowno==0: self._table_header = comment
+        if rowno==0:
+          # But strip potential footer
+          self._table_header = []
+          for line in comment.split("\n"):
+            if line.strip().startswith("Measurement ended at "): break
+            self._table_header.append(line)
+          self._table_header = "\n".join(self._table_header)
+
+        #print("\n" + self._table_header)
+        #if rowno>0: print(self._first_data_row)
+        #time.sleep(0.1)
 
         # Now parse the stored header
         if not hasattr(self, "_table_header"):
           logging.warning(f"No header found in tabular data of {self._path}")
-          self._column_names, self._units = [], []
+          self._column_names, self._units, self._dtypes = [], [], []
         else:
           self._column_names, self._units = PDataSingle._parse_columns_from_header(self._table_header)
+          self._dtypes, self._converters = PDataSingle._parse_dtypes_from_header(self._table_header,
+                                                                                 convert_timestamps=convert_timestamps)
 
         self._column_name_to_index = dict( (n, i) for i,n in enumerate(self._column_names) )
 
         if rowno > 0:
-          assert len(self._column_names) == ncols, "The number of columns in the header and data do not seem to match."
+          # Analyze first data row
+          inferred_dtypes, inferred_converters = PDataSingle._infer_dtypes_from_first_data_row(
+              self._first_data_row,
+              convert_timestamps=(self._dtypes==None and convert_timestamps))
+        else:
+          inferred_dtypes, inferred_converters = dict( (i, float) for i in range(len(self._column_names)) ), {}
 
-          # Parse the actual numerical data
+        assert len(self._column_names) == len(inferred_dtypes.keys()), "The number of columns in the header and first data row do not match."
+        if self._dtypes is None:
+          self._dtypes = inferred_dtypes
+          self._converters = inferred_converters
+
+        assert len(self._column_names) == len(self._dtypes.keys()), "The number of columns in the header and number of parsed dtypes do not match."
+        self._dtypes = list( self._dtypes[i] for i in range(len(self._dtypes.keys())) )
+
+        if rowno > 0:
+          # Parse the actual numerical data.
+          #
+          # Use "col{i}" as names, rather than self._column_names,
+          # since pdata column names may contain characters not
+          # allowed in numpy structured arrays.
           f.seek(0)
           self._data = np.genfromtxt(f,
                                      delimiter="\t",
                                      comments="#",
-                                     converters=converters,
-                                     dtype=float) # Assume all columns contain floats
+                                     converters=dict( (f"col{i}", c) for i,c in self._converters.items() ),
+                                     dtype=self._dtypes,
+                                     names=list(f"col{i}" for i in range(len(self._column_names))) )
 
-          # If the data contains just a single row or a single column,
-          # genfromtxt returns a 1D vector instead of a 2D array, so convert it to 2D.
-          # Note: In Numpy >= 1.23.0, setting ndmin=2 for genfromtxt might also solve this but that remains untested.
-          if len(self._data.shape) == 1: self._data = self._data.reshape((-1, ncols))
+          # If the data contains just a single row, genfromtxt returns a 0D array! Fortunately reshaping still works.
+          # Note: In Numpy >= 1.23.0, setting ndmin for genfromtxt might also solve this but that remains untested.
+          try:
+            len(self._data)
+          except TypeError:
+            self._data = self._data.reshape((-1,))
 
         else:
           logging.warning(f"No data rows in tabular_data of {self._path}")
-          self._data = np.zeros((0,len(self._column_names)))
+          self._data = np.array([], dtype=np.dtype(list( (f"col{i}", dt) for i,dt in enumerate(self._dtypes) )))
+
+        #print("\n" + repr(self._data)); time.sleep(0.1)
 
         if parse_comments:
           # rowno should equal the number of data rows, if comments were parsed and
@@ -157,7 +180,7 @@ class PDataSingle():
           assert len(self._data) >= rowno, 'Unexcepted number of data rows: %s vs %s' % (len(self._data), rowno)
 
         if len(self._data) > 0:
-          assert len(self._data[0]) == ncols, 'Unexcepted number of data columns: %s vs %s' % (len(self._data[0]), ncols)
+          assert len(self._data[0]) == len(self._column_names), 'Unexcepted number of data columns: %s vs %s' % (len(self._data[0]), len(self._column_names))
 
 
       ###########################################################
@@ -210,7 +233,7 @@ class PDataSingle():
       return self._snapshots
 
     def __getitem__(self, key):
-      return self._data[:, self._column_name_to_index[key]]
+      return self._data[f"col{self._column_name_to_index[key]}"]
 
     @staticmethod
     def _parse_timestamp(s):
@@ -218,11 +241,88 @@ class PDataSingle():
       return (t.astimezone() - UNIX_EPOCH).total_seconds()
 
     @staticmethod
-    def _parse_columns_from_header(s):
-      try:
-        # Try assuming the "Column name (unit)\t" format in pdata,
-        # encoded on last non-empty comment line
+    def _infer_dtypes_from_first_data_row(line, convert_timestamps):
+      """Infer data types from the first data row (in case the information
+         is not available in the table header).
+      """
+      converters = {}
+      dtypes = {}
+      for i,c in enumerate(line.split('\t')):
+        c = c.strip().lower()
 
+        if c in ["true", "false"]:
+          dtypes[i] = bool
+          continue
+
+        if convert_timestamps:
+          # If col is a time stamp, convert it into seconds since Unix epoch.
+          try:
+            PDataSingle._parse_timestamp(c)
+            converters[i] = lambda x: PDataSingle._parse_timestamp(x.decode('utf-8'))
+            dtypes[i] = float
+            logging.info(f'Column {i} appears to contain timestamps. Converting them to seconds since Unix epoch. (Disable by setting convert_timestamps=False.)')
+            continue
+          except ValueError:
+            pass # Not a timestamp
+
+        try:
+          # Convert all numerical types to float, including
+          # integers. This is a bit safer, in case the first row looks
+          # like an int but other rows contain floats.
+          float(c)
+          dtypes[i] = float
+          continue
+        except ValueError:
+          pass # Not a float, int, or similar number
+
+        # Otherwise parse this column as str
+        dtypes[i] = str
+
+      return dtypes, converters
+
+    @staticmethod
+    def _parse_dtypes_from_header(s, convert_timestamps):
+      """Check for dtype specification in the
+         "Column dtypes: float\tfloat\tint\t..." format. """
+      m = re.search(r'(?m)^\s*Column dtypes:\s*(.*?)?$', s)
+      if m==None or len(m.groups()) != 1: return None, None
+
+      dtypes = {}
+      converters = {}
+      for i,dt in enumerate(m.group(1).split("\t")):
+        dt = dt.strip()
+        if dt.startswith("numpy."):
+          try:
+            dtypes[i] = getattr(np, dt.lstrip("numpy."))
+          except AttributeError:
+            logging.warning(f"Column {i} dtype = {dt} seems like a numpy data type based on prefix, "
+                            f"but numpy.{dt} doesn't exist. Falling back to str.")
+            dtypes[i] = str
+        elif dt in ["float", "int", "bool", "complex", "str"]:
+          dtypes[i] = eval(dt)
+        elif dt in ["datetime.datetime", "datetime"]:
+          if convert_timestamps:
+            dtypes[i] = float
+            converters[i] = lambda x: PDataSingle._parse_timestamp(x.decode('utf-8'))
+          else:
+            logging.info(f'Column {i} contains timestamps. Converting them to seconds since Unix epoch. (Disable by setting convert_timestamps=False.)')
+            dtypes[i] = datetime.datetime
+            converters[i] = lambda x: dtypes[i](x.decode('utf-8'))
+        else:
+          if not dt in [ "None" ]:
+            logging.warning(f"Column {i} dtype = {dt} unrecognized. Falling back to str.")
+          dtypes[i] = str
+
+      return dtypes, converters
+
+    @staticmethod
+    def _parse_columns_from_header(s):
+      """Parse column names and units from table header. Asssume that the
+         last non-empty header line has them in the "Column name
+         (unit)\t" format. If not, fall back to assuming similar but
+         simpler legacy QCoDeS format.
+      """
+      try:
         # Pick last non-empty line
         column_names_and_units = [ l for l in s.split('\n') if len(l.strip())>0 ][-1]
 
@@ -256,7 +356,7 @@ class DataView():
     See docs/examples/Procedural Data and DataView.ipynb for example use.
     '''
 
-    def __init__(self, data, deep_copy=False, source_column_name='data_source', fill_value=None, **kwargs):
+    def __init__(self, data, deep_copy=False, source_column_name='data_source'):
         '''
         Create a new view of existing data objects for post-processing.
         The original data objects will not be modified.
@@ -283,8 +383,6 @@ class DataView():
           source_column_name -- specifies the name of the (virtual) column that tells which
                                 data object the row originates from. Specify None, if
                                 you don't want this column to be added.
-          fill_value         -- fill value for columns that do not exist in all data objects.
-                                Default is None, in which case the column is omitted entirely.
         '''
 
         self._virtual_dims = {}
@@ -293,7 +391,6 @@ class DataView():
           # these private variables should be immutable so no need to deep copy
           self._dimensions = data._dimensions
           self._units = data._units
-          self._dimension_indices = data._dimension_indices
           self._source_col = data._source_col
           self._comments = data._comments
           self._settings = data._settings
@@ -351,18 +448,10 @@ class DataView():
 
               try:
                 unmasked[dim].append(dat[dim])
-              except:
-                msg = "Dimension '%s' does not exist in Data object '%s'. " % (dim, str(dat))
-                if fill_value == None:
-                  # ignore dimensions that don't exist in all data objects
-                  del unmasked[dim]
-                  msg += ' Omitting the dimension.'
-                  logging.warning(msg)
-                  break
-                else:
-                  unmasked[dim].append(fill_value + np.zeros(n_rows, dtype=type(fill_value)))
-                  msg += ' Using fill_value = %s (for %d rows)' % (str(fill_value), len(unmasked[dim][-1]))
-                  logging.warning(msg)
+              except KeyError:
+                logging.warning(f"Dimension {dim} does not exist in data object {str(dat)}. Omitting the dimension.")
+                del unmasked[dim]
+                break
 
             # concatenate rows from all files
             if dim in unmasked.keys():
@@ -380,7 +469,6 @@ class DataView():
           
           # keep only dimensions that could be parsed from all files
           self._dimensions = unmasked.keys()
-          unmasked = np.array([unmasked[k] for k in self._dimensions]).T
 
           # take units from first data set
           self._units = dict(zip(data[0].dimension_names(), data[0].dimension_units()))
@@ -408,10 +496,9 @@ class DataView():
 
         # Initialize masks
         self._data = unmasked
-        self._mask = np.zeros(len(unmasked), dtype=bool)
+        self._mask = np.zeros(len(unmasked[list(unmasked.keys())[0]]), dtype=bool)
         self._mask_stack = []
 
-        self._dimension_indices = dict([(n,i) for i,n in enumerate(self._dimensions)])
         self.set_mask(False)
 
         if source_column_name != None:
@@ -419,15 +506,10 @@ class DataView():
 
     def __getitem__(self, index):
         '''
-        Access the data.
-
-        index may be a slice or a string, in which case it is interpreted
-        as a dimension name.
+        Get the values of a given dimension as a vector.
         '''
-        if isinstance(index, str):
-            return self.column(index)
-        else:
-            return self.data()[index]
+        assert isinstance(index, str), "Data must be indexed using a dimension name. Dimensions in this Dataview: {self.dimensions()}"
+        return self.column(index)
 
     def copy(self, copy_data=False):
         '''
@@ -461,7 +543,7 @@ class DataView():
         '''
         Returns a list of all dimensions, both real and virtual.
         '''
-        return list(itertools.chain(self._dimension_indices.keys(), self._virtual_dims.keys()))
+        return list(itertools.chain(self._data.keys(), self._virtual_dims.keys()))
 
     def units(self, d):
         '''
@@ -585,8 +667,9 @@ class DataView():
         masked rows as well.)
         '''
         # Removing the real data rows themselves is easy.
-        self._data = self._data[~(self._mask),:]
-        
+        for d in self._data.keys():
+          self._data[d] = self._data[d][~(self._mask)]
+
         # but we have to also adjust the comment & settings line numbers
         s = np.cumsum(self._mask.astype(int))
         def n_masked_before_line(lineno): return s[max(0, min(len(s)-1, lineno-1))]
@@ -607,7 +690,7 @@ class DataView():
           self._virtual_dims[name] = { 'fn': dim['fn'], 'cached_array': cached_arr }
 
         # finally remove the obsolete mask(s)
-        self._mask = np.zeros(len(self._data), dtype=bool)
+        self._mask = np.zeros(len(self._data[list(self._data.keys())[0]]), dtype=bool)
         self._mask_stack = []
 
     def single_valued_parameter(self, param):
@@ -710,18 +793,6 @@ class DataView():
         '''
         self.mask_sweeps(sweep_dimension, sl, unmask_instead=True)
 
-
-    def data(self, deep_copy=False):
-        '''
-        Get the non-masked data as a 2D ndarray.
-
-        kwargs:
-          deep_copy -- copy the returned data so that it is safe to modify it.
-        '''
-        d = self._data[~(self._mask)]
-        if deep_copy: d = d.copy()
-        return d
-
     def column(self, name, deep_copy=False):
         '''
         Get the non-masked entries of dimension 'name' as a 1D ndarray.
@@ -742,8 +813,8 @@ class DataView():
                 d = [ x for i,x in enumerate(d) if not self._mask[i] ]
             return d
         else:
-            d = self._data[~(self._mask),self._dimension_indices[name]]
-        
+            d = self._data[name][~(self._mask)]
+
         if deep_copy: d = d.copy()
         return d
 
