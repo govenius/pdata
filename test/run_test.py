@@ -20,6 +20,8 @@ def resonator_response(f, pwr, Qc=1e3, f0=6e9):
   Q = 1/(1/Qc + 1/Qi)
   return 1 - Q/Qc / (1 + 2j*Q*(f-f0)/f0)
 
+alphabet = "abcdefghijklmnopqrstuvwxyz"
+
 class TestSavingAndAnalysis(unittest.TestCase):
 
   @classmethod
@@ -63,6 +65,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
     with run_measurement(get_instrument_snapshot,
                          columns = [("frequency", "Hz"),
                                     "S21",
+                                    "col with strings",
                                     ("col +with_-=special/symbols*%", "-&+=%*&/")],
                          name='power-sweep',
                          data_base_dir=cls._data_root) as m:
@@ -73,6 +76,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
       for p in [-30, -20, -10]:
         VNA_instrument._power = p  # <-- this new value gets automatically stored in the data since its in the snapshot
         m.add_points({'frequency': freqs, 'S21': VNA_instrument(),
+                      "col with strings": [ alphabet[i%10::-p//10] for i in range(len(freqs)) ],
                       'col +with_-=special/symbols*%': np.random.randn(len(freqs))})
 
     time.sleep(0.5)
@@ -210,6 +214,11 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue(max(np.abs( np.unique(d["frequency"]) / expected_freqs - 1 )) < 1e-10)
     self.assertTrue(max(np.abs(d["frequency"][:len(expected_freqs)] / expected_freqs - 1)) < 1e-10)
     self.assertTrue(max(np.abs(d["frequency"][-len(expected_freqs):] / expected_freqs - 1)) < 1e-10)
+
+    # Check "col with strings": [ alphabet[i%10::-p//10] for i in range(len(freqs)) ],
+    self.assertTrue("col with strings" in d.dimensions())
+    self.assertTrue(d.units("col with strings") == "")
+    self.assertTrue(all( alphabet[i%10::1 + i//len(expected_freqs)] for i,s in enumerate(d["col with strings"]) ))
 
     # Check S21
     self.assertTrue(len(d["S21"]) == len(d["frequency"]))

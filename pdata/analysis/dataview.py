@@ -293,13 +293,13 @@ class PDataSingle():
         dt = dt.strip()
         if dt.startswith("numpy."):
           try:
-            dtypes[i] = getattr(np, dt.lstrip("numpy."))
+            dtypes[i] = getattr(np, dt[len("numpy."):])
           except AttributeError:
             logging.warning(f"Column {i} dtype = {dt} seems like a numpy data type based on prefix, "
                             f"but numpy.{dt} doesn't exist. Falling back to str.")
             dtypes[i] = str
-        elif dt in ["float", "int", "bool", "complex", "str"]:
-          dtypes[i] = eval(dt)
+        elif dt.startswith("builtins."):
+          dtypes[i] = eval(dt[len("builtins."):])
         elif dt in ["datetime.datetime", "datetime"]:
           if convert_timestamps:
             dtypes[i] = float
