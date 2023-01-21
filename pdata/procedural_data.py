@@ -5,6 +5,7 @@ Class for storing measurement data.
 from pdata._metadata import __version__
 
 import os
+import sys
 import numpy as np
 import time
 import datetime
@@ -215,6 +216,7 @@ class Measurement():
     header += f"# pdata_version = {pdata.__version__}\n"
     header += f"# jsondiff_version = {jsondiff.__version__}\n"
     header += f"# numpy_version = {np.__version__}\n"
+    header += f"# python_version = {sys.version}\n"
     header += "# Measurement started at " + self._start_time.strftime("%Y-%m-%d %H:%M:%S\n")
     header += "# Column dtypes: " + "\t".join(Measurement._dtype_to_str(dt)
                                               for dt in self._dtypes) + "\n"
