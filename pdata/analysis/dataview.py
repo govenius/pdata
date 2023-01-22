@@ -109,7 +109,8 @@ class PDataSingle():
 
         # Store header even if there were zero data rows
         if rowno==0:
-          # But strip potential footer
+          # Header is in the "comment" variable at this point.
+          # But "comment" may also contant a footer so strip it first.
           self._table_header = []
           for line in comment.split("\n"):
             if line.strip().startswith("Measurement ended at "): break

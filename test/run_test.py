@@ -393,7 +393,7 @@ pdata_version = 2.0.0
 jsondiff_version = 2.0.0
 numpy_version = 1.22.4
 python_version = 3.10.4 | packaged by conda-forge | (main, Mar 24 2022, 17:38:57) [GCC 10.3.0]
-Measurement started at 2023-01-14 16:02:29
+Measurement started at 2023-01-14 16:02:29.123456
 Column dtypes: numpy.float64	numpy.float64	numpy.float64
 
 frequency (Hz)	S21 ()	col +with_-=special/symbols*% (-&+=%*&/)

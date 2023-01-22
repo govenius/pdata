@@ -217,7 +217,7 @@ class Measurement():
     header += f"# jsondiff_version = {jsondiff.__version__}\n"
     header += f"# numpy_version = {np.__version__}\n"
     header += f"# python_version = {sys.version}\n"
-    header += "# Measurement started at " + self._start_time.strftime("%Y-%m-%d %H:%M:%S\n")
+    header += "# Measurement started at " + self._start_time.strftime("%Y-%m-%d %H:%M:%S.%f\n")
     header += "# Column dtypes: " + "\t".join(Measurement._dtype_to_str(dt)
                                               for dt in self._dtypes) + "\n"
     header += "#\n"
@@ -235,7 +235,7 @@ class Measurement():
     if self._npoints_total == 0: self._write_tabular_data_header()
 
     footer =  "#\n"
-    footer += "# Measurement ended at " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S\n")
+    footer += "# Measurement ended at " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f\n")
     footer += f"# Snapshot diffs preceding rows (0-based index): {','.join(map(str, self._snapshot_diff_rows))}\n"
     try:     self._dat_file.write(footer)
     finally: self._dat_file.flush()
