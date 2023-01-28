@@ -129,12 +129,13 @@ class PDataSingle():
             self._data = self._data.reshape((-1,))
 
           # Parse the footer as well, if any
-          footer = PDataSingle._parse_footer(PDataSingle._extract_footer(f))
+          self._footer = PDataSingle._parse_footer(PDataSingle._extract_footer(f))
           #print("\n\n"); print(footer); time.sleep(0.1)
 
         else:
           logging.warning(f"No data rows in tabular_data of {self._path}")
           self._data = np.array([], dtype=np.dtype(list( (f"col{i}", dt) for i,dt in enumerate(dtypes) )))
+          self._footer = {}
 
         #print("\n" + repr(self._data)); time.sleep(0.1)
 
@@ -176,6 +177,12 @@ class PDataSingle():
         for row,j,fname in parse_snapshot_diff_names(os.listdir(path)):
           with open(os.path.join(path, fname)) as f:
             add_snapshot_diff(row, f)
+
+      if "snapshot_diffs_preceding_rows" in self._footer.keys():
+        # Check that snapshot diff rows parsed from file names match the info in the footer
+        assert all( i==j for i,j in zip(self._footer["snapshot_diffs_preceding_rows"],
+                                        [ r for r,s in self._snapshots[1:] ] )
+                   ), "Snapshot diff rows parsed from file names don't match rows listed in tabular data footer."
 
 
     def name(self): return os.path.split(self._path)[-1]
