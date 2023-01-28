@@ -72,83 +72,42 @@ class PDataSingle():
         return diff_names
 
       def parse_tabular_data(f):
-        # First analyze the first data row and the header rows preceding it.
-        self._comments = []
-        rowno = 0
-        comment = ""
-        while True:
-          line = f.readline()
-          if not isinstance(line, str): line = line.decode('utf-8')
-          if len(line) == 0: break # EOF
+        # First extract the first data row and the header rows preceding it.
+        header = PDataSingle._extract_header(f, parse_all_comments=parse_comments)
+        self._comments = header["comments"]
 
-          line = line.strip()
-          if len(line) == 0: continue # empty line
-
-          if line.startswith('#'): # comment line
-            comment += line[1:].strip() + '\n'
-            continue
-
-          # Otherwise this is a data row
-          comment = comment.strip()
-          if len(comment) > 0:
-            # Store comment(s) preceding this data row
-            self._comments.append((rowno, comment))
-
-          # The comment rows preceding the first data row contain the
-          # table header that defines the column names. Store the
-          # header and the first data row for later parsing.
-          if rowno==0:
-              self._table_header = comment
-              self._first_data_row = line
-
-          rowno += 1
-          comment = ""
-
-          # Done parsing the header. We can stop here if parsing comments after first data row is not requested.
-          if not parse_comments: break
-
-        # Store header even if there were zero data rows
-        if rowno==0:
-          # Header is in the "comment" variable at this point.
-          # But "comment" may also contant a footer so strip it first.
-          self._table_header = []
-          for line in comment.split("\n"):
-            if line.strip().startswith("Measurement ended at "): break
-            self._table_header.append(line)
-          self._table_header = "\n".join(self._table_header)
-
-        #print("\n" + self._table_header)
-        #if rowno>0: print(self._first_data_row)
+        #print("\n" + header["table_header"])
+        #if "first_data_row" in header.keys(): print(header["first_data_row"])
         #time.sleep(0.1)
 
         # Now parse the stored header
-        if not hasattr(self, "_table_header"):
+        if not "table_header" in header.keys():
           logging.warning(f"No header found in tabular data of {self._path}")
-          self._column_names, self._units, self._dtypes = [], [], []
+          self._column_names, self._units, dtypes = [], [], []
         else:
-          self._column_names, self._units = PDataSingle._parse_columns_from_header(self._table_header)
-          self._dtypes, self._converters = PDataSingle._parse_dtypes_from_header(self._table_header,
+          self._column_names, self._units = PDataSingle._parse_columns_from_header(header["table_header"])
+          dtypes, converters = PDataSingle._parse_dtypes_from_header(header["table_header"],
                                                                                  convert_timestamps=convert_timestamps)
 
         self._column_name_to_index = dict( (n, i) for i,n in enumerate(self._column_names) )
 
-        if rowno > 0:
+        if "first_data_row" in header.keys():
           # Analyze first data row
           inferred_dtypes, inferred_converters = PDataSingle._infer_dtypes_from_first_data_row(
-              self._first_data_row,
-              convert_timestamps=(self._dtypes==None and convert_timestamps))
+              header["first_data_row"],
+              convert_timestamps=(dtypes==None and convert_timestamps))
         else:
           inferred_dtypes, inferred_converters = dict( (i, float) for i in range(len(self._column_names)) ), {}
 
         assert len(self._column_names) == len(inferred_dtypes.keys()), "The number of columns in the header and first data row do not match."
-        if self._dtypes is None:
-          self._dtypes = inferred_dtypes
-          self._converters = inferred_converters
+        if dtypes is None:
+          dtypes = inferred_dtypes
+          converters = inferred_converters
 
-        assert len(self._column_names) == len(self._dtypes.keys()), "The number of columns in the header and number of parsed dtypes do not match."
-        self._dtypes = list( self._dtypes[i] for i in range(len(self._dtypes.keys())) )
+        assert len(self._column_names) == len(dtypes.keys()), "The number of columns in the header and number of parsed dtypes do not match."
+        dtypes = list( dtypes[i] for i in range(len(dtypes.keys())) )
 
-        if rowno > 0:
+        if "first_data_row" in header.keys():
           # Parse the actual numerical data.
           #
           # Use "col{i}" as names, rather than self._column_names,
@@ -158,8 +117,8 @@ class PDataSingle():
           self._data = np.genfromtxt(f,
                                      delimiter="\t",
                                      comments="#",
-                                     converters=dict( (f"col{i}", c) for i,c in self._converters.items() ),
-                                     dtype=self._dtypes,
+                                     converters=dict( (f"col{i}", c) for i,c in converters.items() ),
+                                     dtype=dtypes,
                                      names=list(f"col{i}" for i in range(len(self._column_names))) )
 
           # If the data contains just a single row, genfromtxt returns a 0D array! Fortunately reshaping still works.
@@ -169,16 +128,15 @@ class PDataSingle():
           except TypeError:
             self._data = self._data.reshape((-1,))
 
+          # Parse the footer as well, if any
+          footer = PDataSingle._parse_footer(PDataSingle._extract_footer(f))
+          #print("\n\n"); print(footer); time.sleep(0.1)
+
         else:
           logging.warning(f"No data rows in tabular_data of {self._path}")
-          self._data = np.array([], dtype=np.dtype(list( (f"col{i}", dt) for i,dt in enumerate(self._dtypes) )))
+          self._data = np.array([], dtype=np.dtype(list( (f"col{i}", dt) for i,dt in enumerate(dtypes) )))
 
         #print("\n" + repr(self._data)); time.sleep(0.1)
-
-        if parse_comments:
-          # rowno should equal the number of data rows, if comments were parsed and
-          # no new data was added between the two passes through the file.
-          assert len(self._data) >= rowno, 'Unexcepted number of data rows: %s vs %s' % (len(self._data), rowno)
 
         if len(self._data) > 0:
           assert len(self._data[0]) == len(self._column_names), 'Unexcepted number of data columns: %s vs %s' % (len(self._data[0]), len(self._column_names))
@@ -240,6 +198,58 @@ class PDataSingle():
     def _parse_timestamp(s):
       t = datetime.datetime.strptime(s, '%Y-%m-%d %H:%M:%S.%f')
       return (t.astimezone() - UNIX_EPOCH).total_seconds()
+
+    @staticmethod
+    def _extract_header(f, parse_all_comments=False):
+      """ Extract header and first data row from tabular data file f. """
+      r = {} # Dict for results to return
+      r["comments"] = []
+      rowno = 0
+      comment = ""
+      while True:
+        line = f.readline()
+        if not isinstance(line, str): line = line.decode('utf-8')
+        if len(line) == 0: break # EOF
+
+        line = line.strip()
+        if len(line) == 0: continue # empty line
+
+        if line.startswith('#'): # comment line
+          comment += line[1:].strip() + '\n'
+          continue
+
+        # Otherwise this is a data row
+        comment = comment.strip()
+        if len(comment) > 0:
+          # Store comment(s) preceding this data row
+          r["comments"].append((rowno, comment))
+
+        # The comment rows preceding the first data row contain the
+        # table header that defines the column names. Store the
+        # header and the first data row for later parsing.
+        if rowno==0:
+          r["table_header"] = comment
+          r["first_data_row"] = line
+
+        rowno += 1
+        comment = ""
+
+        # Done parsing the header. We can stop here if not requested
+        # to parse all comments, also after first data row.
+        if not parse_all_comments: break
+
+      # Store header even if there were zero data rows
+      if rowno==0:
+        # Header is in the "comment" variable at this point. But
+        # "comment" may also contant a footer so strip everything
+        # after "Measurement ended at".
+        table_header = []
+        for line in comment.split("\n"):
+          if line.strip().startswith("Measurement ended at "): break
+          table_header.append(line)
+        r["table_header"] = "\n".join(table_header)
+
+      return r
 
     @staticmethod
     def _infer_dtypes_from_first_data_row(line, convert_timestamps):
@@ -323,10 +333,12 @@ class PDataSingle():
          (unit)\t" format. If not, fall back to assuming similar but
          simpler legacy QCoDeS format.
       """
-      try:
-        # Pick last non-empty line
-        column_names_and_units = [ l for l in s.split('\n') if len(l.strip())>0 ][-1]
+      # Pick last non-empty line
+      column_names_and_units = [ l for l in s.split('\n') if len(l.strip())>0 ]
+      if len(column_names_and_units) == 0: return [],[]
+      column_names_and_units = column_names_and_units[-1]
 
+      try:
         cols = []
         units = []
         for c in column_names_and_units.split('\t'):
@@ -337,14 +349,82 @@ class PDataSingle():
       except AttributeError:
         # Try assuming the legacy format used in QCoDeS (qcodes/data/gnuplot_format.py)
         try:
-          s = s.split('\n')[-2] # Second to last header row contains the tab separated column names
-          cols = [ c.strip().strip('"') for c in s.split('\t') ]
+          cols = [ c.strip().strip('"') for c in column_names_and_units.split('\t') ]
           units = [ '' for i in range(len(cols))]
         except IndexError:
           logging.warning(f"Could not parse tabular data header. Header: {s}")
           raise
 
       return cols, units
+
+    @staticmethod
+    def _extract_footer(f, chunk_size=4096):
+      """Return tabular data footer from file object f. The footer contains,
+         by defition, all rows following the last data row (= last
+         non-empty row not starting with #).
+
+         Assumes that current position is already at the end of the
+         file.
+
+         If there are zero data rows, the parsed string may also
+         include the header.
+
+      """
+
+      b = isinstance(f.read(0), bytes) # Check whether we read bytes or strings from f
+
+      tail = b"" if b else ""
+      while True:
+        try:
+          # Append one more chunk to tail
+          f.seek(-min(f.tell(), (1 + (len(tail)>0))*chunk_size), os.SEEK_CUR)
+          tail = f.read(chunk_size) + tail
+        except IOError:
+          # Read entire file into tail
+          logging.debug(f"Could not read footer in chunks from end of file object {f} --> Reading entire file.")
+          f.seek(0)
+          tail = f.read()
+          break
+
+        # Check whether tail already contains non-comment rows.
+        # If so, we must have read the entire footer already
+        if any( not (l.strip().startswith(b"#" if b else "#") or len(l.strip())==0)
+                for l in tail.split(b"\n" if b else "\n") ):
+          break
+
+      # Remove non-comment rows:
+      footer = []
+      for l in reversed(tail.split(b"\n" if b else "\n")):
+        l = l.strip()
+        if len(l)==0: continue
+        if b: l = l.decode("utf-8")
+        if not l.startswith("#"): break
+        footer.append(l[1:].strip())
+
+      return "\n".join(reversed(footer))
+
+    @staticmethod
+    def _parse_footer(raw_footer):
+
+      r = { "raw_footer": raw_footer }
+
+      # Parse information from standard rows in the footer.
+      m = re.search(r'(?m)^\s*Snapshot diffs preceding rows \(0-based index\):\s*(.*?)?$', raw_footer)
+      if m!=None and len(m.groups()) == 1:
+        try:
+          r["snapshot_diffs_preceding_rows"] = np.array([ int(i) for i in m.group(1).split(",") ])
+        except:
+          logging.exception(f"Failed to parse snapshot diff row spec '{m.group(1)}' into a list of ints.")
+
+      m = re.search(r'(?m)^\s*Measurement ended at\s+(.*?)?$', raw_footer)
+      if m!=None and len(m.groups()) == 1:
+        try:
+          r["measurement_ended_at"] = datetime.datetime.strptime(m.group(1), '%Y-%m-%d %H:%M:%S.%f')
+        except:
+          logging.exception(f"Failed to parse measurement end time '{m.group(1)}' into a datetime object.")
+
+      return r
+
 
 class DataView():
     '''
