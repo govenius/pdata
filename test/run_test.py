@@ -90,7 +90,8 @@ class TestSavingAndAnalysis(unittest.TestCase):
                          columns = [("frequency", "Hz"),
                                     "S21"],
                          name='power-sweep',
-                         data_base_dir=cls._data_root) as m:
+                         data_base_dir=cls._data_root,
+                         log_level=logging.WARNING) as m:
 
       cls._single_row_datadir = m.path()
 

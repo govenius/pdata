@@ -33,20 +33,20 @@ def run_measurement(get_snapshot,
                     data_base_dir='.',
                     dir_name_generator=lambda n: datetime.datetime.now().strftime(f"%Y-%m-%d_%H-%M-%S_{int(1e3*random.random())}") + f"_{n}",
                     autosnap=True, snap_diff_filter=preprocess_snapshot,
-                    compress=True):
+                    compress=True, log_level="inherit"):
   '''
   A simple context manager that runs begin() and end()
   automatically, and gets an updated snapshot of instrument parameters
   each time data is added, using get_snapshot().
 
-  columns defines the tabular data columns, see Measurement class.
+  See docstring of Measurement.__init__ for definition of most arguments.
 
   The directory name for storing the data set is:
     <data_base_dir>/<dir_name_generator(name)>
 
   By default, we filter out timestamps added by QCoDeS from snapshot diffs.
 
-  If you're using QCoDeS, your get_snapshot funciton would typically look like this::
+  If you're using QCoDeS, your get_snapshot function would typically look like this::
 
     import qcodes.station
     with run_measurement(lambda s=qcodes.station.Station.default: s.snapshot(update=True), ...) as m:
@@ -81,7 +81,7 @@ class Measurement():
 
   Optionally, the files may be compressed (.gz or .tar.gz).
 
-  Although the format is human readable in the simplest cases, it is
+  Although the format is human-readable in the simplest cases, it is
   meant to be parsed programmatically, i.e., by the dataview module
   (analysis/dataview.py).
 
@@ -90,7 +90,7 @@ class Measurement():
 
   def __init__(self, columns, target_dir=None, get_snapshot=None,
                autosnap=True, snap_diff_filter=None, omit_readme=False,
-               compress=True):
+               compress=True, log_level="inherit"):
     '''Args:
 
       columns: a list of strings (column names) or tuples (<column
@@ -114,6 +114,10 @@ class Measurement():
       omit_readme: don't create a README file in the data directory.
 
       compress: compress data files when measurement ends
+
+      log_level: log level for log.txt stored in the data
+                 directory. If "inherit", logging.getLogger().level is
+                 used.
     '''
     self._target_dir = target_dir
     self._get_snapshot = get_snapshot
@@ -121,6 +125,7 @@ class Measurement():
     self._snap_diff_filter = snap_diff_filter
     self._omit_readme = omit_readme
     self._compress = compress
+    self._log_level = log_level
 
     self._npoints_total = 0
     self._last_snapshot = None
@@ -353,7 +358,7 @@ class Measurement():
       formatter = None
 
     self._log_file_handler = logging.FileHandler(fn)
-    self._log_file_handler.setLevel(logging.getLogger().level)
+    self._log_file_handler.setLevel(logging.getLogger().level if self._log_level=="inherit" else self._log_level)
     self._log_file_handler.setFormatter(formatter)
 
     logging.getLogger().addHandler(self._log_file_handler)
