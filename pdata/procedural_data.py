@@ -451,7 +451,7 @@ class Measurement():
     return "".join(x if acceptable_char(x) else '_' for x in s)
 
   @staticmethod
-  def _replace_disallowed_tabular_data_chars(s): return s.replace("\t","    ").replace("\n", " ")
+  def _replace_disallowed_tabular_data_chars(s): return s.replace("\t","    ").replace("\n", " ").replace("#", " ")
 
   @staticmethod
   def _dtype_to_str(dt):
