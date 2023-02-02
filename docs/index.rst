@@ -3,8 +3,8 @@
    contain the root `toctree` directive.
 
 
-pdata: Simple-to-understand and robust data storage for experimental data
-=========================================================================
+pdata: Straightforward and robust data storage for experimental data
+====================================================================
 
 This *procedural* data storage package provides a self-contained
 interface **focused exclusively on storing and reading experimental
@@ -13,18 +13,22 @@ framework used for instrument control**.
 
 The main goals are to provide an interface that:
 
-  * Maximizes the amount of automatically stored metadata, without relying on the experimenter specifying which values are worthy of saving.
-  * Is "procedural" rather than "functional" in terms of the API the experimenter sees, as procedural programming tends to be easier to understand for a typical experimental physicist.
+  * Automatically stores a lot of metadata, including parameters that change during a measurement.
+  * Is *procedural* rather than *functional* in terms of the API the experimenter sees, as procedural programming tends to be easier to understand for a typical experimental physicist.
+  * Uses standard Python flow-control constructs (for, while, if, etc.) for looping over setpoints.
   * The API aims to be self-explanatory, wherever possible.
 
 In practice, the experimenter calls an explicit :code:`add_points(<new
 data points>)` function to add rows to a traditional table of data
 points, with user-defined columns. In the background, **pdata
-automatically records all changes to instrument parameters**, each
+automatically records all changes to instrument parameters** each
 time :code:`add_points` is called.
 
-In addition, pdata provides useful helpers for reading back the
-automatically recorded instrument parameters.
+In addition, pdata provides useful helpers for reading back the data,
+including automatically recorded instrument parameters, basic helpers
+for visualization, and good export capabilities to other tools for
+further analysis (see :ref:`Analyzing with other tools
+<analyzing_with_other_tools>`).
 
 .. note:: The only requirement for the framework used to control the
           instruments is that the framework needs to be able to return
@@ -34,6 +38,17 @@ automatically recorded instrument parameters.
           `jsondiff <https://pypi.org/project/jsondiff/>`_. In `QCoDeS
           <https://github.com/QCoDeS/Qcodes>`_ for example, you would
           use :code:`qcodes.station.Station.default.snapshot()`.
+
+**Content in this manual:**
+
+.. toctree::
+    :maxdepth: 2
+
+    Basic usage <index>
+    install
+    dataformat
+    api
+    contributing
 
 Saving data in measurement script
 ---------------------------------
@@ -159,6 +174,8 @@ as sweeps using your favorite plotting library::
 .. image:: ./_static/index_S21-example_manual.png
    :alt: S21 vs frequency
    :scale: 80 %
+
+.. _analyzing_with_other_tools:
 
 Analyzing with other tools (xarray, pandas, Matlab, etc.)
 ---------------------------------------------------------
@@ -292,54 +309,3 @@ signal to the kernel::
           creation of arbitrarily complex live plots. The custom
           functions just need to take the same arguments as
           :code:`data_selector` and :code:`basic_plot` do.
-
-Data format
------------
-
-The goal of the data format is to be self-documenting, such that it is
-possible to figure out what it is, even without the pdata source or
-binary package. Therefore the data format is:
-
-  * Relatively verbose (i.e. **not** optimized for size).
-  * Based on text files and other wide-spread formats (.gz, .json).
-  * Includes a README file in each data directory.
-  * Includes a copy of the measurement script, if possible.
-
-.. warning:: Despite being self-explanatory, you should **always read
-  in the data using** :code:`pdata.analysis.dataview`, which provides
-  plenty of useful functions for automatically parsing data not just
-  from the tabular data stored with :code:`add_points`, but also the
-  instrument parameters stored in the JSON files. Reimplementing these
-  features is almost never a wise use of time. If you want to work
-  with a language other than Python, export the parsed DataView object
-  to a suitable format (see Analyzing with other tools section above).
-
-Concretely, a data directory contains the following files:
-
-  * :file:`tabular_data.dat` -- Data table with rows added using :code:`add_points`, and columns defined as arguments of :code:`run_measurement`.
-  * :file:`snapshot.json` -- Instrument parameter snapshot when :code:`run_measurement` started.
-  * :file:`snapshot.row-<n>.diff<m>.json` -- `jsondiff <https://pypi.org/project/jsondiff/>`_ of parameter changes, recorded when the there were <n> data rows in tabular_data.dat. <m> is a simple counter, in case multiple diffs are created for the same row.
-  * :file:`log.txt` -- copy of messages from the logging module.
-  * A copy of the Jupyter notebook (.ipynb) or other measurement script, if possible.
-
-  Optionally, the files may be compressed (.gz or .tar.gz).
-
-.. note:: A downside of the chosen data format is that it's relatively
-  slow to read from disk to memory. So if you are dealing with larger
-  data sets, it's highly recommended to split your analysis script
-  into multiple steps and make use of caching parsed values and/or
-  intermediate analysis results in cache files. There are several easy
-  ways of doing that in Python, for example using `pickle
-  <https://docs.python.org/3/library/pickle.html>`_ or `json
-  <https://docs.python.org/3/library/json.html>`_
-
-Content in this manual
-----------------------------
-
-.. toctree::
-    :maxdepth: 2
-
-    Overview <self>
-    install
-    api
-    contributing
