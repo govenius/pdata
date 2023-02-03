@@ -44,7 +44,7 @@ further analysis (see :ref:`Analyzing with other tools
 .. toctree::
     :maxdepth: 2
 
-    Basic usage <index>
+    Basic usage <self>
     install
     dataformat
     api
