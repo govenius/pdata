@@ -39,16 +39,9 @@ further analysis (see :ref:`Analyzing with other tools
           <https://github.com/QCoDeS/Qcodes>`_ for example, you would
           use :code:`qcodes.station.Station.default.snapshot()`.
 
-**Content in this manual:**
-
-.. toctree::
-    :maxdepth: 2
-
-    Basic usage <self>
-    install
-    dataformat
-    api
-    contributing
+.. contents:: Basic usage
+    :local:
+    :depth: 2
 
 Saving data in measurement script
 ---------------------------------
@@ -309,3 +302,15 @@ signal to the kernel::
           creation of arbitrarily complex live plots. The custom
           functions just need to take the same arguments as
           :code:`data_selector` and :code:`basic_plot` do.
+
+Content in the rest of this manual
+----------------------------------
+
+.. toctree::
+    :maxdepth: 2
+
+    Basic usage <self>
+    install
+    dataformat
+    api
+    contributing
