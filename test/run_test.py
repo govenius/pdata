@@ -415,6 +415,17 @@ class TestSavingAndAnalysis(unittest.TestCase):
   def test_tabular_data_footer_parsing(self):
     """Test that parsing tabular data footer works as expected, also for
        legacy formats."""
+
+    # Test some corner cases
+    footer = PDataSingle._parse_footer("Measurement ended at 2023-01-22 13:07:44.551944\n"
+                                       "Snapshot diffs preceding rows (0-based index): ")
+    self.assertEqual(len(footer["snapshot_diffs_preceding_rows"]), 0)
+
+    footer = PDataSingle._parse_footer("Measurement ended at 2023-01-22 13:07:44.551944\n"
+                                       "Snapshot diffs preceding rows (0-based index): 11")
+    self.assertTrue(all(i==j for i,j in zip(footer["snapshot_diffs_preceding_rows"], [ 11 ]) ))
+
+    # Test older data format versions too
     for version in [ "qcodes legacy",
                      "pre-v1",
                      "v1.0.0" ]:

@@ -419,7 +419,9 @@ class PDataSingle():
       m = re.search(r'(?m)^\s*Snapshot diffs preceding rows \(0-based index\):\s*(.*?)?$', raw_footer)
       if m!=None and len(m.groups()) == 1:
         try:
-          r["snapshot_diffs_preceding_rows"] = np.array([ int(i) for i in m.group(1).split(",") ])
+          r["snapshot_diffs_preceding_rows"] = np.array([ int(i) for i in m.group(1).split(",") ]
+                                                        if m.group(1).strip() != "" else [],
+                                                        dtype=int)
         except:
           logging.exception(f"Failed to parse snapshot diff row spec '{m.group(1)}' into a list of ints.")
 
