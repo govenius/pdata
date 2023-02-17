@@ -187,6 +187,11 @@ def snapshot_explorer(d, max_depth=10):
   assert len(d.settings()) > 0, 'No snapshots in DataView.'
   snap = d.settings()[0][1]
 
+  def get_keys(d):
+    """ Return all values that are valid indices of d. """
+    try: return list(d.keys()) # Assume that d is a dict
+    except AttributeError: return list(range(0,len(d))) # Assume that d is a list, tuple, etc.
+
   def update_path_selectors():
     """ Update dropdown options. """
     kwargs = _widget.kwargs_widgets
@@ -196,8 +201,8 @@ def snapshot_explorer(d, max_depth=10):
       prev_key = kwargs[i-1].value
       #print(f"prev_key = {prev_key}")
       try:
-        subsnap = subsnap.get(prev_key, subsnap[list(subsnap.keys())[0]])
-        kwargs[i].options = subsnap.keys()
+        subsnap = subsnap.get(prev_key, subsnap[get_keys(subsnap)[0]])
+        kwargs[i].options = get_keys(subsnap)
       except (TypeError,AttributeError,IndexError):
         # subsnap is no longer subscriptable, or is an empty list
         if subsnap is not None: return_val = subsnap
@@ -215,8 +220,8 @@ def snapshot_explorer(d, max_depth=10):
   def construct_vdim_spec(**kwargs):
     """ Print out a .add_virtual_dimension(...) template based on the values in the dropdown menus. """
     val = update_path_selectors()
-    print('d.add_virtual_dimension(<name>, units=<units>, from_set=['
-          + ", ".join(v for v in kwargs.values() if v is not None)
+    print('\nd.add_virtual_dimension(<name>, units=<units>, from_set=['
+          + ", ".join(v for v in kwargs.values() if v is not None) + "]"
           + dtype_spec(val)
           + "))")
     print(f"Value = {val}  @row==0")

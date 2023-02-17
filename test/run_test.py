@@ -43,16 +43,18 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
     def get_instrument_snapshot():
       """ Fake snapshot of instrument parameters. """
-      snap = { 'instruments': {
-        "VNA1": { "power": VNA_instrument._power, "RBW": 10e3,
-                  "freqs": freqs,
-                  "random_scalar": np.random.randn(),
-                  "random_list": np.random.randn(10).tolist(),
-                  "random_ndarray": np.random.randn(10)
+      snap = {
+        'instruments': {
+          "VNA1": { "power": VNA_instrument._power, "RBW": 10e3,
+                    "freqs": freqs,
+                    "random_scalar": np.random.randn(),
+                    "random_list": np.random.randn(10).tolist(),
+                    "random_ndarray": np.random.randn(10)
+                   },
+          "voltage_source1": { "V": -1.234 },
+          "voltage_source2": { "V": -1.234 },
         },
-        "voltage_source1": { "V": -1.234 },
-        "voltage_source2": { "V": -1.234 },
-      }}
+        "list": [ "list_value0", {"key": "value"} ]}
 
       if get_instrument_snapshot.counter % 2 == 0: snap["key_that_gets_removed"] = "value_for_key_that_gets_removed"
 
