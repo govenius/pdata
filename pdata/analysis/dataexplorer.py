@@ -189,6 +189,7 @@ def snapshot_explorer(d, max_depth=10):
 
   def get_keys(d):
     """ Return all values that are valid indices of d. """
+    if isinstance(d, str): raise AttributeError()
     try: return list(d.keys()) # Assume that d is a dict
     except AttributeError: return list(range(0,len(d))) # Assume that d is a list, tuple, etc.
 
@@ -196,7 +197,7 @@ def snapshot_explorer(d, max_depth=10):
     """ Update dropdown options. """
     kwargs = _widget.kwargs_widgets
     subsnap = snap
-    return_val = None
+    leaf_val = None
     for i in range(1, max_depth):
       prev_key = kwargs[i-1].value
       #print(f"prev_key = {prev_key}")
@@ -205,31 +206,39 @@ def snapshot_explorer(d, max_depth=10):
         kwargs[i].options = get_keys(subsnap)
       except (TypeError,AttributeError,IndexError):
         # subsnap is no longer subscriptable, or is an empty list
-        if subsnap is not None: return_val = subsnap
+        if subsnap is not None: leaf_val = subsnap
         kwargs[i].options = []
         subsnap = None
         continue
-    return return_val
+    return leaf_val
 
   def dtype_spec(val):
-    """ Construct dtype specification. """
+    """ Construct dtype specification as string. """
     if val is None: return ""
     if isinstance(val, numbers.Number): return ", dtype=float"
     return ", dtype=str"
 
   def construct_vdim_spec(**kwargs):
-    """ Print out a .add_virtual_dimension(...) template based on the values in the dropdown menus. """
-    val = update_path_selectors()
-    print('\nd.add_virtual_dimension(<name>, units=<units>, from_set=['
-          + ", ".join(v for v in kwargs.values() if v is not None) + "]"
-          + dtype_spec(val)
+    """ Print out the d.add_virtual_dimension(...) template based on the values in the dropdown menus. """
+    with _out:
+      if construct_vdim_spec._recursion_depth==0: clear_output()
+      construct_vdim_spec._recursion_depth += 1
+      leaf_val = update_path_selectors()
+      print('\nd.add_virtual_dimension(<name>, units=<units>, from_set=['
+          + ", ".join(str(v) for v in kwargs.values() if v is not None) + "]"
+          + dtype_spec(leaf_val)
           + "))")
-    print(f"Value = {val}  @row==0")
+      print(f"Value = {leaf_val}  @row==0")
+      construct_vdim_spec._recursion_depth -= 1
+
+  construct_vdim_spec._recursion_depth = 0
 
   # Specify the number of dropdown menus, and populate options for the first one.
   # The rest of the dropdowns will be populated when first displayed.
   path_selectors = dict( (f"path{i}", snap.keys() if i==0 else []) for i in range(max_depth) )
 
-  from ipywidgets import interactive
+  from ipywidgets import interactive, Output, VBox
+  from IPython.display import clear_output
   _widget = interactive(construct_vdim_spec, **path_selectors)
-  return _widget
+  _out = Output()
+  return VBox([ _widget, _out ])
