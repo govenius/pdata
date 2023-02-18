@@ -16,21 +16,33 @@ from typing import Any
 def preprocess_snapshot(snap, delete_timestamps=True, convert_ndarrays=False):
   '''
   Helper that preprocesses snapshots so that they are compatible with pdata/jsondiff.
-  In particular converts numpy arrays to regular Python lists.
+  In particular converts numpy arrays to regular Python lists, if requested.
   Also, optionally, deletes QCodes timestamp entries from a snapshot dict,
   i.e. dict entries of the form "ts": <str>.
   '''
 
   def preprocesss_dict(d):
     ''' Recursive helper. '''
-    for k in list(d.keys()):
-      if isinstance(d[k], dict): preprocesss_dict(d[k])
-      elif convert_ndarrays and isinstance(d[k], np.ndarray): d[k] = d[k].tolist() # jsondiff doesn't handle ndarrays, unless you use PdataJSONDiffer
-      elif delete_timestamps and k=="ts" and isinstance(d[k], str): del d[k] # QCodes updates these very often
+    for k in get_keys(d):
+      if isinstance(d[k], (collections.abc.Mapping, collections.abc.Sequence)) and not isinstance(d[k], str):
+        preprocesss_dict(d[k])
+      elif convert_ndarrays and isinstance(d[k], np.ndarray):
+        # jsondiff doesn't handle ndarrays by default, but the custom
+        # PdataJSONDiffer below does, so this conversion is no longer
+        # needed and is disabled by default.
+        d[k] = d[k].tolist()
+      elif delete_timestamps and k=="ts" and isinstance(d[k], str):
+        del d[k] # QCodes updates these very often
 
   preprocesss_dict(snap)
   return snap
 
+def get_keys(d):
+  """ Return keys of d, if d is dict-like, or indices if d is list-like. Raise TypeError for str. """
+  if not isinstance(d, (collections.abc.Mapping, collections.abc.Sequence)): raise TypeError()
+  if isinstance(d, str): raise TypeError()
+  try: return list(d.keys()) # Assume that d is dict-like
+  except AttributeError: return list(range(0,len(d))) # Assume that d is a list, tuple, or similar
 
 from jsondiff import JsonDiffer
 class PdataJSONDiffer(JsonDiffer):

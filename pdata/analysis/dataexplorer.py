@@ -15,6 +15,7 @@ import numpy as np
 import numbers
 
 from pdata.analysis.dataview import DataView, PDataSingle
+from pdata.helpers import get_keys
 
 from IPython import display
 
@@ -186,12 +187,6 @@ def snapshot_explorer(d, max_depth=10):
   assert max_depth >= 2
   assert len(d.settings()) > 0, 'No snapshots in DataView.'
   snap = d.settings()[0][1]
-
-  def get_keys(d):
-    """ Return all values that are valid indices of d. """
-    if isinstance(d, str): raise AttributeError()
-    try: return list(d.keys()) # Assume that d is a dict
-    except AttributeError: return list(range(0,len(d))) # Assume that d is a list, tuple, etc.
 
   def update_path_selectors():
     """ Update dropdown options. """
