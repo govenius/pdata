@@ -6,7 +6,8 @@ Introduction
 
 As a user of pdata, you don't normally need to worry about the on-disk
 data format, since you should be using :code:`pdata.analysis.dataview`
-for loading the data.
+for loading the data. This page is meant mainly for developers of
+pdata itself, or people who run into unexpected issues.
 
 .. warning:: Despite the format being self-explanatory in principle,
   you should **always read in the data using**
@@ -132,9 +133,7 @@ figure out how to parse the data, even without the pdata source.
 
 The format also aims to be stable enough that the latest version of
 :code:`pdata.analysis.dataview` is able to read any data set recorded
-with any previous version of pdata. To keep this task manageable,
-**changes to the on-disk data format are generally to be avoided**
-without good reason.
+with any previous version of pdata.
 
 Another important design criterion is that it must be
 possible to read the latest data in a separate analysis script
@@ -166,12 +165,20 @@ Therefore the data format is:
 Discussion on alternative formats
 ---------------------------------
 
+Here we have some notes on alternative formats, *which are not used by
+pdata*.
+
+To simplify the task of having :code:`pdata.analysis.dataview` support
+all pdata datasets, including ones recorded with earlier versions of
+pdata, **changes to the on-disk data format are generally to be
+avoided** without very good reason.
+
 Text based vs binary
 ++++++++++++++++++++
 
 Binary formats could offer better write and read speeds, assuming that
-details are properly tuned. Reaching hardware-limited speed is,
-however, almost irrelevant for the vast majority of physics
+implementation details are properly tuned. Reaching hardware-limited
+speed is, however, almost irrelevant for the vast majority of physics
 experiments that pdata is geared toward.
 
 Binary *cache* files are also easy to create in Python and can be
@@ -193,20 +200,24 @@ rows of tabular data. The format is `well-specified and stable
 and has a design philosophy similar to pdata's, except that it's
 binary.
 
-The main reason for not using this format is the generic one, i.e
-avoiding proliferation of different formats that need to be supported
-by :code:`pdata.analysis.dataview`.
-
 HDF5
 ++++
 
-The main argument against using HDF5 is that HDF5 is complex (see
-`HDF5 specification
-<https://docs.hdfgroup.org/hdf5/develop/_f_m_t3.html>`_).
+The main argument against using HDF5 is that the HDF5 specification is
+very complex (see `100+ page HDF5 specification
+<https://docs.hdfgroup.org/hdf5/develop/_f_m_t3.html>`_ vs `.npy/.npz
+specification
+<https://numpy.org/doc/stable/reference/generated/numpy.lib.format.html#module-numpy.lib.format>`_),
+without providing any clear advantage compared to .npz, in the case of
+pdata. The complexity of the specification isn't a problem from the
+point of view of routine use since one, and only one, `HDF5 library
+implementation <https://github.com/hdfgroup/hdf5>`_ exists. However,
+it could be non-trivial to debug issues in the unlikely event that
+bugs related to the HDF5 library would be encountered.
 
-.. note:: At first sight it seems tempting to encode contents of
-  snapshot as nested HDF5 groups. However, the overhead in file size
-  is severe (~kB per group!).
+.. note:: At first sight it seems tempting to encode snapshots as
+  nested HDF5 groups, which would provide strong data typing. However,
+  the overhead in file size is severe (~kB per group!).
 
 Binary JSON
 +++++++++++
