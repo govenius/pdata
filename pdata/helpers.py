@@ -37,10 +37,14 @@ def preprocess_snapshot(snap, delete_timestamps=True, convert_ndarrays=False):
   preprocesss_dict(snap)
   return snap
 
-def get_keys(d):
-  """ Return keys of d, if d is dict-like, or indices if d is list-like. Raise TypeError for str. """
+def get_keys(d, reject_str=True, reject_ndarray=True):
+  """Return keys of d, if d is dict-like, or indices if d is
+     list-like. Raise TypeError for str/ndarray if reject_str/ndarray
+     is True.
+  """
   if not isinstance(d, (collections.abc.Mapping, collections.abc.Sequence)): raise TypeError()
-  if isinstance(d, str): raise TypeError()
+  if reject_str and isinstance(d, str): raise TypeError()
+  if reject_ndarray and isinstance(d, np.ndarray): raise TypeError()
   try: return list(d.keys()) # Assume that d is dict-like
   except AttributeError: return list(range(0,len(d))) # Assume that d is a list, tuple, or similar
 
