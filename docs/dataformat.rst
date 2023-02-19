@@ -228,4 +228,6 @@ being rather simple. This could be a benefit in use cases with very
 large snapshot diffs
 
 The main disadvantage is that there are several slightly-incompatible
-variants of these formats and none of them seems broadly adopted.
+variants of these formats and none of them seems broadly adopted,
+although `Mathematica supports UBJSON
+<https://reference.wolfram.com/language/workflow/GenerateJSON.html>`_.
