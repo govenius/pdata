@@ -116,13 +116,18 @@ Here is how you read the data back from the above example using DataView::
 
   d = DataView([ PDataSingle(data_path), ]) # <-- You can concatenate multiple data dirs by adding multiple PDataSingle's to the array
 
-  print('Instruments in the snapshot file:')
-  print(d.settings()[0][1]['instruments'].keys())
-
   # Add a "column" to the data table based on a value from the snapshot.
+  # The path given in the from_set argument depends on the framework
+  # you use for instrument control. You can determine it by
+  # examining snapshot.json.gz, or d.settings()[0][1].
   d.add_virtual_dimension('VNA power',
                           from_set=('instruments', 'vna',
                                     'parameters', 'power', 'value'))
+
+Let's run some print statements to see how to access the data columns::
+
+  print('Instruments in the snapshot file:')
+  print(d.settings()[0][1]['instruments'].keys())
 
   # You can now access the columns by name:
   print('\nFirst few frequencies: %s' % (d["frequency"][:5]))
@@ -134,7 +139,7 @@ Here is how you read the data back from the above example using DataView::
 
   print('\nSweeps based on a per-sweep-swept parameter: %s' % d.divide_into_sweeps('frequency'))
 
-Which outputs the following from the print statements::
+Which outputs the following::
 
   Instruments in the snapshot file:
   dict_keys(['vna'])
