@@ -7,7 +7,8 @@ Introduction
 As a user of pdata, you don't normally need to worry about the on-disk
 data format, since you should be using :code:`pdata.analysis.dataview`
 for loading the data. This page is meant mainly for developers of
-pdata itself, or people who run into unexpected issues.
+pdata itself, and other people who run into unexpected issues and need
+some understanding of the inner workings of the package.
 
 .. warning:: Despite the format being self-explanatory in principle,
   you should **always read in the data using**
@@ -19,6 +20,10 @@ pdata itself, or people who run into unexpected issues.
   :code:`pdata.analysis.dataview` for the initial parsing step even if
   you use other tools later on in the analysis (see :ref:`Analyzing
   with other tools <analyzing_with_other_tools>`).
+
+.. contents:: Contents
+    :local:
+    :depth: 3
 
 Specification
 -------------
