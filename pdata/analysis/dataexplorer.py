@@ -13,6 +13,7 @@ import itertools
 import logging
 import numpy as np
 import numbers
+import datetime
 
 from pdata.analysis.dataview import DataView, PDataSingle
 from pdata.helpers import get_keys
@@ -130,33 +131,44 @@ def monitor_dir(base_dir, x, y,
     # Convert all reference data dirs to PDataSingle objects
     ref_data_dirs = [ PDataSingle(n) if isinstance(n, str) else n for n in ref_data_dirs ]
 
+    print(f"Monitoring {base_dir} for data directories.)")
+    print(f"Stop by sending a KeybordInterrupt (in Jupyter, Kernel --> Interrupt kernel).")
+    print(f"Waiting for first data set matching filter(s).)")
+
     pdata_objects = {}
     last_mtimes = {}
+    first_plot = True
     while True:
       data_dirs = selector(base_dir, name_filter=name_filter, age_filter=age_filter, return_widget=False)[::-1]
 
       # Load data from modified data dirs to PDataSingle objects
-      no_changes = True
+      latest_mtime = 0
       for dd in data_dirs:
         mtime = get_data_mtime(base_dir, dd)
         if last_mtimes.get(dd, np.nan) != mtime:
           last_mtimes[dd] = mtime
           pdata_objects[dd] = PDataSingle(os.path.join(base_dir, dd))
-          no_changes = False
+          latest_mtime = max(mtime, latest_mtime)
 
       # Release data objects (--> memory) that are no longer going to be plotted
       for dd in pdata_objects.keys():
         if dd not in data_dirs: del pdata_objects[dd]
 
       # Replot
-      if not no_changes:
+      if latest_mtime > 0:
         display.clear_output(wait=True)
+        fig.clear()
+
         all_data = list(itertools.chain(ref_data_dirs, [ pdata_objects[dd] for dd in data_dirs ] ))
         plotter(None, all_data, x, y, xlog=xlog, ylog=ylog,
                          slowcoordinate=slowcoordinate,
                          preprocessor=preprocessor, figure=fig)
+
         display.display(fig)
-        print(f"Monitoring {base_dir} for data directories. Stop by sending a KeybordInterrupt (in Jupyter, Kernel --> Interrupt kernel).")
+
+        print(f"Monitoring {base_dir} for data directories.)")
+        print(f"Stop by sending a KeybordInterrupt (in Jupyter, Kernel --> Interrupt kernel).")
+        print(f"Last dataset change @ {datetime.datetime.fromtimestamp(latest_mtime)})")
 
       time.sleep(poll_period)
 
