@@ -340,15 +340,14 @@ class PDataSingle():
          (unit)\t" format. If not, fall back to assuming similar but
          simpler legacy QCoDeS format.
       """
-      # Pick last non-empty line
+      # Split into lines and keep only non-empty ones
       column_names_and_units = [ l for l in s.split('\n') if len(l.strip())>0 ]
       if len(column_names_and_units) == 0: return [],[]
-      column_names_and_units = column_names_and_units[-1]
 
       try:
         cols = []
         units = []
-        for c in column_names_and_units.split('\t'):
+        for c in column_names_and_units[-1].split('\t'):
           m = re.match(f'({column_name_regex})\s+\(({column_unit_regex})\)', c.strip())
           cols.append(m.group(1))
           units.append(m.group(2))
@@ -356,7 +355,10 @@ class PDataSingle():
       except AttributeError:
         # Try assuming the legacy format used in QCoDeS (qcodes/data/gnuplot_format.py)
         try:
-          cols = [ c.strip().strip('"') for c in column_names_and_units.split('\t') ]
+          # Last row contains the number of data points --> ignore
+          if column_names_and_units[-1].strip().isdigit(): del column_names_and_units[-1]
+
+          cols = [ c.strip().strip('"') for c in column_names_and_units[-1].split('\t') ]
           units = [ '' for i in range(len(cols))]
         except IndexError:
           logging.warning(f"Could not parse tabular data header. Header: {s}")

@@ -384,10 +384,11 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue(isinstance(PDataSingle._parse_timestamp('2017-12-06 09:15:40.123'), float))
 
     for version in [ "qcodes legacy",
+                     "legacy variant 1",
                      "pre-v1",
                      "v1.0.0" ]:
 
-      if version in ["qcodes legacy", "pre-v1"]:
+      if version in ["qcodes legacy", "legacy variant 1", "pre-v1"]:
         expected_name = [ "frequency", "S21", "col name +with_-=special/symbols*%" ]
         expected_units = [ "Hz", "",  "-&+=%*&/"]
         expected_dtype = [ numpy.float64, numpy.float64,  numpy.float64]
@@ -405,7 +406,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
         for i in range(3):
           self.assertEqual(expected_name[i], column_names[i])
-          if version != "qcodes legacy":
+          if version not in ["qcodes legacy", "legacy variant 1"]:
             self.assertEqual(expected_units[i], units[i])
           if version in [ "v1.0.0" ]:
             self.assertEqual(expected_dtype[i], dtypes[i])
@@ -429,6 +430,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
     # Test older data format versions too
     for version in [ "qcodes legacy",
+                     "legacy variant 1",
                      "pre-v1",
                      "v1.0.0" ]:
 
@@ -437,7 +439,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
         f.readlines(); raw_footer = PDataSingle._extract_footer(f)
         footer = PDataSingle._parse_footer(raw_footer)
 
-        if version in ["qcodes legacy", "pre-v1"]:
+        if version in ["qcodes legacy", "legacy variant 1", "pre-v1"]:
           # No footer expected
           self.assertEqual(raw_footer.strip(), "")
           self.assertEqual(footer["raw_footer"], raw_footer)
@@ -454,6 +456,17 @@ def example_tabular_data(version, file_object=False, binary_mode=False):
   """Examples of contents of tabular_data.dat, useful especially for
      testing that parsing of legacy data sets also works."""
   tabular_data_qcodes_legacy = """
+# some	other	content
+# "frequency"	"S21"	"col name +with_-=special/symbols*%"
+# 5
+5.900000000000000e+09	9.878581064994841e-01	-8.724404509699187e-01
+5.905000000000000e+09	9.868398417340444e-01	-2.716625651538533e-01
+5.910000000000000e+09	9.857022708158116e-01	4.430024269210494e-02
+5.915000000000000e+09	9.844290657439446e-01	-1.705752478646343e+00
+5.920000000000000e+09	9.830018886790357e-01	-4.686516332742403e-03
+"""
+
+  tabular_data_legacy_variant1 = """
 #
 # frequency	S21	col name +with_-=special/symbols*%
 #
@@ -616,6 +629,7 @@ def example_tabular_data(version, file_object=False, binary_mode=False):
 """
 
   tabular_data = { "qcodes legacy": tabular_data_qcodes_legacy,
+                   "legacy variant 1": tabular_data_legacy_variant1,
                    "pre-v1": tabular_data_pre_v1,
                    "v1.0.0": tabular_data_v1_0_0 }[version]
 
