@@ -503,8 +503,8 @@ class DataView():
         try: # see if a single Data object
           self._dimensions = data.dimension_names()
           self._units = dict(zip(data.dimension_names(), data.dimension_units()))
-          unmasked = data.data().copy() if deep_copy else data.data()
-          
+          unmasked = dict( (dim, data[dim]) for dim in data.dimension_names() )
+
           if source_column_name != None:
             n = data.name()
             self._source_col = [n for i in range(data.npoints())]

@@ -195,7 +195,10 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
   def test_reading_data(self):
     """ Read back the data saved on disk using dataview. """
-    # Test reading the data using DataView
+    # Test the short-hand syntax for a single data dir
+    d = DataView( PDataSingle(self._typical_datadir) )
+
+    # Test the more common syntax where we pass an array of data objects
     d = DataView([ PDataSingle(self._typical_datadir), ])
 
     # Check sanity of initial snapshot
