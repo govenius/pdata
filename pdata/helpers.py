@@ -51,7 +51,7 @@ def get_keys(d, reject_str=True, reject_ndarray=True):
 from jsondiff import JsonDiffer
 class PdataJSONDiffer(JsonDiffer):
   """Custom JSON diff creator that handles Numpy ndarrays and lists of
-     only (scalars) as complete blocks. That is, does not create diffs
+     only scalars as complete blocks. That is, does not create diffs
      at element level within ndarrays. This is much faster than the
      default jsondiff list diff creation, and becomes important if the
      snapshots contain e.g. AWG patterns that can be long vectors.
