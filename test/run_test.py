@@ -451,6 +451,39 @@ class TestSavingAndAnalysis(unittest.TestCase):
         expected_diff_rows = [ 0,41,82 ]
         self.assertTrue(all(i==j for i,j in zip(footer["snapshot_diffs_preceding_rows"], expected_diff_rows) ))
 
+  def test_jsondiff_format_consistency(self):
+    """Test that jsondiff.diff() produces output compliant with pdata on
+       disk fomat v1.0.0. By having this unit test, we can more
+       confidently allow use of latest jsondiff version. Otherwise we
+       should fix the jsondiff version that pdata depends on.
+    """
+    import jsondiff
+    from pdata.helpers import PdataJSONDiffer
+
+    snap0 = {"a": 0, "b": {"ba": 1, "bb": 2}}
+    snap1 = {"a": 0, "b": {"ba": 1, "bb": 3}}
+    d = jsondiff.diff(snap0, snap1, cls=PdataJSONDiffer, marshal=True)
+    self.assertEqual(d, {'b': {'bb': 3}})
+
+    snap0 = {"a": 0, "b": {"ba": 1, "bb": 2}}
+    snap1 = {"a": 0, "b": {"ba": 4, "bb": 3}}
+    d = jsondiff.diff(snap0, snap1, cls=PdataJSONDiffer, marshal=True)
+    self.assertEqual(d, {'b': {"ba": 4, 'bb': 3}})
+
+    snap0 = {"a": 0, "b": [{"ba": 1, "bb": 2}]}
+    snap1 = {"a": 0, "b": [{"ba": 4, "bb": 2}]}
+    d = jsondiff.diff(snap0, snap1, cls=PdataJSONDiffer, marshal=True)
+    self.assertEqual(d, {'b': {0: {'ba': 4}}})
+
+    snap0 = {"a": 0, "b": {"ba": 1, "bb": 2}}
+    snap1 = {"a": 0, "b": {"bb": 3}}
+    d = jsondiff.diff(snap0, snap1, cls=PdataJSONDiffer, marshal=True)
+    self.assertEqual(d, {'b': {'bb': 3, '$delete': ['ba']}})
+
+    snap0 = {"a": 0, "b": {"ba": 1, "bb": 2}}
+    snap1 = {"a": 0, "b": {}}
+    d = jsondiff.diff(snap0, snap1, cls=PdataJSONDiffer, marshal=True)
+    self.assertEqual(d, {'b': {'$replace': {}}})
 
 def example_tabular_data(version, file_object=False, binary_mode=False):
   """Examples of contents of tabular_data.dat, useful especially for
