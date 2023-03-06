@@ -500,13 +500,21 @@ class DataView():
 
           return
 
-        try: # see if a single Data object
+        def get_source_column_name(dat):
+          return f"{dat.name()}_({dat.filename().strip('.dat')})"
+
+        def is_pdatasingle_like(x):
+          return ( hasattr(x, "dimension_names") and hasattr(x, "dimension_units")
+                   and hasattr(x, "name") and hasattr(x, "comments")
+                   and hasattr(x, "data") )
+
+        if is_pdatasingle_like(data): # data is a single Data object
           self._dimensions = data.dimension_names()
           self._units = dict(zip(data.dimension_names(), data.dimension_units()))
           unmasked = dict( (dim, data[dim]) for dim in data.dimension_names() )
 
           if source_column_name != None:
-            n = data.name()
+            n = get_source_column_name(data)
             self._source_col = [n for i in range(data.npoints())]
           else:
             self._source_col = None
@@ -519,10 +527,9 @@ class DataView():
             logging.exception("Could not parse the instrument settings file. Doesn't matter if you were not planning to add virtual columns based on values in the snapshot files.")
             self._settings = None
 
-        except MemoryError as e:
-          raise
+        else: # probably data is a sequence of Data objects then
+          assert all(is_pdatasingle_like(dd) for dd in data), "data does not seem to be a PDataSingle-like object, nor a sequence of them: " + repr(data)
 
-        except Exception as e: # probably a sequence of Data objects then
           self._dimensions = set(itertools.chain( *(dd.dimension_names() for dd in data) ))
 
           unmasked = {}
@@ -552,13 +559,13 @@ class DataView():
           # add a column that specifies the source data file
           lens = [ dat.npoints() for dat in data ]
           if source_column_name != None:
-            names = [ '%s_(%s)' % (dat.name(), dat.filename().strip('.dat')) for dat in data ]
+            names = [ get_source_column_name(dat) for dat in data ]
             self._source_col = [ [n for jj in range(l)] for n,l in zip(names,lens) ]
             #self._source_col = [ jj for jj in itertools.chain.from_iterable(self._source_col) ] # flatten
             self._source_col = list(itertools.chain.from_iterable(self._source_col)) # flatten
           else:
             self._source_col = None
-          
+
           # keep only dimensions that could be parsed from all files
           self._dimensions = unmasked.keys()
 
