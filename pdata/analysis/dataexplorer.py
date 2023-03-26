@@ -194,27 +194,45 @@ def snapshot_explorer(d, max_depth=10):
   """Graphical dropdown-menu-based helper for creating virtual dimension
      specifications for DataView d. max_depth controls the number of
      dropdown menus.
+
+     In the current implementaion, if you call snapshot_explorer in
+     multiple cells, only the most recently created GUI may work
+     properly. This is due to use of snapshot_explorer_globals
+     effectively as a static variable (see code for details).
   """
+  from ipywidgets import interactive, Output, VBox, Dropdown
+  from IPython.display import clear_output
 
   assert max_depth >= 2
   assert len(d.settings()) > 0, 'No snapshots in DataView.'
   snap = d.settings()[0][1]
 
+  # Create the dropdown widgets and text output display
+  snapshot_explorer_globals = {}
+  snapshot_explorer_globals["out"] = Output()
+  snapshot_explorer_globals["dropdowns"] = [ Dropdown(options=(snap.keys() if i==0 else []), index=None) for i in range(max_depth) ]
+  snapshot_explorer_globals["recursion_depth"] = 0
+
   def update_path_selectors():
     """ Update dropdown options. """
-    kwargs = _widget.kwargs_widgets
+    nonlocal snapshot_explorer_globals
+    dropdowns = snapshot_explorer_globals["dropdowns"]
     subsnap = snap
     leaf_val = None
     for i in range(1, max_depth):
-      prev_key = kwargs[i-1].value
+      prev_key = dropdowns[i-1].value
       #print(f"prev_key = {prev_key}")
       try:
         subsnap = subsnap.get(prev_key, subsnap[get_keys(subsnap)[0]])
-        kwargs[i].options = get_keys(subsnap)
+        new_options = list(get_keys(subsnap))
+        if new_options != list(dropdowns[i].options):
+          #print(new_options)
+          dropdowns[i].options = new_options
+          if len(new_options) > 0: dropdowns[i].index = 0
       except (TypeError,AttributeError,IndexError):
         # subsnap is no longer subscriptable, or is an empty list
         if subsnap is not None: leaf_val = subsnap
-        kwargs[i].options = []
+        dropdowns[i].options = []
         subsnap = None
         continue
     return leaf_val
@@ -225,27 +243,29 @@ def snapshot_explorer(d, max_depth=10):
     if isinstance(val, numbers.Number): return ", dtype=float"
     return ", dtype=str"
 
-  def construct_vdim_spec(**kwargs):
-    """ Print out the d.add_virtual_dimension(...) template based on the values in the dropdown menus. """
-    with _out:
-      if construct_vdim_spec._recursion_depth==0: clear_output()
-      construct_vdim_spec._recursion_depth += 1
+  def construct_vdim_spec(change):
+    """Update dropdown menu selections and print out the
+       d.add_virtual_dimension(...) template based on the selected
+       values in the dropdown menus.
+    """
+    nonlocal snapshot_explorer_globals
+
+    # Avoid recursive updates triggered by update_path_selectors()
+    if snapshot_explorer_globals["recursion_depth"] > 0: return
+    snapshot_explorer_globals["recursion_depth"] += 1
+
+    with snapshot_explorer_globals["out"]:
+      clear_output()
       leaf_val = update_path_selectors()
       print('\nd.add_virtual_dimension(<name>, units=<units>, from_set=['
-          + ", ".join(str(v) for v in kwargs.values() if v is not None) + "]"
+          + ", ".join(str(dd.value) for dd in snapshot_explorer_globals["dropdowns"] if dd.value is not None) + "]"
           + dtype_spec(leaf_val)
           + "))")
       print(f"Value = {leaf_val}  @row==0")
-      construct_vdim_spec._recursion_depth -= 1
 
-  construct_vdim_spec._recursion_depth = 0
+    snapshot_explorer_globals["recursion_depth"] -= 1
 
-  # Specify the number of dropdown menus, and populate options for the first one.
-  # The rest of the dropdowns will be populated when first displayed.
-  path_selectors = dict( (f"path{i}", snap.keys() if i==0 else []) for i in range(max_depth) )
+  # Add callbacks
+  for dd in snapshot_explorer_globals["dropdowns"]: dd.observe(construct_vdim_spec)
 
-  from ipywidgets import interactive, Output, VBox
-  from IPython.display import clear_output
-  _widget = interactive(construct_vdim_spec, **path_selectors)
-  _out = Output()
-  return VBox([ _widget, _out ])
+  return VBox([ VBox(snapshot_explorer_globals["dropdowns"]), snapshot_explorer_globals["out"] ])
