@@ -151,7 +151,7 @@ def monitor_dir(base_dir, x, y,
           latest_mtime = max(mtime, latest_mtime)
 
       # Release data objects (--> memory) that are no longer going to be plotted
-      for dd in pdata_objects.keys():
+      for dd in list(pdata_objects.keys()):
         if dd not in data_dirs: del pdata_objects[dd]
 
       # Replot
