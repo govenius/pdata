@@ -166,9 +166,9 @@ def monitor_dir(base_dir, x, y,
 
         display.display(fig)
 
-        print(f"Monitoring {base_dir} for data directories.)")
+        print(f"Monitoring {base_dir} for data directories.")
         print(f"Stop by sending a KeybordInterrupt (in Jupyter, Kernel --> Interrupt kernel).")
-        print(f"Last dataset change @ {datetime.datetime.fromtimestamp(latest_mtime)})")
+        print(f"Last dataset change @ {datetime.datetime.fromtimestamp(latest_mtime)}")
 
       time.sleep(poll_period)
 
