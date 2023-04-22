@@ -179,7 +179,11 @@ def monitor_dir(base_dir, x, y,
 
 def is_valid_pdata_dir(base_dir, data_dir):
   """ Check whether <base_dir>/<data_dir> is a pdata data set. """
-  return any( os.path.isfile(os.path.join(base_dir, data_dir, f)) for f in ["tabular_data.dat", "tabular_data.dat.gz"] )
+  # Check for presence of a non-empty tabular_data.dat(.gz)
+  uncompressed_tabular_dat = os.path.join(base_dir, data_dir, "tabular_data.dat")
+  for f in [ uncompressed_tabular_dat+".gz", uncompressed_tabular_dat ]:
+    if os.path.isfile(f) and os.path.getsize(f) > 5: return True
+  return False # No tabular_data found
 
 def get_data_mtime(base_dir, data_dir, fallback_value=0):
   """Get last modification time of data set in
