@@ -258,11 +258,13 @@ def snapshot_explorer(d, max_depth=10):
     if snapshot_explorer_globals["recursion_depth"] > 0: return
     snapshot_explorer_globals["recursion_depth"] += 1
 
+    def to_str(x): return f"'{x}'" if isinstance(x, str) else str(x)
+
     with snapshot_explorer_globals["out"]:
       clear_output()
       leaf_val = update_path_selectors()
       print('\nd.add_virtual_dimension(<name>, units=<units>, from_set=['
-          + ", ".join(str(dd.value) for dd in snapshot_explorer_globals["dropdowns"] if dd.value is not None) + "]"
+          + ", ".join(to_str(dd.value) for dd in snapshot_explorer_globals["dropdowns"] if dd.value is not None) + "]"
           + dtype_spec(leaf_val)
           + "))")
       print(f"Value = {leaf_val}  @row==0")
