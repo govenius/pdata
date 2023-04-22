@@ -140,6 +140,20 @@ class TestSavingAndAnalysis(unittest.TestCase):
         VNA_instrument._power = p
         m.add_points({'frequency': freqs})
 
+    # Create test dataset with an empty tabular_data.dat file.
+    # Resembles the case of an ongoing measurement where add_points()
+    # hasn't been called yet.
+    with run_measurement(get_instrument_snapshot,
+                         columns = [("frequency", "Hz"),
+                                    "S21"],
+                         name='power-sweep',
+                         data_base_dir=cls._data_root,
+                         compress=False) as m:
+
+      cls._empty_tabulardat_datadir = m.path()
+
+    with open(os.path.join(cls._empty_tabulardat_datadir, 'tabular_data.dat'), 'w') as f: pass
+
   @classmethod
   def tearDownClass(cls):
     pass
@@ -169,7 +183,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
   def test_dataexplorer_selector(self):
     # Test the graphical dataset selector
     sel = dataexplorer.data_selector(self._data_root)
-    self.assertTrue(len(sel.options) == 4)
+    self.assertEqual(len(sel.options), 4)
     self.assertTrue(sel.options[0] == os.path.split(self._single_column_datadir)[-1])
     self.assertTrue(sel.options[1] == os.path.split(self._no_rows_datadir)[-1])
     self.assertTrue(sel.options[2] == os.path.split(self._single_row_datadir)[-1])
@@ -319,11 +333,20 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
   def test_reading_no_rows_data(self):
     """ Read a data set containing no data rows. """
-    d = DataView([ PDataSingle(self._no_rows_datadir), ])
-    self.assertTrue(len(d["frequency"]) == 0)
+    for d in [ DataView([ PDataSingle(self._no_rows_datadir), ]),
+               DataView(PDataSingle(self._no_rows_datadir)) ]:
+      self.assertEqual(set(d.dimensions()), set(['S21', 'frequency', 'data_source']))
+      self.assertEqual(d["frequency"].size, 0)
+
+  def test_reading_empty_tabular_data(self):
+    """ Read a data set containing an empty tabular_data.dat. """
+    d = DataView([ PDataSingle(self._empty_tabulardat_datadir), ])
+    self.assertEqual(d.dimensions(), ['data_source'])
+    d = DataView(PDataSingle(self._empty_tabulardat_datadir))
+    self.assertEqual(d.dimensions(), ['data_source'])
 
   def test_reading_data_with_different_columns(self):
-    """ Read a data set containing just a single column. """
+    """ Read data sets containing different columns into a single DataView. """
     # Test reading the data using DataView
     d = DataView([ PDataSingle(self._typical_datadir), PDataSingle(self._single_column_datadir) ])
 

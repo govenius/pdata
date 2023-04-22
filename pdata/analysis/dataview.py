@@ -595,7 +595,8 @@ class DataView():
 
         # Initialize masks
         self._data = unmasked
-        self._mask = np.zeros(len(unmasked[list(unmasked.keys())[0]]), dtype=bool)
+        self._mask = np.zeros(0 if len(unmasked.keys())==0 else
+                              len(unmasked[list(unmasked.keys())[0]]), dtype=bool)
         self._mask_stack = []
 
         self.set_mask(False)
