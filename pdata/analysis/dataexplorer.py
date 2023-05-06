@@ -131,9 +131,9 @@ def monitor_dir(base_dir, x, y,
     # Convert all reference data dirs to PDataSingle objects
     ref_data_dirs = [ PDataSingle(n) if isinstance(n, str) else n for n in ref_data_dirs ]
 
-    print(f"Monitoring {base_dir} for data directories.)")
+    print(f"Monitoring {base_dir} for data directories.")
     print(f"Stop by sending a KeybordInterrupt (in Jupyter, Kernel --> Interrupt kernel).")
-    print(f"Waiting for first data set matching filter(s).)")
+    print(f"Waiting for first data set matching filter(s).")
 
     pdata_objects = {}
     last_mtimes = {}
@@ -266,7 +266,7 @@ def snapshot_explorer(d, max_depth=10):
       print('\nd.add_virtual_dimension(<name>, units=<units>, from_set=['
           + ", ".join(to_str(dd.value) for dd in snapshot_explorer_globals["dropdowns"] if dd.value is not None) + "]"
           + dtype_spec(leaf_val)
-          + "))")
+          + ")")
       print(f"Value = {leaf_val}  @row==0")
 
     snapshot_explorer_globals["recursion_depth"] -= 1
