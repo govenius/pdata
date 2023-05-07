@@ -196,8 +196,13 @@ def get_data_mtime(base_dir, data_dir, fallback_value=0):
 
 def snapshot_explorer(d, max_depth=10):
   """Graphical dropdown-menu-based helper for creating virtual dimension
-     specifications for DataView d. max_depth controls the number of
-     dropdown menus.
+     specifications for DataView d. Alternatively, a single snapshot
+     can be provided as d.
+
+     max_depth controls the number of dropdown menus shown.
+
+     If detect_qcodes_params==True, a more complete suggestion is
+     provided for selections that seem like QCoDeS parameters.
 
      In the current implementaion, if you call snapshot_explorer in
      multiple cells, only the most recently created GUI may work
@@ -208,8 +213,15 @@ def snapshot_explorer(d, max_depth=10):
   from IPython.display import clear_output
 
   assert max_depth >= 2
-  assert len(d.settings()) > 0, 'No snapshots in DataView.'
-  snap = d.settings()[0][1]
+
+  try:
+    # Assume that d is a DataView
+    assert len(d.settings()) > 0, 'No snapshots in DataView.'
+    snap = d.settings()[0][1]
+  except AttributeError:
+    # Assume that d is a single snapshot
+    snap = d
+    assert len(get_keys(d)) > 0, f"d is not a non-empty DataView or a non-empty snapshot: d = {d}"
 
   # Create the dropdown widgets and text output display
   snapshot_explorer_globals = {}
