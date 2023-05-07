@@ -48,6 +48,12 @@ def get_keys(d, reject_str=True, reject_ndarray=True):
   try: return list(d.keys()) # Assume that d is dict-like
   except AttributeError: return list(range(0,len(d))) # Assume that d is a list, tuple, or similar
 
+def get_subdict(d, keys):
+  """Given a nested dict-like structure, return the subdict or leaf
+     value corresponding to a list of keys."""
+  for k in keys: d = d[k]
+  return d
+
 from jsondiff import JsonDiffer
 class PdataJSONDiffer(JsonDiffer):
   """Custom JSON diff creator that handles Numpy ndarrays and lists of

@@ -16,7 +16,7 @@ import numbers
 import datetime
 
 from pdata.analysis.dataview import DataView, PDataSingle
-from pdata.helpers import get_keys
+from pdata.helpers import get_keys, get_subdict
 
 from IPython import display
 
@@ -194,7 +194,7 @@ def get_data_mtime(base_dir, data_dir, fallback_value=0):
     except FileNotFoundError: continue
   return fallback_value
 
-def snapshot_explorer(d, max_depth=10):
+def snapshot_explorer(d, max_depth=10, detect_qcodes_params=True):
   """Graphical dropdown-menu-based helper for creating virtual dimension
      specifications for DataView d. Alternatively, a single snapshot
      can be provided as d.
@@ -243,11 +243,20 @@ def snapshot_explorer(d, max_depth=10):
           subsnap = subsnap.get(prev_key, subsnap[get_keys(subsnap)[0]])
         except AttributeError: # Assume subsnap is list-like
           subsnap = subsnap[prev_key if isinstance(prev_key, int) else 0]
+
         new_options = list(get_keys(subsnap))
         if new_options != list(dropdowns[i].options):
           #print(new_options)
           dropdowns[i].options = new_options
-          if len(new_options) > 0: dropdowns[i].index = 0
+          if len(new_options) > 0:
+            index_to_select = 0
+            if detect_qcodes_params:
+              for kk in [ "instruments", "parameters", "value" ]:
+                if kk in new_options:
+                  index_to_select = new_options.index(kk)
+                  break
+            dropdowns[i].index = index_to_select
+
       except (TypeError,AttributeError,IndexError):
         # subsnap is no longer subscriptable, or is an empty list
         if subsnap is not None: leaf_val = subsnap
@@ -265,7 +274,7 @@ def snapshot_explorer(d, max_depth=10):
   def to_str(x): return f"'{x}'" if isinstance(x, str) else str(x)
 
   def to_virtual_dim_str(keys, name="<name>", units="<units>", first_value=None):
-    x  = f'd.add_virtual_dimension({name}, units={units}, from_set=['
+    x  = f"d.add_virtual_dimension('{name}', units='{units}', from_set=["
     x += ", ".join(to_str(k) for k in keys) + "]"
     x += dtype_spec(first_value)
     x += ")"
@@ -286,9 +295,19 @@ def snapshot_explorer(d, max_depth=10):
     leaf_val = update_path_selectors()
     selected_path = [ dd.value for dd in snapshot_explorer_globals["dropdowns"] if dd.value is not None ]
 
+    name = "<name>"
+    units = "<units>"
+    if detect_qcodes_params and len(selected_path) >= 4 and selected_path[-1]=="value":
+      if selected_path[-3]=="parameters":
+        name = f"{selected_path[-4]}_{selected_path[-2]}"
+      try:
+        units = get_subdict(snap, selected_path[:-1])["unit"]
+      except (TypeError,AttributeError,IndexError):
+        pass
+
     with snapshot_explorer_globals["out"]:
       clear_output()
-      print("\n" + to_virtual_dim_str(selected_path, first_value=leaf_val))
+      print("\n" + to_virtual_dim_str(selected_path, name=name, units=units, first_value=leaf_val))
 
     snapshot_explorer_globals["recursion_depth"] -= 1
 
