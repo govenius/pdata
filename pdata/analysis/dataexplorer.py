@@ -262,6 +262,16 @@ def snapshot_explorer(d, max_depth=10):
     if isinstance(val, numbers.Number): return ", dtype=float"
     return ", dtype=str"
 
+  def to_str(x): return f"'{x}'" if isinstance(x, str) else str(x)
+
+  def to_virtual_dim_str(keys, name="<name>", units="<units>", first_value=None):
+    x  = f'd.add_virtual_dimension({name}, units={units}, from_set=['
+    x += ", ".join(to_str(k) for k in keys) + "]"
+    x += dtype_spec(first_value)
+    x += ")"
+    if first_value is not None: x += f"\nValue = {first_value}  @row==0"
+    return x
+
   def construct_vdim_spec(change):
     """Update dropdown menu selections and print out the
        d.add_virtual_dimension(...) template based on the selected
@@ -273,16 +283,12 @@ def snapshot_explorer(d, max_depth=10):
     if snapshot_explorer_globals["recursion_depth"] > 0: return
     snapshot_explorer_globals["recursion_depth"] += 1
 
-    def to_str(x): return f"'{x}'" if isinstance(x, str) else str(x)
+    leaf_val = update_path_selectors()
+    selected_path = [ dd.value for dd in snapshot_explorer_globals["dropdowns"] if dd.value is not None ]
 
     with snapshot_explorer_globals["out"]:
       clear_output()
-      leaf_val = update_path_selectors()
-      print('\nd.add_virtual_dimension(<name>, units=<units>, from_set=['
-          + ", ".join(to_str(dd.value) for dd in snapshot_explorer_globals["dropdowns"] if dd.value is not None) + "]"
-          + dtype_spec(leaf_val)
-          + ")")
-      print(f"Value = {leaf_val}  @row==0")
+      print("\n" + to_virtual_dim_str(selected_path, first_value=leaf_val))
 
     snapshot_explorer_globals["recursion_depth"] -= 1
 
