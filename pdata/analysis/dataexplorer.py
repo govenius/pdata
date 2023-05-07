@@ -214,7 +214,7 @@ def snapshot_explorer(d, max_depth=10):
   # Create the dropdown widgets and text output display
   snapshot_explorer_globals = {}
   snapshot_explorer_globals["out"] = Output()
-  snapshot_explorer_globals["dropdowns"] = [ Dropdown(options=(snap.keys() if i==0 else []), index=None) for i in range(max_depth) ]
+  snapshot_explorer_globals["dropdowns"] = [ Dropdown(options=(get_keys(snap) if i==0 else []), index=None) for i in range(max_depth) ]
   snapshot_explorer_globals["recursion_depth"] = 0
 
   def update_path_selectors():
@@ -227,7 +227,10 @@ def snapshot_explorer(d, max_depth=10):
       prev_key = dropdowns[i-1].value
       #print(f"prev_key = {prev_key}")
       try:
-        subsnap = subsnap.get(prev_key, subsnap[get_keys(subsnap)[0]])
+        try: # Assume subsnap is dict-like
+          subsnap = subsnap.get(prev_key, subsnap[get_keys(subsnap)[0]])
+        except AttributeError: # Assume subsnap is list-like
+          subsnap = subsnap[prev_key if isinstance(prev_key, int) else 0]
         new_options = list(get_keys(subsnap))
         if new_options != list(dropdowns[i].options):
           #print(new_options)
