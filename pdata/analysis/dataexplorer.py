@@ -24,9 +24,15 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 def data_selector(base_dir, name_filter=".", age_filter=None, max_entries=30, sort_order='chronological', return_widget=True):
-  """
-  Create an interactive Jupyter selector widget listing all pdata data directories in base_dir,
-  with directory name satisfying the regular expression name_filter.
+  """Create an interactive Jupyter selector widget listing at most
+  max_entries data directories located in base_dir, with directory
+  name satisfying the regular expression name_filter.
+
+  Data sets last modified more than age_filter seconds ago are
+  filtered out.
+
+  sort_order=='chronological' implies inverse chronological sort
+  order. The other option is 'alphabetical'.
 
   If return_widget==False, return a list instead.
   """
