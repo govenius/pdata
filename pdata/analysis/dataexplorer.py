@@ -32,9 +32,11 @@ def data_selector(base_dir, name_filter=".", age_filter=None, max_entries=30, so
   filtered out.
 
   sort_order=='chronological' implies inverse chronological sort
-  order. The other option is 'alphabetical'.
+  order, by last modification date. The other option is
+  'alphabetical'.
 
   If return_widget==False, return a list instead.
+
   """
 
   # Get list of data dirs
