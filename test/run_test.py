@@ -52,7 +52,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
                     "random_ndarray": np.random.randn(10)
                    },
           "voltage_source1": { "V": -1.234 },
-          "voltage_source2": { "V": -1.234 },
+          "voltage_source2": { "V": -5.678, "strange unicode characters": "∰ ᴥ ❽ ⁂" },
         },
         "list": [ "list_value0", {"key": "value"} ]}
 
@@ -221,6 +221,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue("voltage_source2" in d.settings()[0][1]['instruments'].keys())
 
     d.add_virtual_dimension('VNA power', units="dBm", from_set=('instruments', 'VNA1', 'power'))
+    d.add_virtual_dimension('unicode check', dtype=str, from_set=('instruments', 'voltage_source2', 'strange unicode characters'))
 
     # Check dimensions and units
     self.assertTrue("frequency" in d.dimensions())
@@ -241,6 +242,9 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue("col with strings" in d.dimensions())
     self.assertTrue(d.units("col with strings") == "")
     self.assertTrue(all( alphabet[i%10::1 + i//len(expected_freqs)] for i,s in enumerate(d["col with strings"]) ))
+
+    # Check handling of unicode characters
+    self.assertTrue(all( x == "∰ ᴥ ❽ ⁂" for x in d["unicode check"] ))
 
     # Check S21
     self.assertTrue(len(d["S21"]) == len(d["frequency"]))
