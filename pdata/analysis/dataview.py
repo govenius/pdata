@@ -49,7 +49,7 @@ class PDataSingle():
           with open(os.path.join(path, 'snapshot.json'), 'r') as f:
             self._snapshots.append((0, json.load(f)))
         else:
-          with gzip.open(os.path.join(path, 'snapshot.json.gz'), 'r') as f:
+          with gzip.open(os.path.join(path, 'snapshot.json.gz'), 'rt') as f:
             self._snapshots.append((0, json.load(f)))
 
       def add_snapshot_diff(row, f):
