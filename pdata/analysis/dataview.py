@@ -5,6 +5,7 @@ Class for post-processing measurement data.
 from pdata._metadata import __version__
 
 import os
+import io
 import time
 import numpy as np
 import types
@@ -154,7 +155,11 @@ class PDataSingle():
 
       elif os.path.exists(os.path.join(path, "tabular_data.dat.gz")):
         with gzip.open(os.path.join(path, "tabular_data.dat.gz"), 'rb') as f:
-          parse_tabular_data(f)
+          # Read entire file into memory. In the current implementation,
+          # this gives a non-negligible speed benefit, due to use of f.seek()
+          buffered_data = io.BytesIO(f.read())
+        parse_tabular_data(buffered_data)
+        del buffered_data # Make sure to release the memory as soon as we're done
 
       else:
         other_dat_files = [ pp for pp in os.scandir(path) if pp.name.endswith(".dat") ]
