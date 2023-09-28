@@ -338,6 +338,11 @@ class Measurement():
       if self._dtypes[i] == None:
         self._dtypes[i] = type(data[c][0])
 
+        if self._dtypes[i] in [ np.ndarray, list ]:
+          logging.warning(f"First row for column {c} is an array or a list, instead of a scalar. [*] "
+                          f"It may work while saving data but is not supported and likely causes issues when reading the data. "
+                          f"[*] Value: {data[c][0]}")
+
       if self._formatters[i] == None:
         # Infer appropriate formatter
         if isinstance(data[c][0], float):
