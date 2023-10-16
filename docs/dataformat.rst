@@ -54,9 +54,9 @@ sign. Floating-point numbers must be in the locale-independent format
 expected by the C++17 from_chars function. In particular, use a period
 (:code:`.`) as the decimal separator and no thousands separator.
 
-Complex numbers must be formatted as <float0>+<float1>j, or
-<float0>-<|float1|>j if float1 is negative. Both real and imaginary
-parts must be present.
+Complex numbers must be formatted as :code:`<float0>+<float1>j`, or
+:code:`<float0>-<|float1|>j` if :code:`float1` is negative. Both real
+and imaginary parts must be present.
 
 The last non-empty comment row contains the column names and units as
 a tab-separated (:code:`\t`) list of strings. Each string is of the
