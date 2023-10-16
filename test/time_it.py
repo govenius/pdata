@@ -39,6 +39,7 @@ def create_data_set(snapshots=1, inner_repetitions=100000,
                     formatter=None):
   """ Create a dummy dataset. """
   random_values = np.random.random((inner_repetitions,2))
+  random_values[:,1] *= 64
 
   cols = [["X",""], ["Y",""]]
   if formatter is not None:

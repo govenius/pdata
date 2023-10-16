@@ -23,6 +23,8 @@ import pytz
 from dateutil import tz
 from collections import OrderedDict
 
+from pdata.analysis.fast_parser import tabular_data_parser
+
 UNIX_EPOCH = datetime.datetime(1970, 1, 1, 0, 0, tzinfo = pytz.utc)
 
 column_name_regex = r"[\w\d\s\-+%=/*&]+"
@@ -109,29 +111,48 @@ class PDataSingle():
         dtypes = list( dtypes[i] for i in range(len(dtypes.keys())) )
 
         if "first_data_row" in header.keys():
+
+          # Parse the footer as well, if any
+          f.seek(0, io.SEEK_END)
+          self._footer = PDataSingle._parse_footer(PDataSingle._extract_footer(f))
+          #print("\n\n"); print(footer); time.sleep(0.1)
+
           # Parse the actual numerical data.
           #
           # Use "col{i}" as names, rather than self._column_names,
           # since pdata column names may contain characters not
           # allowed in numpy structured arrays.
           f.seek(0)
-          self._data = np.genfromtxt(f,
+
+          if all(dt in [ float, np.float64, np.float32, np.float16,
+                         int, np.int64, np.int32, np.int16, np.int8, np.intc,
+                         complex, np.complex128, np.complex64, np.cdouble, np.cfloat ] for dt in dtypes):
+
+            try: chunk_size = max(2, self._footer["number_of_data_rows"])
+            except KeyError: chunk_size = 10000
+
+            self._data = tabular_data_parser.parse_tabular_data(f.read(), dtypes, chunk_size=chunk_size)
+
+            assert len(self._data.keys()) == len(self._column_names), 'Unexcepted number of data columns: %s vs %s' % (len(self._data.keys()), len(self._column_names))
+
+          else:
+            self._data = np.genfromtxt(f,
                                      delimiter="\t",
                                      comments="#",
                                      converters=dict( (f"col{i}", c) for i,c in converters.items() ),
                                      dtype=dtypes,
                                      names=list(f"col{i}" for i in range(len(self._column_names))) )
 
-          # If the data contains just a single row, genfromtxt returns a 0D array! Fortunately reshaping still works.
-          # Note: In Numpy >= 1.23.0, setting ndmin for genfromtxt might also solve this but that remains untested.
-          try:
-            len(self._data)
-          except TypeError:
-            self._data = self._data.reshape((-1,))
+            # If the data contains just a single row, genfromtxt returns a 0D array! Fortunately reshaping still works.
+            # Note: In Numpy >= 1.23.0, setting ndmin for genfromtxt might also solve this but that remains untested.
+            try:
+              len(self._data)
+            except TypeError:
+              self._data = self._data.reshape((-1,))
 
-          # Parse the footer as well, if any
-          self._footer = PDataSingle._parse_footer(PDataSingle._extract_footer(f))
-          #print("\n\n"); print(footer); time.sleep(0.1)
+            assert len(self._data[0]) == len(self._column_names), 'Unexcepted number of data columns: %s vs %s' % (len(self._data[0]), len(self._column_names))
+
+            self._structured_data = self._data
 
         else:
           logging.warning(f"No data rows in tabular_data of {self._path}")
@@ -139,9 +160,6 @@ class PDataSingle():
           self._footer = {}
 
         #print("\n" + repr(self._data)); time.sleep(0.1)
-
-        if len(self._data) > 0:
-          assert len(self._data[0]) == len(self._column_names), 'Unexcepted number of data columns: %s vs %s' % (len(self._data[0]), len(self._column_names))
 
 
       ###########################################################
@@ -194,8 +212,21 @@ class PDataSingle():
     def filename(self): return self._path
     def dimension_names(self): return self._column_names
     def dimension_units(self): return self._units
-    def npoints(self): return len(self._data)
-    def data(self): return self._data
+
+    def npoints(self):
+      try: return len(self._data["col0"])
+      except ValueError: return 0 # No columns in data set
+
+    def data(self):
+      """ DEPRECATED: Return data as a structured numpy array, with column names col0, col1, etc. """
+      logging.warning("PDataSingle.data() is deprecated and will be removed in a future version. Instead, access the data by column usin data_object[<column name>]")
+      if hasattr(self, "_structured_data"): return self._structured_data
+
+      n = len(self.dimension_names())
+      src = np.transpose([ self._data[f"col{i}"] for i in range(n) ])
+      self._structured_data = np.array([ tuple(row) for row in src ], # <-- This is probably slow but let's not worry about it since this function is deprecated
+                                       dtype=[(f"col{i}", self._data[f"col{i}"].dtype) for i in range(n)])
+      return self._structured_data
 
     def comments(self):
       return self._comments
@@ -514,8 +545,7 @@ class DataView():
 
         def is_pdatasingle_like(x):
           return ( hasattr(x, "dimension_names") and hasattr(x, "dimension_units")
-                   and hasattr(x, "name") and hasattr(x, "comments")
-                   and hasattr(x, "data") )
+                   and hasattr(x, "name") and hasattr(x, "comments") )
 
         if is_pdatasingle_like(data): # data is a single Data object
           self._dimensions = data.dimension_names()

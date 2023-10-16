@@ -14,6 +14,7 @@ import numpy.random
 
 from pdata.procedural_data import run_measurement
 from pdata.analysis.dataview import DataView, PDataSingle
+from pdata.analysis.fast_parser import tabular_data_parser as tdp
 from pdata.analysis import dataexplorer
 
 def resonator_response(f, pwr, Qc=1e3, f0=6e9):
@@ -699,6 +700,195 @@ def example_tabular_data(version, file_object=False, binary_mode=False):
   if not file_object: return tabular_data
 
   return io.BytesIO(bytes(tabular_data, "utf-8")) if binary_mode else io.StringIO(tabular_data)
+
+
+class TestFastParser(unittest.TestCase):
+
+  def get_single_col_single_val(self, cols):
+    self.assertEqual(len(cols.keys()), 1)
+    self.assertEqual(len(cols["col0"]), 1)
+    return cols["col0"][0]
+
+  def assert_float_equality(self, float0, float1):
+    ma = np.abs([ float0, float1 ]).max()
+    mi = np.abs([ float0, float1 ]).min()
+
+    if np.isnan(float0) or np.isnan(float1):
+      self.assertEqual(np.isnan(float0), np.isnan(float1))
+    elif not (np.isfinite(float0) and np.isfinite(float1)):
+      self.assertEqual(np.isfinite(float0), np.isfinite(float1))
+      self.assertEqual(float0 > 0, float1 > 0)
+    elif mi <= np.finfo(float).tiny: # At least one number is near zero
+      self.assertTrue(ma <= np.finfo(float).tiny) # The other one should be near zero too
+    else: # "normal" case --> check for difference in percent
+      self.assertTrue(np.abs(float1/float0 - 1) < 100*np.finfo(float).eps)
+
+  def assert_complex_equality(self, compl0, real, imag):
+    self.assert_float_equality(compl0.real, real)
+    self.assert_float_equality(compl0.imag, imag)
+
+  def test_int_parsing(self):
+    self.assertEqual(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"314\n", dtypes=[int]) ),
+                               314)
+    self.assertEqual(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"-314\n", dtypes=[int]) ),
+                               -314)
+    self.assertEqual(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"-1\n", dtypes=[int]) ),
+                               -1)
+    self.assertEqual(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"0\n", dtypes=[int]) ),
+                               0)
+    self.assertEqual(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"1\n", dtypes=[int]) ),
+                               1)
+    self.assertEqual(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"314159265358979323\n", dtypes=[int]) ),
+                               314159265358979323)
+    self.assertEqual(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"-314159265358979323\n", dtypes=[int]) ),
+                               -314159265358979323)
+
+  def test_float_parsing(self):
+    # Standard cases
+    self.assert_float_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"3.14159265359e0\n", dtypes=[float]) ),
+                               3.14159265359)
+    self.assert_float_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"3.14159265359\n", dtypes=[float]) ),
+                               3.14159265359)
+    self.assert_float_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"6.93147180560e-1\n", dtypes=[float]) ),
+                               6.93147180560e-1)
+    self.assert_float_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"6.93147180560e-30\n", dtypes=[float]) ),
+                               6.93147180560e-30)
+    self.assert_float_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"6.93147180560e30\n", dtypes=[float]) ),
+                               6.93147180560e30)
+
+    # Integers
+    self.assert_float_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"314\n", dtypes=[float]) ),
+                               314.)
+    self.assert_float_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"314e0\n", dtypes=[float]) ),
+                               314.)
+
+    # Zeros
+    self.assert_float_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"0.0\n", dtypes=[float]) ),
+                               0.)
+    self.assert_float_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"-0.0\n", dtypes=[float]) ),
+                               -0.)
+    self.assert_float_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"0\n", dtypes=[float]) ),
+                               0.)
+
+    self.assert_float_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"-0\n", dtypes=[float]) ),
+                               -0.)
+
+    # More sig. figs than double precision can hold (~16)
+    self.assert_float_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"3.1415926535897932384626433e0\n", dtypes=[float]) ),
+                               3.1415926535897932384626433)
+
+    # NaN's, inf's
+    self.assert_float_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"nan\n", dtypes=[float]) ),
+                               np.nan)
+    self.assert_float_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"NAN\n", dtypes=[float]) ),
+                               np.nan)
+    self.assert_float_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"NaN\n", dtypes=[float]) ),
+                               np.nan)
+    self.assert_float_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"inf\n", dtypes=[float]) ),
+                               np.inf)
+    self.assert_float_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"INF\n", dtypes=[float]) ),
+                               np.inf)
+    self.assert_float_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"-inf\n", dtypes=[float]) ),
+                               -np.inf)
+
+  def test_complex_parsing(self):
+    # Standard cases
+    self.assert_complex_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"3.14159265359e0+6.93147180560e-1j\n", dtypes=[complex]) ),
+                               3.14159265359, 6.93147180560e-1)
+    self.assert_complex_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"3.14159265359e0-6.93147180560e-1j\n", dtypes=[complex]) ),
+                               3.14159265359, -6.93147180560e-1)
+    self.assert_complex_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"-3.14159265359e0-6.93147180560e-1j\n", dtypes=[complex]) ),
+                               -3.14159265359, -6.93147180560e-1)
+    self.assert_complex_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"-3.14159265359e0+6.93147180560e-1j\n", dtypes=[complex]) ),
+                               -3.14159265359, 6.93147180560e-1)
+
+    self.assert_complex_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"3.14159265359e0+123j\n", dtypes=[complex]) ),
+                               3.14159265359, 123.)
+
+    # Implicitly zero real or imag part
+    self.assert_complex_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"3.14159265359e0\n", dtypes=[complex]) ),
+                               3.14159265359, 0)
+    self.assert_complex_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"3.14159265359e0j\n", dtypes=[complex]) ),
+                               0., 3.14159265359)
+
+    # NaN's, inf's
+    self.assert_complex_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"nan-6.93147180560e-1j\n", dtypes=[complex]) ),
+                               np.nan, -6.93147180560e-1)
+    self.assert_complex_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"3.14159265359e0+nanj\n", dtypes=[complex]) ),
+                               3.14159265359, np.nan)
+    self.assert_complex_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"nan+nanj\n", dtypes=[complex]) ),
+                               np.nan, np.nan)
+
+    self.assert_complex_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"inf-6.93147180560e-1j\n", dtypes=[complex]) ),
+                               np.inf, -6.93147180560e-1)
+    self.assert_complex_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"3.14159265359e0+infj\n", dtypes=[complex]) ),
+                               3.14159265359, np.inf)
+    self.assert_complex_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"inf+infj\n", dtypes=[complex]) ),
+                               np.inf, np.inf)
+    self.assert_complex_equality(self.get_single_col_single_val(
+      tdp.parse_tabular_data(b"-inf-infj\n", dtypes=[complex]) ),
+                               -np.inf, -np.inf)
+
+  def test_multiple_cols_and_rows(self):
+    nrows = 10000
+    random_values = np.random.random((nrows,4))
+    random_values[:,1] *= 8
+    random_values[:,2] *= 64
+    random_values[:,3] *= 512
+
+    buf = io.BytesIO()
+
+    buf.write(b"\n\n# Comment row\n# Another comment row\n\n\n\n")
+    for i in range(nrows): buf.write(b"%.15e\t%.15e\t%.15e\t%.15e\n" % tuple(random_values[i,:]))
+    buf.write(b"\n\n# Comment row\n# Another comment row\n\n\n\n")
+
+    # Now parse the random data. Interpret one of the columns as complex.
+    buf.seek(0)
+    parsed_vals = tdp.parse_tabular_data(buf.read(), dtypes=[float, float, complex, float])
+
+    for col in [0,1,3]:
+      self.assertTrue(np.abs(parsed_vals[f"col{col}"]/random_values[:,col] - 1).max() < 100*np.finfo(float).eps)
+
+    self.assertTrue(np.abs(parsed_vals[f"col2"].real/random_values[:,2] - 1).max() < 100*np.finfo(float).eps)
+    self.assertTrue(np.abs(parsed_vals[f"col2"].imag).max() < 100*np.finfo(float).eps)
 
 if __name__ == '__main__':
   unittest.main(exit=False)
