@@ -150,7 +150,7 @@ class PDataSingle():
 
       # Parse main data file (possibly compressed)
       if os.path.exists(os.path.join(path, "tabular_data.dat")):
-        with open(os.path.join(path, "tabular_data.dat"), 'r') as f:
+        with open(os.path.join(path, "tabular_data.dat"), 'rb') as f:
           parse_tabular_data(f)
 
       elif os.path.exists(os.path.join(path, "tabular_data.dat.gz")):

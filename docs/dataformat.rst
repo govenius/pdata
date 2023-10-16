@@ -35,7 +35,7 @@ tabular_data.dat
 ++++++++++++++++
     
 Data table with rows added using :code:`add_points`, and columns
-defined as arguments of :code:`run_measurement`. Only valid utf-8
+defined as arguments of :code:`run_measurement`. Only ASCII
 characters are allowed, and new lines are encoded as :code:`\n`.
 
 Any row starting with :code:`#` is a comment row. A row is considered
@@ -45,8 +45,18 @@ white space. All characters except :code:`\n` are allowed.
 All non-empty non-comment rows are data rows. Each data row contains a
 single data point as a tab-separated (:code:`\t`) list of values, one
 value per column. The tab-separated values can contain any character
-except :code:`#`, :code:`\t`, or :code:`\n`. (:code:`add_points` will
-automatically replace these characters with spaces.)
+except :code:`#`, :code:`\t`, or :code:`\n`. :code:`add_points` will
+automatically replace these characters with spaces.
+
+Numerical values must not include extra whitespace at the beginning or
+end. Numerical values must not contain a leading plus
+sign. Floating-point numbers must be in the locale-independent format
+expected by the C++17 from_chars function. In particular, use a period
+(:code:`.`) as the decimal separator and no thousands separator.
+
+Complex numbers must be formatted as <float0>+<float1>j, or
+<float0>-<|float1|>j if float1 is negative. Both real and imaginary
+parts must be present.
 
 The last non-empty comment row contains the column names and units as
 a tab-separated (:code:`\t`) list of strings. Each string is of the
