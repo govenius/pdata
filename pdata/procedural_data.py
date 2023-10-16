@@ -25,7 +25,7 @@ import pdata.jupyter_helpers
 
 # Version number of the data format written to disk, following Semantic Versioning (https://semver.org/).
 # This version number should increase much more slowly than the pdata package/release versions.
-ondisk_format_version = (1, 0, 0)
+ondisk_format_version = (1, 1, 0)
 
 @contextlib.contextmanager
 def run_measurement(get_snapshot,
@@ -241,6 +241,7 @@ class Measurement():
 
     footer =  "#\n"
     footer += "# Measurement ended at " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f\n")
+    footer += f"# Number of data rows: {self._npoints_total}\n"
     footer += f"# Snapshot diffs preceding rows (0-based index): {','.join(map(str, self._snapshot_diff_rows))}\n"
     try:     self._dat_file.write(footer)
     finally: self._dat_file.flush()

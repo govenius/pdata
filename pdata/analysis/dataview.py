@@ -439,6 +439,10 @@ class PDataSingle():
         except:
           logging.exception(f"Failed to parse measurement end time '{m.group(1)}' into a datetime object.")
 
+      m = re.search(r'(?m)^\s*Number of data rows:\s*(\d+)$', raw_footer)
+      if m!=None and len(m.groups()) == 1:
+        r["number_of_data_rows"] = int(m.group(1))
+
       return r
 
 

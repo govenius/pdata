@@ -91,6 +91,11 @@ measurement started (ended), encoded as :code:`# Measurement started
 (ended) at <timestamp>`, where timestamps has the format
 :code:`%Y-%m-%d %H:%M:%S.%f`. *New in ondisk format version 1.0.0.*
 
+The footer provides the total number of data rows, encoded as :code:`#
+Number of data rows: <total number of data rows>`. This is available
+only after the measurement has ended. *New in ondisk format version
+1.1.0.*
+
 The footer contains a list of snapshot diff rows, encoded as :code:`#
 Snapshot diffs preceding rows (0-based index): <row no>, <another row
 no>, ...`, where row numbers are defined in the same way as in the
@@ -132,6 +137,17 @@ A copy of the Jupyter notebook (.ipynb) or other measurement script
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 A copy of the main measurement script is stored if possible.
+
+
+Changelog
+---------
+
+v1.1.0 (from v1.0.0)
+++++++++++++++++++++
+
+  * Added number of data rows as metadata in footer.
+  * Clarified that only ASCII characters are allowed in tabular_data.dat.
+  * Specified better how numerical values should be formatted.
 
 
 Motivation for the chosen format
