@@ -15,3 +15,4 @@ ipywidgets
 matplotlib
 uncertainties
 xarray
+sphinx_rtd_theme
