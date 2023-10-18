@@ -136,6 +136,14 @@ class PDataSingle():
             assert len(self._data.keys()) == len(self._column_names), 'Unexcepted number of data columns: %s vs %s' % (len(self._data.keys()), len(self._column_names))
 
           else:
+
+            # In numpy arrays, arbitrary length strings should have type object instead.
+            # Also decode the byte strings.
+            for j in range(len(dtypes)):
+              if dtypes[j]==str and j not in converters.keys():
+                dtypes[j] = object
+                converters[j] = lambda x: x.decode('utf-8')
+
             self._data = np.genfromtxt(f,
                                      delimiter="\t",
                                      comments="#",
@@ -183,7 +191,7 @@ class PDataSingle():
         other_dat_files = [ pp for pp in os.scandir(path) if pp.name.endswith(".dat") ]
         if len(other_dat_files) == 0: assert False, f'No .dat file found in {os.path.abspath(path)}'
         logging.info(f"No tabular_data.dat(.gz) found in {path}. Using {other_dat_files[0].name} instead.")
-        with open(other_dat_files[0].path, 'r') as f:
+        with open(other_dat_files[0].path, 'rb') as f:
           parse_tabular_data(f)
 
       # Parse initial snapshot
@@ -329,7 +337,7 @@ class PDataSingle():
         except ValueError:
           pass # Not a float, int, or similar number
 
-        # Otherwise parse this column as str
+        # Otherwise parse this column as strings
         dtypes[i] = str
 
       return dtypes, converters
@@ -350,7 +358,7 @@ class PDataSingle():
             dtypes[i] = getattr(np, dt[len("numpy."):])
           except AttributeError:
             logging.warning(f"Column {i} dtype = {dt} seems like a numpy data type based on prefix, "
-                            f"but numpy.{dt} doesn't exist. Falling back to str.")
+                            f"but numpy.{dt} doesn't exist. Falling back to string.")
             dtypes[i] = str
         elif dt.startswith("builtins."):
           dtypes[i] = eval(dt[len("builtins."):])
@@ -364,7 +372,7 @@ class PDataSingle():
             converters[i] = lambda x: dtypes[i](x.decode('utf-8'))
         else:
           if not dt in [ "None" ]:
-            logging.warning(f"Column {i} dtype = {dt} unrecognized. Falling back to str.")
+            logging.warning(f"Column {i} dtype = {dt} unrecognized. Falling back to string.")
           dtypes[i] = str
 
       return dtypes, converters

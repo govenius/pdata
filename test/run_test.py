@@ -239,10 +239,15 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue(max(np.abs(d["frequency"][:len(expected_freqs)] / expected_freqs - 1)) < 1e-10)
     self.assertTrue(max(np.abs(d["frequency"][-len(expected_freqs):] / expected_freqs - 1)) < 1e-10)
 
-    # Check "col with strings": [ alphabet[i%10::-p//10] for i in range(len(freqs)) ],
+    # Check "col with strings": [ alphabet[i%10::-p//10] for i in range(len(freqs)) ]
     self.assertTrue("col with strings" in d.dimensions())
     self.assertTrue(d.units("col with strings") == "")
-    self.assertTrue(all( alphabet[i%10::1 + i//len(expected_freqs)] for i,s in enumerate(d["col with strings"]) ))
+    self.assertTrue(d["col with strings"][0] == "adgjmpsvy")
+    self.assertTrue(d["col with strings"][1] == "behknqtwz")
+    self.assertTrue(d["col with strings"][13] == "dgjmpsvy")
+    self.assertTrue(d["col with strings"][-2] == "jklmnopqrstuvwxyz")
+    self.assertTrue(d["col with strings"][-1] == "abcdefghijklmnopqrstuvwxyz")
+    self.assertTrue(all( alphabet[(i%len(expected_freqs))%10::3 - i//len(expected_freqs)] == s for i,s in enumerate(d["col with strings"]) ))
 
     # Check handling of unicode characters
     self.assertTrue(all( x == "∰ ᴥ ❽ ⁂" for x in d["unicode check"] ))

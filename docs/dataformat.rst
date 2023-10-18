@@ -33,14 +33,18 @@ contains the following files.
 
 tabular_data.dat
 ++++++++++++++++
-    
+
 Data table with rows added using :code:`add_points`, and columns
-defined as arguments of :code:`run_measurement`. Only ASCII
-characters are allowed, and new lines are encoded as :code:`\n`.
+defined as arguments of :code:`run_measurement`.
+
+Encoding: Only bytes corresponding to valid UTF-8 code points are
+allowed. In all comment rows, including header and footer, only ASCII
+characters 0-127 are allowed. Those are also valid single-byte UTF-8
+characters. New lines are encoded as :code:`\n`.
 
 Any row starting with :code:`#` is a comment row. A row is considered
 empty if it contains only white space or the :code:`#` character and
-white space. All characters except :code:`\n` are allowed.
+white space. :code:`\n` is not allowed.
 
 All non-empty non-comment rows are data rows. Each data row contains a
 single data point as a tab-separated (:code:`\t`) list of values, one
@@ -146,7 +150,7 @@ v1.1.0 (from v1.0.0)
 ++++++++++++++++++++
 
   * Added number of data rows as metadata in footer.
-  * Clarified that only ASCII characters are allowed in tabular_data.dat.
+  * Specified that only ASCII characters 0...127 are allowed in comment rows in tabular_data.dat.
   * Specified better how numerical values should be formatted.
 
 
