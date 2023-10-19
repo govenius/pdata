@@ -126,7 +126,8 @@ class PDataSingle():
 
           if all(dt in [ float, np.float64, np.float32, np.float16,
                          int, np.int64, np.int32, np.int16, np.int8, np.intc,
-                         complex, np.complex128, np.complex64, np.cdouble, np.cfloat ] for dt in dtypes):
+                         complex, np.complex128, np.complex64, np.cdouble, np.cfloat,
+                         str ] for dt in dtypes):
 
             try: chunk_size = max(2, self._footer["number_of_data_rows"])
             except KeyError: chunk_size = 10000

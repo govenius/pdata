@@ -47,7 +47,7 @@ from libc.stdint cimport uint8_t
 from libcpp.vector cimport vector
 
 cdef enum ColumnType:
-  double_col, longlong_col, complex_col #, str_col
+  double_col, longlong_col, complex_col, char_col
 
 cdef struct ColumnSpec:
   ColumnType col_type
@@ -98,8 +98,8 @@ cdef inline from_chars_result parse_longlong(const char* p, long long* outInt) n
 
   return from_chars_result(p, getSuccessErrc())
 
-cdef inline from_chars_result parse_single_value(const char* p, const char* end_of_buffer,
-                                           ColumnSpec col_spec, size_t row):
+cdef inline from_chars_result parse_single_value(const char* p, const char* start_of_block, const char* end_of_block,
+                                                 ColumnSpec col_spec, size_t row):
   cdef double* double_buf
   cdef long long* longlong_buf
 
@@ -112,7 +112,7 @@ cdef inline from_chars_result parse_single_value(const char* p, const char* end_
 
   if col_spec.col_type == ColumnType.double_col:
     double_buf = <double*> (col_spec.output_buffer)
-    return from_chars(p, end_of_buffer, double_buf[row])
+    return from_chars(p, end_of_block, double_buf[row])
 
   elif col_spec.col_type == ColumnType.longlong_col:
     longlong_buf = <long long*> (col_spec.output_buffer)
@@ -122,7 +122,7 @@ cdef inline from_chars_result parse_single_value(const char* p, const char* end_
     double_buf = <double*> (col_spec.output_buffer)
 
     # Parse (presumably) real part
-    r = from_chars(p, end_of_buffer, double_buf[2*row])
+    r = from_chars(p, end_of_block, double_buf[2*row])
     if r.ec != getSuccessErrc(): return r
 
     # Special cases:
@@ -137,18 +137,27 @@ cdef inline from_chars_result parse_single_value(const char* p, const char* end_
 
     # Parse imaginary part
     if r.ptr[0]==CHAR_PLUS: r.ptr += 1 # skip leading +
-    r = from_chars(r.ptr, end_of_buffer, double_buf[2*row + 1])
+    r = from_chars(r.ptr, end_of_block, double_buf[2*row + 1])
     if r.ec != getSuccessErrc() or r.ptr[0] != CHAR_j: return r # Expected j at the end of a complex number
     r.ptr += 1 # Skip j
 
     return r
+
+  elif col_spec.col_type == ColumnType.char_col:
+    longlong_buf = <long long*> (col_spec.output_buffer)
+
+    longlong_buf[2*row] = p-start_of_block # index of start of value, relative to input block
+    while p<end_of_block and p[0]!=CHAR_NEWLINE and p[0]!=CHAR_TAB: p += 1
+    longlong_buf[2*row+1] = p-start_of_block # index of end of string, relative to input block
+
+    return from_chars_result(p, getSuccessErrc())
 
 cdef from_chars_result parse_up_to_max_rows(bytes block, size_t max_rows, const vector[ColumnSpec] col_specs, size_t &outNrows, ptrdiff_t &parsed_bytes):
   """ Parse at most max_rows data rows from block. Returns the number of
       processed bytes. Number of parsed rows is stored in outNrows. """
   cdef size_t L = len(block)
   cdef const char* start = block
-  cdef const char* end_of_buffer = start+L
+  cdef const char* end_of_block = start+L
   cdef size_t row = 0
   cdef size_t col
   cdef size_t ncols = col_specs.size()
@@ -161,25 +170,25 @@ cdef from_chars_result parse_up_to_max_rows(bytes block, size_t max_rows, const 
 
   cdef from_chars_result r = from_chars_result(start, success)
 
-  while r.ptr < end_of_buffer and row < max_rows:
+  while r.ptr < end_of_block and row < max_rows:
 
     if r.ptr[0] == CHAR_NEWLINE: # skip empty lines
       r.ptr += 1
       continue
 
     if r.ptr[0] == CHAR_HASH: # skip comment lines
-      while r.ptr < end_of_buffer and r.ptr[0] != CHAR_NEWLINE: r.ptr += 1
+      while r.ptr < end_of_block and r.ptr[0] != CHAR_NEWLINE: r.ptr += 1
       continue
 
     # Parse all but last column
     for col in range(ncols-1):
-      r = parse_single_value(r.ptr, end_of_buffer, col_specs[col], row)
+      r = parse_single_value(r.ptr, start, end_of_block, col_specs[col], row)
       if r.ec != success: return r
       if r.ptr[0] != CHAR_TAB: return from_chars_result(r.ptr, errc.protocol_error) # Expected a tab as column separator
       r.ptr += 1
 
     # Parse last column
-    r = parse_single_value(r.ptr, end_of_buffer, col_specs[ncols-1], row)
+    r = parse_single_value(r.ptr, start, end_of_block, col_specs[ncols-1], row)
     if r.ec != success: return r
     if r.ptr[0] != CHAR_NEWLINE: return from_chars_result(r.ptr, errc.protocol_not_supported) # Expected a new line to indicate the end of a row
     r.ptr += 1
@@ -219,7 +228,7 @@ def parse_tabular_data(s, dtypes, chunk_size=1000000):
     if dtypes[i] in [ np.int64, np.int32, np.int16, np.int8, np.intc ]: dtypes[i] = int
     if dtypes[i] in [ np.complex128, np.complex64, np.cdouble, np.cfloat ]: dtypes[i] = complex
 
-  assert all(dt in [ float, int, complex ] for dt in dtypes ), f"One or more unsupported datatypes: {dtypes}"
+  assert all(dt in [ float, int, complex, str ] for dt in dtypes ), f"One or more unsupported datatypes: {dtypes}"
 
   # Parse first chunk
   parsed_bytes, data = parse_up_to_chunk_size(s, dtypes, chunk_size)
@@ -247,8 +256,8 @@ def parse_tabular_data(s, dtypes, chunk_size=1000000):
 def parse_up_to_chunk_size(s, dtypes, chunk_size):
 
   # Allocate output buffers
-  output_buffers = [ np.empty(chunk_size*(2 if dtp==complex else 1),
-                              dtype={float: np.double, int: np.longlong, complex: np.double}[dtp])
+  output_buffers = [ np.empty(chunk_size*(2 if dtp==complex or dtp==str else 1),
+                              dtype={float: np.double, int: np.longlong, complex: np.double, str:np.intp}[dtp])
                      for dtp in dtypes ]
 
   cdef vector[ColumnSpec] col_specs
@@ -270,6 +279,10 @@ def parse_up_to_chunk_size(s, dtypes, chunk_size):
       col_specs.push_back(
         ColumnSpec(ColumnType.longlong_col, &(getLonglongView(np_buf)[0]))
         )
+    elif dt==str:
+      col_specs.push_back(
+        ColumnSpec(ColumnType.char_col, &(getLonglongView(np_buf)[0]))
+        )
 
   cdef size_t n_parsed_rows = 0
   cdef ptrdiff_t parsed_bytes = 0
@@ -283,10 +296,19 @@ def parse_up_to_chunk_size(s, dtypes, chunk_size):
       print(f"Parsing error near character {parsed_bytes}: {s[parsed_bytes:min(len(s), parsed_bytes+30)]}")
     assert False, (f"Got error code {error_code} from parse_up_to_max_rows()")
 
-  # Reinterpret complex numbers, which are parsed above as two doubles
+  # Postprocess certain dtypes
   for j in range(len(output_buffers)):
     if dtypes[j] == complex:
+      # Reinterpret complex numbers, which are parsed above as two doubles
       output_buffers[j] = output_buffers[j][:2*n_parsed_rows].view(np.cdouble)
+
+    if dtypes[j] == str:
+      # Copy strings to new Python str objects. They are parsed above as
+      # start and end pointers, within the original input string s.
+      b = output_buffers[j]
+      output_buffers[j] = np.array([
+          s[b[2*k]:b[2*k+1]].decode('utf-8')
+        for k in range(n_parsed_rows)], dtype=object)
 
   # output_buffers now contain the parsed values.
   # Strip the uninitialized rows beyond n_parsed_rows.
