@@ -71,6 +71,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
                          columns = [("frequency", "Hz"),
                                     "S21",
                                     "col with strings",
+                                    ("integer column", "apples", str, np.int64),
                                     ("col name +with_-=special/symbols*%", "-&+=%*&/")],
                          name='power-sweep',
                          data_base_dir=cls._data_root) as m:
@@ -81,7 +82,8 @@ class TestSavingAndAnalysis(unittest.TestCase):
       for p in [-30, -20, -10]:
         VNA_instrument._power = p  # <-- this new value gets automatically stored in the data since its in the snapshot
         m.add_points({'frequency': freqs, 'S21': VNA_instrument(),
-                      "col with strings": [ alphabet[i%10::-p//10] for i in range(len(freqs)) ],
+                      'col with strings': [ alphabet[i%10::-p//10] for i in range(len(freqs)) ],
+                      'integer column': [ i*p for i in range(len(freqs)) ],
                       'col name +with_-=special/symbols*%': np.random.randn(len(freqs))})
 
     time.sleep(0.5)
@@ -248,6 +250,15 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue(d["col with strings"][-2] == "jklmnopqrstuvwxyz")
     self.assertTrue(d["col with strings"][-1] == "abcdefghijklmnopqrstuvwxyz")
     self.assertTrue(all( alphabet[(i%len(expected_freqs))%10::3 - i//len(expected_freqs)] == s for i,s in enumerate(d["col with strings"]) ))
+
+    # Check integer column: [ i*p for i in range(len(freqs)) ]
+    self.assertTrue("integer column" in d.dimensions())
+    self.assertTrue(d.units("integer column") == "apples")
+    self.assertTrue(d["integer column"].dtype in [ int, np.int64, np.int32 ])
+    self.assertTrue(d["integer column"][0] == 0)
+    self.assertTrue(d["integer column"][1] == -30)
+    self.assertTrue(d["integer column"][2] == -60)
+    self.assertTrue(all( (i%len(expected_freqs)) * (-30 + 10*(i//len(expected_freqs))) == v for i,v in enumerate(d["integer column"]) ))
 
     # Check handling of unicode characters
     self.assertTrue(all( x == "∰ ᴥ ❽ ⁂" for x in d["unicode check"] ))
