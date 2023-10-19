@@ -8,3 +8,5 @@ build
 dist
 *.egg-info
 Pipfile.lock
+*.so
+tabular_data_parser.html

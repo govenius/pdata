@@ -23,7 +23,9 @@ import pytz
 from dateutil import tz
 from collections import OrderedDict
 
-from pdata.analysis.fast_parser import tabular_data_parser
+FAST_PARSER_ENABLED = True
+try: from pdata.analysis.fast_parser import tabular_data_parser
+except ImportError: FAST_PARSER_ENABLED = False
 
 UNIX_EPOCH = datetime.datetime(1970, 1, 1, 0, 0, tzinfo = pytz.utc)
 
@@ -124,10 +126,11 @@ class PDataSingle():
           # allowed in numpy structured arrays.
           f.seek(0)
 
-          if all(dt in [ float, np.float64, np.float32, np.float16,
-                         int, np.int64, np.int32, np.int16, np.int8, np.intc,
-                         complex, np.complex128, np.complex64, np.cdouble, np.cfloat,
-                         str ] for dt in dtypes):
+          if FAST_PARSER_ENABLED and all(dt in [
+              float, np.float64, np.float32, np.float16,
+              int, np.int64, np.int32, np.int16, np.int8, np.intc,
+              complex, np.complex128, np.complex64, np.cdouble, np.cfloat,
+              str ] for dt in dtypes):
 
             try: chunk_size = max(2, self._footer["number_of_data_rows"])
             except KeyError: chunk_size = 10000
