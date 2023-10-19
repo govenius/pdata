@@ -50,7 +50,8 @@ All non-empty non-comment rows are data rows. Each data row contains a
 single data point as a tab-separated (:code:`\t`) list of values, one
 value per column. The tab-separated values can contain any character
 except :code:`#`, :code:`\t`, or :code:`\n`. :code:`add_points` will
-automatically replace these characters with spaces.
+automatically replace these characters with spaces. Each data row,
+including the last one, must end in :code:`\n`.
 
 Numerical values must not include extra whitespace at the beginning or
 end. Numerical values must not contain a leading plus
@@ -152,6 +153,7 @@ v1.1.0 (from v1.0.0)
   * Added number of data rows as metadata in footer.
   * Specified that only ASCII characters 0...127 are allowed in comment rows in tabular_data.dat.
   * Specified better how numerical values should be formatted.
+  * Specified that the last data row must also end in a new line character.
 
 
 Motivation for the chosen format
