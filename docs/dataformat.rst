@@ -40,18 +40,18 @@ defined as arguments of :code:`run_measurement`.
 Encoding: Only bytes corresponding to valid UTF-8 code points are
 allowed. In all comment rows, including header and footer, only ASCII
 characters 0-127 are allowed. Those are also valid single-byte UTF-8
-characters. New lines are encoded as :code:`\n`.
+characters. New lines are encoded as :code:`\\n`.
 
 Any row starting with :code:`#` is a comment row. A row is considered
 empty if it contains only white space or the :code:`#` character and
-white space. :code:`\n` is not allowed.
+white space. :code:`\\n` is not allowed.
 
 All non-empty non-comment rows are data rows. Each data row contains a
-single data point as a tab-separated (:code:`\t`) list of values, one
+single data point as a tab-separated (:code:`\\t`) list of values, one
 value per column. The tab-separated values can contain any character
-except :code:`#`, :code:`\t`, or :code:`\n`. :code:`add_points` will
+except :code:`#`, :code:`\\t`, or :code:`\\n`. :code:`add_points` will
 automatically replace these characters with spaces. Each data row,
-including the last one, must end in :code:`\n`.
+including the last one, must end in :code:`\\n`.
 
 Numerical values must not include extra whitespace at the beginning or
 end. Numerical values must not contain a leading plus
@@ -64,10 +64,10 @@ Complex numbers must be formatted as :code:`<float0>+<float1>j`, or
 and imaginary parts must be present.
 
 The last non-empty comment row contains the column names and units as
-a tab-separated (:code:`\t`) list of strings. Each string is of the
+a tab-separated (:code:`\\t`) list of strings. Each string is of the
 format (:code:`<column name> (<units>)`), where the column names
-(units) must match the regular expression :code:`[\w\d\s\-+%=/*&]+`
-(:code:`[\w\d\s\-+%=/*&]*`).
+(units) must match the regular expression :code:`[\\w\\d\\s\\-+%=/*&]+`
+(:code:`[\\w\\d\\s\\-+%=/*&]*`).
 
 All comment rows preceding the first data row are called the
 header. All comment rows after the last data row are defined as the
@@ -84,7 +84,7 @@ numpy packages as well as the version of Python, encoded as
 format version 1.0.0.*
 
 The header contains the column data types, encoded as a tab-separated
-(:code:`\t`) list of strings. Each string has the format
+(:code:`\\t`) list of strings. Each string has the format
 :code:`<module>.<dtype>`, where :code:`<module>` is typically either
 :code:`<numpy>` or :code:`<builtins>`. These help
 :code:`pdata.analysis.dataview` parse common dtypes (float, int,
