@@ -201,7 +201,7 @@ class Measurement():
     self._copy_jupyter_notebook()
     self.write_snapshot()
 
-    self._dat_file = open(os.path.join(self._target_dir, 'tabular_data.dat'), 'w')
+    self._dat_file = open(os.path.join(self._target_dir, 'tabular_data.dat'), 'w', newline='\n')
 
     self._start_time = datetime.datetime.now()
 
