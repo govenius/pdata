@@ -449,7 +449,7 @@ class Measurement():
   @staticmethod
   def _dump_json(snap, fhandle):
     json.dump(snap, fhandle, sort_keys=False,
-              indent=2, ensure_ascii=False, cls=NumpyJSONEncoder)
+              indent=2, ensure_ascii=True, cls=NumpyJSONEncoder)
 
   @staticmethod
   def _path_friendly_str(s):
