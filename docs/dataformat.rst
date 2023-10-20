@@ -40,7 +40,10 @@ defined as arguments of :code:`run_measurement`.
 Encoding: Only bytes corresponding to valid UTF-8 code points are
 allowed. In all comment rows, including header and footer, only ASCII
 characters 0-127 are allowed. Those are also valid single-byte UTF-8
-characters. New lines are encoded as :code:`\\n`.
+characters.
+
+New lines are encoded as :code:`\\n`. However, parsers must also
+tolerate :code:`\\r\\n`, since they can be present in legacy datasets.
 
 Any row starting with :code:`#` is a comment row. A row is considered
 empty if it contains only white space or the :code:`#` character and

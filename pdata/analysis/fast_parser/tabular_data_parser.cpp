@@ -1177,14 +1177,24 @@ static CYTHON_INLINE float __PYX_NAN() {
 #define __PYX_HAVE__tabular_data_parser
 #define __PYX_HAVE_API__tabular_data_parser
 /* Early includes */
+#include <string.h>
+#include <string>
+#include "ios"
+#include "new"
+#include "stdexcept"
+#include "typeinfo"
 #include <system_error>
 
     // Don't know how else to invoke the default constructor for an enum class from Cython,
     // so use this verbatim-docstring-include-trick to define a function that does it.
     std::errc getSuccessErrc() { return std::errc(); }
+
+    // Also define a way of getting a string representation of an
+    // error (even though this wouldn't be too hard with Cython syntax
+    // either).
+    std::string getErrcMessage(std::errc e) { return make_error_code(e).message(); }
     
 #include "fast_float.h"
-#include <string.h>
 #include <stdio.h>
 
     /* Using NumPy API declarations from "numpy/__init__.cython-30.pxd" */
@@ -1195,10 +1205,6 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include "numpy/arrayscalars.h"
 #include "numpy/ufuncobject.h"
 #include <stdint.h>
-#include "ios"
-#include "new"
-#include "stdexcept"
-#include "typeinfo"
 #include <vector>
 #include "pythread.h"
 #include <stdlib.h>
@@ -1908,7 +1914,7 @@ typedef npy_clongdouble __pyx_t_5numpy_clongdouble_t;
 typedef npy_cdouble __pyx_t_5numpy_complex_t;
 struct __pyx_t_19tabular_data_parser_ColumnSpec;
 
-/* "tabular_data_parser.pyx":49
+/* "tabular_data_parser.pyx":57
  * from libcpp.vector cimport vector
  * 
  * cdef enum ColumnType:             # <<<<<<<<<<<<<<
@@ -1922,7 +1928,7 @@ enum __pyx_t_19tabular_data_parser_ColumnType {
   __pyx_e_19tabular_data_parser_char_col
 };
 
-/* "tabular_data_parser.pyx":52
+/* "tabular_data_parser.pyx":60
  *   double_col, longlong_col, complex_col, char_col
  * 
  * cdef struct ColumnSpec:             # <<<<<<<<<<<<<<
@@ -1934,7 +1940,7 @@ struct __pyx_t_19tabular_data_parser_ColumnSpec {
   void *output_buffer;
 };
 
-/* "tabular_data_parser.pyx":212
+/* "tabular_data_parser.pyx":229
  *   return v
  * 
  * def parse_tabular_data(s, dtypes, chunk_size=1000000):             # <<<<<<<<<<<<<<
@@ -1947,7 +1953,7 @@ struct __pyx_obj_19tabular_data_parser___pyx_scope_struct__parse_tabular_data {
 };
 
 
-/* "tabular_data_parser.pyx":231
+/* "tabular_data_parser.pyx":248
  *     if dtypes[i] in [ np.complex128, np.complex64, np.cdouble, np.cfloat ]: dtypes[i] = complex
  * 
  *   assert all(dt in [ float, int, complex, str ] for dt in dtypes ), f"One or more unsupported datatypes: {dtypes}"             # <<<<<<<<<<<<<<
@@ -1961,7 +1967,7 @@ struct __pyx_obj_19tabular_data_parser___pyx_scope_struct_1_genexpr {
 };
 
 
-/* "tabular_data_parser.pyx":252
+/* "tabular_data_parser.pyx":269
  * 
  *   # For each column, concatenate values from all chunks into a single array
  *   return dict( (col,             # <<<<<<<<<<<<<<
@@ -1977,7 +1983,7 @@ struct __pyx_obj_19tabular_data_parser___pyx_scope_struct_2_genexpr {
 };
 
 
-/* "tabular_data_parser.pyx":256
+/* "tabular_data_parser.pyx":273
  *                 ) for col in data.keys() )
  * 
  * def parse_up_to_chunk_size(s, dtypes, chunk_size):             # <<<<<<<<<<<<<<
@@ -1990,7 +1996,7 @@ struct __pyx_obj_19tabular_data_parser___pyx_scope_struct_3_parse_up_to_chunk_si
 };
 
 
-/* "tabular_data_parser.pyx":316
+/* "tabular_data_parser.pyx":339
  *   # Strip the uninitialized rows beyond n_parsed_rows.
  *   # Give the columns names "col<i>", as expected by PDataSingle/DataView.
  *   return parsed_bytes, dict( (f"col{j}", np_buf[:n_parsed_rows]) for j,np_buf in enumerate(output_buffers) )             # <<<<<<<<<<<<<<
@@ -3408,13 +3414,15 @@ static CYTHON_INLINE npy_intp *__pyx_f_5numpy_7ndarray_7strides_strides(PyArrayO
 static CYTHON_INLINE npy_intp __pyx_f_5numpy_7ndarray_4size_size(PyArrayObject *__pyx_v_self); /* proto*/
 static CYTHON_INLINE char *__pyx_f_5numpy_7ndarray_4data_data(PyArrayObject *__pyx_v_self); /* proto*/
 
+/* Module declarations from "libc.string" */
+
+/* Module declarations from "libcpp.string" */
+
 /* Module declarations from "cython.view" */
 
 /* Module declarations from "cython.dataclasses" */
 
 /* Module declarations from "cython" */
-
-/* Module declarations from "libc.string" */
 
 /* Module declarations from "libc.stdio" */
 
@@ -3450,6 +3458,11 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
 static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_max_rows(PyObject *, size_t, std::vector<struct __pyx_t_19tabular_data_parser_ColumnSpec>  const , size_t &, ptrdiff_t &); /*proto*/
 static CYTHON_INLINE __Pyx_memviewslice __pyx_f_19tabular_data_parser_getDoubleView(PyArrayObject *); /*proto*/
 static CYTHON_INLINE __Pyx_memviewslice __pyx_f_19tabular_data_parser_getLonglongView(PyArrayObject *); /*proto*/
+static CYTHON_INLINE PyObject *__pyx_convert_PyObject_string_to_py_std__in_string(std::string const &); /*proto*/
+static CYTHON_INLINE PyObject *__pyx_convert_PyUnicode_string_to_py_std__in_string(std::string const &); /*proto*/
+static CYTHON_INLINE PyObject *__pyx_convert_PyStr_string_to_py_std__in_string(std::string const &); /*proto*/
+static CYTHON_INLINE PyObject *__pyx_convert_PyBytes_string_to_py_std__in_string(std::string const &); /*proto*/
+static CYTHON_INLINE PyObject *__pyx_convert_PyByteArray_string_to_py_std__in_string(std::string const &); /*proto*/
 static int __pyx_array_allocate_buffer(struct __pyx_array_obj *); /*proto*/
 static struct __pyx_array_obj *__pyx_array_new(PyObject *, Py_ssize_t, char *, char *, char *); /*proto*/
 static PyObject *__pyx_memoryview_new(PyObject *, int, int, __Pyx_TypeInfo *); /*proto*/
@@ -3527,7 +3540,8 @@ static const char __pyx_k_ec[] = "ec";
 static const char __pyx_k_gc[] = "gc";
 static const char __pyx_k_id[] = "id";
 static const char __pyx_k_np[] = "np";
-static const char __pyx_k__27[] = "?";
+static const char __pyx_k__11[] = " (";
+static const char __pyx_k__28[] = "?";
 static const char __pyx_k_abc[] = "abc";
 static const char __pyx_k_and[] = " and ";
 static const char __pyx_k_col[] = "col";
@@ -3639,6 +3653,7 @@ static const char __pyx_k_pyx_checksum[] = "__pyx_checksum";
 static const char __pyx_k_stringsource[] = "<stringsource>";
 static const char __pyx_k_version_info[] = "version_info";
 static const char __pyx_k_class_getitem[] = "__class_getitem__";
+static const char __pyx_k_error_message[] = "error_message";
 static const char __pyx_k_n_parsed_rows[] = "n_parsed_rows";
 static const char __pyx_k_output_buffer[] = "output_buffer";
 static const char __pyx_k_reduce_cython[] = "__reduce_cython__";
@@ -3658,6 +3673,7 @@ static const char __pyx_k_asyncio_coroutines[] = "asyncio.coroutines";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_parse_tabular_data[] = "parse_tabular_data";
 static const char __pyx_k_strided_and_direct[] = "<strided and direct>";
+static const char __pyx_k_error_message_bytes[] = "error_message_bytes";
 static const char __pyx_k_tabular_data_parser[] = "tabular_data_parser";
 static const char __pyx_k_strided_and_indirect[] = "<strided and indirect>";
 static const char __pyx_k_Invalid_shape_in_axis[] = "Invalid shape in axis ";
@@ -3669,7 +3685,7 @@ static const char __pyx_k_MemoryView_of_r_at_0x_x[] = "<MemoryView of %r at 0x%x
 static const char __pyx_k_contiguous_and_indirect[] = "<contiguous and indirect>";
 static const char __pyx_k_tabular_data_parser_pyx[] = "tabular_data_parser.pyx";
 static const char __pyx_k_Dimension_d_is_not_direct[] = "Dimension %d is not direct";
-static const char __pyx_k_from_parse_up_to_max_rows[] = " from parse_up_to_max_rows()";
+static const char __pyx_k_from_parse_up_to_max_rows[] = ") from parse_up_to_max_rows()";
 static const char __pyx_k_Index_out_of_bounds_axis_d[] = "Index out of bounds (axis %d)";
 static const char __pyx_k_Step_may_not_be_zero_axis_d[] = "Step may not be zero (axis %d)";
 static const char __pyx_k_itemsize_0_for_cython_array[] = "itemsize <= 0 for cython.array";
@@ -3797,6 +3813,8 @@ typedef struct {
   #endif
   #if CYTHON_USE_MODULE_STATE
   #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
   PyTypeObject *__pyx_ptype_7cpython_4type_type;
   #if CYTHON_USE_MODULE_STATE
   #endif
@@ -3885,8 +3903,9 @@ typedef struct {
   PyObject *__pyx_kp_s_Unable_to_convert_item_to_object;
   PyObject *__pyx_n_s_ValueError;
   PyObject *__pyx_n_s_View_MemoryView;
+  PyObject *__pyx_kp_u__11;
   PyObject *__pyx_kp_u__2;
-  PyObject *__pyx_n_s__27;
+  PyObject *__pyx_n_s__28;
   PyObject *__pyx_n_s__3;
   PyObject *__pyx_kp_u__6;
   PyObject *__pyx_kp_u__7;
@@ -3936,6 +3955,8 @@ typedef struct {
   PyObject *__pyx_n_s_enumerate;
   PyObject *__pyx_n_s_error;
   PyObject *__pyx_n_s_error_code;
+  PyObject *__pyx_n_s_error_message;
+  PyObject *__pyx_n_s_error_message_bytes;
   PyObject *__pyx_n_s_flags;
   PyObject *__pyx_n_s_float16;
   PyObject *__pyx_n_s_float32;
@@ -4053,7 +4074,6 @@ typedef struct {
   PyObject *__pyx_tuple__8;
   PyObject *__pyx_tuple__9;
   PyObject *__pyx_tuple__10;
-  PyObject *__pyx_tuple__11;
   PyObject *__pyx_tuple__12;
   PyObject *__pyx_tuple__13;
   PyObject *__pyx_tuple__14;
@@ -4063,12 +4083,13 @@ typedef struct {
   PyObject *__pyx_tuple__18;
   PyObject *__pyx_tuple__19;
   PyObject *__pyx_tuple__20;
-  PyObject *__pyx_tuple__22;
-  PyObject *__pyx_tuple__24;
+  PyObject *__pyx_tuple__21;
+  PyObject *__pyx_tuple__23;
   PyObject *__pyx_tuple__25;
-  PyObject *__pyx_codeobj__21;
-  PyObject *__pyx_codeobj__23;
-  PyObject *__pyx_codeobj__26;
+  PyObject *__pyx_tuple__26;
+  PyObject *__pyx_codeobj__22;
+  PyObject *__pyx_codeobj__24;
+  PyObject *__pyx_codeobj__27;
 } __pyx_mstate;
 
 #if CYTHON_USE_MODULE_STATE
@@ -4183,8 +4204,9 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_kp_s_Unable_to_convert_item_to_object);
   Py_CLEAR(clear_module_state->__pyx_n_s_ValueError);
   Py_CLEAR(clear_module_state->__pyx_n_s_View_MemoryView);
+  Py_CLEAR(clear_module_state->__pyx_kp_u__11);
   Py_CLEAR(clear_module_state->__pyx_kp_u__2);
-  Py_CLEAR(clear_module_state->__pyx_n_s__27);
+  Py_CLEAR(clear_module_state->__pyx_n_s__28);
   Py_CLEAR(clear_module_state->__pyx_n_s__3);
   Py_CLEAR(clear_module_state->__pyx_kp_u__6);
   Py_CLEAR(clear_module_state->__pyx_kp_u__7);
@@ -4234,6 +4256,8 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_enumerate);
   Py_CLEAR(clear_module_state->__pyx_n_s_error);
   Py_CLEAR(clear_module_state->__pyx_n_s_error_code);
+  Py_CLEAR(clear_module_state->__pyx_n_s_error_message);
+  Py_CLEAR(clear_module_state->__pyx_n_s_error_message_bytes);
   Py_CLEAR(clear_module_state->__pyx_n_s_flags);
   Py_CLEAR(clear_module_state->__pyx_n_s_float16);
   Py_CLEAR(clear_module_state->__pyx_n_s_float32);
@@ -4351,7 +4375,6 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_tuple__8);
   Py_CLEAR(clear_module_state->__pyx_tuple__9);
   Py_CLEAR(clear_module_state->__pyx_tuple__10);
-  Py_CLEAR(clear_module_state->__pyx_tuple__11);
   Py_CLEAR(clear_module_state->__pyx_tuple__12);
   Py_CLEAR(clear_module_state->__pyx_tuple__13);
   Py_CLEAR(clear_module_state->__pyx_tuple__14);
@@ -4361,12 +4384,13 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_tuple__18);
   Py_CLEAR(clear_module_state->__pyx_tuple__19);
   Py_CLEAR(clear_module_state->__pyx_tuple__20);
-  Py_CLEAR(clear_module_state->__pyx_tuple__22);
-  Py_CLEAR(clear_module_state->__pyx_tuple__24);
+  Py_CLEAR(clear_module_state->__pyx_tuple__21);
+  Py_CLEAR(clear_module_state->__pyx_tuple__23);
   Py_CLEAR(clear_module_state->__pyx_tuple__25);
-  Py_CLEAR(clear_module_state->__pyx_codeobj__21);
-  Py_CLEAR(clear_module_state->__pyx_codeobj__23);
-  Py_CLEAR(clear_module_state->__pyx_codeobj__26);
+  Py_CLEAR(clear_module_state->__pyx_tuple__26);
+  Py_CLEAR(clear_module_state->__pyx_codeobj__22);
+  Py_CLEAR(clear_module_state->__pyx_codeobj__24);
+  Py_CLEAR(clear_module_state->__pyx_codeobj__27);
   return 0;
 }
 #endif
@@ -4459,8 +4483,9 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_kp_s_Unable_to_convert_item_to_object);
   Py_VISIT(traverse_module_state->__pyx_n_s_ValueError);
   Py_VISIT(traverse_module_state->__pyx_n_s_View_MemoryView);
+  Py_VISIT(traverse_module_state->__pyx_kp_u__11);
   Py_VISIT(traverse_module_state->__pyx_kp_u__2);
-  Py_VISIT(traverse_module_state->__pyx_n_s__27);
+  Py_VISIT(traverse_module_state->__pyx_n_s__28);
   Py_VISIT(traverse_module_state->__pyx_n_s__3);
   Py_VISIT(traverse_module_state->__pyx_kp_u__6);
   Py_VISIT(traverse_module_state->__pyx_kp_u__7);
@@ -4510,6 +4535,8 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_enumerate);
   Py_VISIT(traverse_module_state->__pyx_n_s_error);
   Py_VISIT(traverse_module_state->__pyx_n_s_error_code);
+  Py_VISIT(traverse_module_state->__pyx_n_s_error_message);
+  Py_VISIT(traverse_module_state->__pyx_n_s_error_message_bytes);
   Py_VISIT(traverse_module_state->__pyx_n_s_flags);
   Py_VISIT(traverse_module_state->__pyx_n_s_float16);
   Py_VISIT(traverse_module_state->__pyx_n_s_float32);
@@ -4627,7 +4654,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_tuple__8);
   Py_VISIT(traverse_module_state->__pyx_tuple__9);
   Py_VISIT(traverse_module_state->__pyx_tuple__10);
-  Py_VISIT(traverse_module_state->__pyx_tuple__11);
   Py_VISIT(traverse_module_state->__pyx_tuple__12);
   Py_VISIT(traverse_module_state->__pyx_tuple__13);
   Py_VISIT(traverse_module_state->__pyx_tuple__14);
@@ -4637,12 +4663,13 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_tuple__18);
   Py_VISIT(traverse_module_state->__pyx_tuple__19);
   Py_VISIT(traverse_module_state->__pyx_tuple__20);
-  Py_VISIT(traverse_module_state->__pyx_tuple__22);
-  Py_VISIT(traverse_module_state->__pyx_tuple__24);
+  Py_VISIT(traverse_module_state->__pyx_tuple__21);
+  Py_VISIT(traverse_module_state->__pyx_tuple__23);
   Py_VISIT(traverse_module_state->__pyx_tuple__25);
-  Py_VISIT(traverse_module_state->__pyx_codeobj__21);
-  Py_VISIT(traverse_module_state->__pyx_codeobj__23);
-  Py_VISIT(traverse_module_state->__pyx_codeobj__26);
+  Py_VISIT(traverse_module_state->__pyx_tuple__26);
+  Py_VISIT(traverse_module_state->__pyx_codeobj__22);
+  Py_VISIT(traverse_module_state->__pyx_codeobj__24);
+  Py_VISIT(traverse_module_state->__pyx_codeobj__27);
   return 0;
 }
 #endif
@@ -4670,6 +4697,8 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #endif
 #ifdef __Pyx_Coroutine_USED
 #define __pyx_CoroutineType __pyx_mstate_global->__pyx_CoroutineType
+#endif
+#if CYTHON_USE_MODULE_STATE
 #endif
 #if CYTHON_USE_MODULE_STATE
 #endif
@@ -4773,8 +4802,9 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_kp_s_Unable_to_convert_item_to_object __pyx_mstate_global->__pyx_kp_s_Unable_to_convert_item_to_object
 #define __pyx_n_s_ValueError __pyx_mstate_global->__pyx_n_s_ValueError
 #define __pyx_n_s_View_MemoryView __pyx_mstate_global->__pyx_n_s_View_MemoryView
+#define __pyx_kp_u__11 __pyx_mstate_global->__pyx_kp_u__11
 #define __pyx_kp_u__2 __pyx_mstate_global->__pyx_kp_u__2
-#define __pyx_n_s__27 __pyx_mstate_global->__pyx_n_s__27
+#define __pyx_n_s__28 __pyx_mstate_global->__pyx_n_s__28
 #define __pyx_n_s__3 __pyx_mstate_global->__pyx_n_s__3
 #define __pyx_kp_u__6 __pyx_mstate_global->__pyx_kp_u__6
 #define __pyx_kp_u__7 __pyx_mstate_global->__pyx_kp_u__7
@@ -4824,6 +4854,8 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_enumerate __pyx_mstate_global->__pyx_n_s_enumerate
 #define __pyx_n_s_error __pyx_mstate_global->__pyx_n_s_error
 #define __pyx_n_s_error_code __pyx_mstate_global->__pyx_n_s_error_code
+#define __pyx_n_s_error_message __pyx_mstate_global->__pyx_n_s_error_message
+#define __pyx_n_s_error_message_bytes __pyx_mstate_global->__pyx_n_s_error_message_bytes
 #define __pyx_n_s_flags __pyx_mstate_global->__pyx_n_s_flags
 #define __pyx_n_s_float16 __pyx_mstate_global->__pyx_n_s_float16
 #define __pyx_n_s_float32 __pyx_mstate_global->__pyx_n_s_float32
@@ -4941,7 +4973,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_tuple__8 __pyx_mstate_global->__pyx_tuple__8
 #define __pyx_tuple__9 __pyx_mstate_global->__pyx_tuple__9
 #define __pyx_tuple__10 __pyx_mstate_global->__pyx_tuple__10
-#define __pyx_tuple__11 __pyx_mstate_global->__pyx_tuple__11
 #define __pyx_tuple__12 __pyx_mstate_global->__pyx_tuple__12
 #define __pyx_tuple__13 __pyx_mstate_global->__pyx_tuple__13
 #define __pyx_tuple__14 __pyx_mstate_global->__pyx_tuple__14
@@ -4951,13 +4982,263 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_tuple__18 __pyx_mstate_global->__pyx_tuple__18
 #define __pyx_tuple__19 __pyx_mstate_global->__pyx_tuple__19
 #define __pyx_tuple__20 __pyx_mstate_global->__pyx_tuple__20
-#define __pyx_tuple__22 __pyx_mstate_global->__pyx_tuple__22
-#define __pyx_tuple__24 __pyx_mstate_global->__pyx_tuple__24
+#define __pyx_tuple__21 __pyx_mstate_global->__pyx_tuple__21
+#define __pyx_tuple__23 __pyx_mstate_global->__pyx_tuple__23
 #define __pyx_tuple__25 __pyx_mstate_global->__pyx_tuple__25
-#define __pyx_codeobj__21 __pyx_mstate_global->__pyx_codeobj__21
-#define __pyx_codeobj__23 __pyx_mstate_global->__pyx_codeobj__23
-#define __pyx_codeobj__26 __pyx_mstate_global->__pyx_codeobj__26
+#define __pyx_tuple__26 __pyx_mstate_global->__pyx_tuple__26
+#define __pyx_codeobj__22 __pyx_mstate_global->__pyx_codeobj__22
+#define __pyx_codeobj__24 __pyx_mstate_global->__pyx_codeobj__24
+#define __pyx_codeobj__27 __pyx_mstate_global->__pyx_codeobj__27
 /* #### Code section: module_code ### */
+
+/* "string.to_py":31
+ * 
+ * @cname("__pyx_convert_PyObject_string_to_py_std__in_string")
+ * cdef inline object __pyx_convert_PyObject_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
+ *     return __Pyx_PyObject_FromStringAndSize(s.data(), s.size())
+ * cdef extern from *:
+ */
+
+static CYTHON_INLINE PyObject *__pyx_convert_PyObject_string_to_py_std__in_string(std::string const &__pyx_v_s) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__pyx_convert_PyObject_string_to_py_std__in_string", 0);
+
+  /* "string.to_py":32
+ * @cname("__pyx_convert_PyObject_string_to_py_std__in_string")
+ * cdef inline object __pyx_convert_PyObject_string_to_py_std__in_string(const string& s):
+ *     return __Pyx_PyObject_FromStringAndSize(s.data(), s.size())             # <<<<<<<<<<<<<<
+ * cdef extern from *:
+ *     cdef object __Pyx_PyUnicode_FromStringAndSize(const char*, size_t)
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyObject_FromStringAndSize(__pyx_v_s.data(), __pyx_v_s.size()); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 32, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "string.to_py":31
+ * 
+ * @cname("__pyx_convert_PyObject_string_to_py_std__in_string")
+ * cdef inline object __pyx_convert_PyObject_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
+ *     return __Pyx_PyObject_FromStringAndSize(s.data(), s.size())
+ * cdef extern from *:
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("string.to_py.__pyx_convert_PyObject_string_to_py_std__in_string", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = 0;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "string.to_py":37
+ * 
+ * @cname("__pyx_convert_PyUnicode_string_to_py_std__in_string")
+ * cdef inline object __pyx_convert_PyUnicode_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
+ *     return __Pyx_PyUnicode_FromStringAndSize(s.data(), s.size())
+ * cdef extern from *:
+ */
+
+static CYTHON_INLINE PyObject *__pyx_convert_PyUnicode_string_to_py_std__in_string(std::string const &__pyx_v_s) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__pyx_convert_PyUnicode_string_to_py_std__in_string", 0);
+
+  /* "string.to_py":38
+ * @cname("__pyx_convert_PyUnicode_string_to_py_std__in_string")
+ * cdef inline object __pyx_convert_PyUnicode_string_to_py_std__in_string(const string& s):
+ *     return __Pyx_PyUnicode_FromStringAndSize(s.data(), s.size())             # <<<<<<<<<<<<<<
+ * cdef extern from *:
+ *     cdef object __Pyx_PyStr_FromStringAndSize(const char*, size_t)
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyUnicode_FromStringAndSize(__pyx_v_s.data(), __pyx_v_s.size()); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 38, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "string.to_py":37
+ * 
+ * @cname("__pyx_convert_PyUnicode_string_to_py_std__in_string")
+ * cdef inline object __pyx_convert_PyUnicode_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
+ *     return __Pyx_PyUnicode_FromStringAndSize(s.data(), s.size())
+ * cdef extern from *:
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("string.to_py.__pyx_convert_PyUnicode_string_to_py_std__in_string", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = 0;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "string.to_py":43
+ * 
+ * @cname("__pyx_convert_PyStr_string_to_py_std__in_string")
+ * cdef inline object __pyx_convert_PyStr_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
+ *     return __Pyx_PyStr_FromStringAndSize(s.data(), s.size())
+ * cdef extern from *:
+ */
+
+static CYTHON_INLINE PyObject *__pyx_convert_PyStr_string_to_py_std__in_string(std::string const &__pyx_v_s) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__pyx_convert_PyStr_string_to_py_std__in_string", 0);
+
+  /* "string.to_py":44
+ * @cname("__pyx_convert_PyStr_string_to_py_std__in_string")
+ * cdef inline object __pyx_convert_PyStr_string_to_py_std__in_string(const string& s):
+ *     return __Pyx_PyStr_FromStringAndSize(s.data(), s.size())             # <<<<<<<<<<<<<<
+ * cdef extern from *:
+ *     cdef object __Pyx_PyBytes_FromStringAndSize(const char*, size_t)
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyStr_FromStringAndSize(__pyx_v_s.data(), __pyx_v_s.size()); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 44, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "string.to_py":43
+ * 
+ * @cname("__pyx_convert_PyStr_string_to_py_std__in_string")
+ * cdef inline object __pyx_convert_PyStr_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
+ *     return __Pyx_PyStr_FromStringAndSize(s.data(), s.size())
+ * cdef extern from *:
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("string.to_py.__pyx_convert_PyStr_string_to_py_std__in_string", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = 0;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "string.to_py":49
+ * 
+ * @cname("__pyx_convert_PyBytes_string_to_py_std__in_string")
+ * cdef inline object __pyx_convert_PyBytes_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
+ *     return __Pyx_PyBytes_FromStringAndSize(s.data(), s.size())
+ * cdef extern from *:
+ */
+
+static CYTHON_INLINE PyObject *__pyx_convert_PyBytes_string_to_py_std__in_string(std::string const &__pyx_v_s) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__pyx_convert_PyBytes_string_to_py_std__in_string", 0);
+
+  /* "string.to_py":50
+ * @cname("__pyx_convert_PyBytes_string_to_py_std__in_string")
+ * cdef inline object __pyx_convert_PyBytes_string_to_py_std__in_string(const string& s):
+ *     return __Pyx_PyBytes_FromStringAndSize(s.data(), s.size())             # <<<<<<<<<<<<<<
+ * cdef extern from *:
+ *     cdef object __Pyx_PyByteArray_FromStringAndSize(const char*, size_t)
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyBytes_FromStringAndSize(__pyx_v_s.data(), __pyx_v_s.size()); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 50, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "string.to_py":49
+ * 
+ * @cname("__pyx_convert_PyBytes_string_to_py_std__in_string")
+ * cdef inline object __pyx_convert_PyBytes_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
+ *     return __Pyx_PyBytes_FromStringAndSize(s.data(), s.size())
+ * cdef extern from *:
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("string.to_py.__pyx_convert_PyBytes_string_to_py_std__in_string", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = 0;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "string.to_py":55
+ * 
+ * @cname("__pyx_convert_PyByteArray_string_to_py_std__in_string")
+ * cdef inline object __pyx_convert_PyByteArray_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
+ *     return __Pyx_PyByteArray_FromStringAndSize(s.data(), s.size())
+ * 
+ */
+
+static CYTHON_INLINE PyObject *__pyx_convert_PyByteArray_string_to_py_std__in_string(std::string const &__pyx_v_s) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__pyx_convert_PyByteArray_string_to_py_std__in_string", 0);
+
+  /* "string.to_py":56
+ * @cname("__pyx_convert_PyByteArray_string_to_py_std__in_string")
+ * cdef inline object __pyx_convert_PyByteArray_string_to_py_std__in_string(const string& s):
+ *     return __Pyx_PyByteArray_FromStringAndSize(s.data(), s.size())             # <<<<<<<<<<<<<<
+ * 
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyByteArray_FromStringAndSize(__pyx_v_s.data(), __pyx_v_s.size()); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 56, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "string.to_py":55
+ * 
+ * @cname("__pyx_convert_PyByteArray_string_to_py_std__in_string")
+ * cdef inline object __pyx_convert_PyByteArray_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
+ *     return __Pyx_PyByteArray_FromStringAndSize(s.data(), s.size())
+ * 
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("string.to_py.__pyx_convert_PyByteArray_string_to_py_std__in_string", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = 0;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
 
 /* "View.MemoryView":131
  *         cdef bint dtype_is_object
@@ -19944,7 +20225,7 @@ static CYTHON_INLINE NPY_DATETIMEUNIT __pyx_f_5numpy_get_datetime64_unit(PyObjec
   return __pyx_r;
 }
 
-/* "tabular_data_parser.pyx":56
+/* "tabular_data_parser.pyx":64
  *   void* output_buffer # <-- type depends on col_type
  * 
  * cdef inline from_chars_result parse_longlong(const char* p, long long* outInt) noexcept:             # <<<<<<<<<<<<<<
@@ -19966,7 +20247,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
   fast_float::from_chars_result __pyx_t_2;
   __Pyx_RefNannySetupContext("parse_longlong", 0);
 
-  /* "tabular_data_parser.pyx":70
+  /* "tabular_data_parser.pyx":78
  *   # These should be const but I don't know how to do that either in
  *   # Cython. Presumably the C++ compiler will figure it out anyway.
  *   cdef uint8_t CHAR_ZERO = <uint8_t> 48             # <<<<<<<<<<<<<<
@@ -19975,7 +20256,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
   __pyx_v_CHAR_ZERO = ((uint8_t)48);
 
-  /* "tabular_data_parser.pyx":71
+  /* "tabular_data_parser.pyx":79
  *   # Cython. Presumably the C++ compiler will figure it out anyway.
  *   cdef uint8_t CHAR_ZERO = <uint8_t> 48
  *   cdef uint8_t CHAR_MINUS = <uint8_t> 45             # <<<<<<<<<<<<<<
@@ -19984,7 +20265,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
   __pyx_v_CHAR_MINUS = ((uint8_t)45);
 
-  /* "tabular_data_parser.pyx":72
+  /* "tabular_data_parser.pyx":80
  *   cdef uint8_t CHAR_ZERO = <uint8_t> 48
  *   cdef uint8_t CHAR_MINUS = <uint8_t> 45
  *   cdef uint8_t CHAR_PLUS = <uint8_t> 43             # <<<<<<<<<<<<<<
@@ -19993,7 +20274,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
   __pyx_v_CHAR_PLUS = ((uint8_t)43);
 
-  /* "tabular_data_parser.pyx":74
+  /* "tabular_data_parser.pyx":82
  *   cdef uint8_t CHAR_PLUS = <uint8_t> 43
  * 
  *   cdef const char* start = p             # <<<<<<<<<<<<<<
@@ -20002,7 +20283,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
   __pyx_v_start = __pyx_v_p;
 
-  /* "tabular_data_parser.pyx":76
+  /* "tabular_data_parser.pyx":84
  *   cdef const char* start = p
  * 
  *   cdef bint negative = False             # <<<<<<<<<<<<<<
@@ -20011,7 +20292,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
   __pyx_v_negative = 0;
 
-  /* "tabular_data_parser.pyx":77
+  /* "tabular_data_parser.pyx":85
  * 
  *   cdef bint negative = False
  *   cdef long long norm = 0             # <<<<<<<<<<<<<<
@@ -20020,7 +20301,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
   __pyx_v_norm = 0;
 
-  /* "tabular_data_parser.pyx":78
+  /* "tabular_data_parser.pyx":86
  *   cdef bint negative = False
  *   cdef long long norm = 0
  *   cdef uint8_t c = (<uint8_t> p[0]) - CHAR_ZERO  #b'0'[0]             # <<<<<<<<<<<<<<
@@ -20029,7 +20310,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
   __pyx_v_c = (((uint8_t)(__pyx_v_p[0])) - __pyx_v_CHAR_ZERO);
 
-  /* "tabular_data_parser.pyx":81
+  /* "tabular_data_parser.pyx":89
  * 
  *   # Check for - or +
  *   if c == <uint8_t> (CHAR_MINUS-CHAR_ZERO):             # <<<<<<<<<<<<<<
@@ -20039,7 +20320,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
   __pyx_t_1 = (__pyx_v_c == ((uint8_t)(__pyx_v_CHAR_MINUS - __pyx_v_CHAR_ZERO)));
   if (__pyx_t_1) {
 
-    /* "tabular_data_parser.pyx":82
+    /* "tabular_data_parser.pyx":90
  *   # Check for - or +
  *   if c == <uint8_t> (CHAR_MINUS-CHAR_ZERO):
  *     negative = True             # <<<<<<<<<<<<<<
@@ -20048,7 +20329,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
     __pyx_v_negative = 1;
 
-    /* "tabular_data_parser.pyx":83
+    /* "tabular_data_parser.pyx":91
  *   if c == <uint8_t> (CHAR_MINUS-CHAR_ZERO):
  *     negative = True
  *     p += 1; c = (<uint8_t> p[0]) - CHAR_ZERO             # <<<<<<<<<<<<<<
@@ -20058,7 +20339,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
     __pyx_v_p = (__pyx_v_p + 1);
     __pyx_v_c = (((uint8_t)(__pyx_v_p[0])) - __pyx_v_CHAR_ZERO);
 
-    /* "tabular_data_parser.pyx":81
+    /* "tabular_data_parser.pyx":89
  * 
  *   # Check for - or +
  *   if c == <uint8_t> (CHAR_MINUS-CHAR_ZERO):             # <<<<<<<<<<<<<<
@@ -20068,7 +20349,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
     goto __pyx_L3;
   }
 
-  /* "tabular_data_parser.pyx":84
+  /* "tabular_data_parser.pyx":92
  *     negative = True
  *     p += 1; c = (<uint8_t> p[0]) - CHAR_ZERO
  *   elif c == <uint8_t> (CHAR_PLUS-CHAR_ZERO):             # <<<<<<<<<<<<<<
@@ -20078,7 +20359,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
   __pyx_t_1 = (__pyx_v_c == ((uint8_t)(__pyx_v_CHAR_PLUS - __pyx_v_CHAR_ZERO)));
   if (__pyx_t_1) {
 
-    /* "tabular_data_parser.pyx":85
+    /* "tabular_data_parser.pyx":93
  *     p += 1; c = (<uint8_t> p[0]) - CHAR_ZERO
  *   elif c == <uint8_t> (CHAR_PLUS-CHAR_ZERO):
  *     p += 1; c = (<uint8_t> p[0]) - CHAR_ZERO             # <<<<<<<<<<<<<<
@@ -20088,7 +20369,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
     __pyx_v_p = (__pyx_v_p + 1);
     __pyx_v_c = (((uint8_t)(__pyx_v_p[0])) - __pyx_v_CHAR_ZERO);
 
-    /* "tabular_data_parser.pyx":84
+    /* "tabular_data_parser.pyx":92
  *     negative = True
  *     p += 1; c = (<uint8_t> p[0]) - CHAR_ZERO
  *   elif c == <uint8_t> (CHAR_PLUS-CHAR_ZERO):             # <<<<<<<<<<<<<<
@@ -20098,7 +20379,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
   }
   __pyx_L3:;
 
-  /* "tabular_data_parser.pyx":87
+  /* "tabular_data_parser.pyx":95
  *     p += 1; c = (<uint8_t> p[0]) - CHAR_ZERO
  * 
  *   if c > 9: return from_chars_result(start, errc.illegal_byte_sequence) # No digits found             # <<<<<<<<<<<<<<
@@ -20113,7 +20394,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
     goto __pyx_L0;
   }
 
-  /* "tabular_data_parser.pyx":90
+  /* "tabular_data_parser.pyx":98
  * 
  *   # Read digits
  *   while c < 10:             # <<<<<<<<<<<<<<
@@ -20124,7 +20405,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
     __pyx_t_1 = (__pyx_v_c < 10);
     if (!__pyx_t_1) break;
 
-    /* "tabular_data_parser.pyx":91
+    /* "tabular_data_parser.pyx":99
  *   # Read digits
  *   while c < 10:
  *     norm = 10*norm + c             # <<<<<<<<<<<<<<
@@ -20133,7 +20414,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
     __pyx_v_norm = ((10 * __pyx_v_norm) + __pyx_v_c);
 
-    /* "tabular_data_parser.pyx":92
+    /* "tabular_data_parser.pyx":100
  *   while c < 10:
  *     norm = 10*norm + c
  *     p += 1; c = (<uint8_t> p[0]) - CHAR_ZERO             # <<<<<<<<<<<<<<
@@ -20144,7 +20425,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
     __pyx_v_c = (((uint8_t)(__pyx_v_p[0])) - __pyx_v_CHAR_ZERO);
   }
 
-  /* "tabular_data_parser.pyx":94
+  /* "tabular_data_parser.pyx":102
  *     p += 1; c = (<uint8_t> p[0]) - CHAR_ZERO
  * 
  *   if negative:             # <<<<<<<<<<<<<<
@@ -20153,7 +20434,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
   if (__pyx_v_negative) {
 
-    /* "tabular_data_parser.pyx":95
+    /* "tabular_data_parser.pyx":103
  * 
  *   if negative:
  *     outInt[0] = -norm             # <<<<<<<<<<<<<<
@@ -20162,7 +20443,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
     (__pyx_v_outInt[0]) = (-__pyx_v_norm);
 
-    /* "tabular_data_parser.pyx":94
+    /* "tabular_data_parser.pyx":102
  *     p += 1; c = (<uint8_t> p[0]) - CHAR_ZERO
  * 
  *   if negative:             # <<<<<<<<<<<<<<
@@ -20172,7 +20453,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
     goto __pyx_L7;
   }
 
-  /* "tabular_data_parser.pyx":97
+  /* "tabular_data_parser.pyx":105
  *     outInt[0] = -norm
  *   else:
  *     outInt[0] =  norm             # <<<<<<<<<<<<<<
@@ -20184,7 +20465,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
   }
   __pyx_L7:;
 
-  /* "tabular_data_parser.pyx":99
+  /* "tabular_data_parser.pyx":107
  *     outInt[0] =  norm
  * 
  *   return from_chars_result(p, getSuccessErrc())             # <<<<<<<<<<<<<<
@@ -20196,7 +20477,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
   __pyx_r = __pyx_t_2;
   goto __pyx_L0;
 
-  /* "tabular_data_parser.pyx":56
+  /* "tabular_data_parser.pyx":64
  *   void* output_buffer # <-- type depends on col_type
  * 
  * cdef inline from_chars_result parse_longlong(const char* p, long long* outInt) noexcept:             # <<<<<<<<<<<<<<
@@ -20210,7 +20491,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
   return __pyx_r;
 }
 
-/* "tabular_data_parser.pyx":101
+/* "tabular_data_parser.pyx":109
  *   return from_chars_result(p, getSuccessErrc())
  * 
  * cdef inline from_chars_result parse_single_value(const char* p, const char* start_of_block, const char* end_of_block,             # <<<<<<<<<<<<<<
@@ -20223,6 +20504,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
   PY_LONG_LONG *__pyx_v_longlong_buf;
   char __pyx_v_CHAR_TAB;
   char __pyx_v_CHAR_NEWLINE;
+  char __pyx_v_CHAR_CARRRET;
   char __pyx_v_CHAR_PLUS;
   char __pyx_v_CHAR_j;
   fast_float::from_chars_result __pyx_v_r;
@@ -20230,38 +20512,48 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
   int __pyx_t_2;
-  fast_float::from_chars_result __pyx_t_3;
+  size_t __pyx_t_3;
+  fast_float::from_chars_result __pyx_t_4;
   __Pyx_RefNannySetupContext("parse_single_value", 0);
 
-  /* "tabular_data_parser.pyx":106
+  /* "tabular_data_parser.pyx":114
  *   cdef long long* longlong_buf
  * 
  *   cdef char CHAR_TAB = <char> 9             # <<<<<<<<<<<<<<
  *   cdef char CHAR_NEWLINE = <char> 10
- *   cdef char CHAR_PLUS = <char> 43
+ *   cdef char CHAR_CARRRET = <char> 13
  */
   __pyx_v_CHAR_TAB = ((char)9);
 
-  /* "tabular_data_parser.pyx":107
+  /* "tabular_data_parser.pyx":115
  * 
  *   cdef char CHAR_TAB = <char> 9
  *   cdef char CHAR_NEWLINE = <char> 10             # <<<<<<<<<<<<<<
+ *   cdef char CHAR_CARRRET = <char> 13
  *   cdef char CHAR_PLUS = <char> 43
- *   cdef char CHAR_j = <char> 106
  */
   __pyx_v_CHAR_NEWLINE = ((char)10);
 
-  /* "tabular_data_parser.pyx":108
+  /* "tabular_data_parser.pyx":116
  *   cdef char CHAR_TAB = <char> 9
  *   cdef char CHAR_NEWLINE = <char> 10
+ *   cdef char CHAR_CARRRET = <char> 13             # <<<<<<<<<<<<<<
+ *   cdef char CHAR_PLUS = <char> 43
+ *   cdef char CHAR_j = <char> 106
+ */
+  __pyx_v_CHAR_CARRRET = ((char)13);
+
+  /* "tabular_data_parser.pyx":117
+ *   cdef char CHAR_NEWLINE = <char> 10
+ *   cdef char CHAR_CARRRET = <char> 13
  *   cdef char CHAR_PLUS = <char> 43             # <<<<<<<<<<<<<<
  *   cdef char CHAR_j = <char> 106
  * 
  */
   __pyx_v_CHAR_PLUS = ((char)43);
 
-  /* "tabular_data_parser.pyx":109
- *   cdef char CHAR_NEWLINE = <char> 10
+  /* "tabular_data_parser.pyx":118
+ *   cdef char CHAR_CARRRET = <char> 13
  *   cdef char CHAR_PLUS = <char> 43
  *   cdef char CHAR_j = <char> 106             # <<<<<<<<<<<<<<
  * 
@@ -20269,7 +20561,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
   __pyx_v_CHAR_j = ((char)0x6A);
 
-  /* "tabular_data_parser.pyx":113
+  /* "tabular_data_parser.pyx":122
  *   cdef from_chars_result r
  * 
  *   if col_spec.col_type == ColumnType.double_col:             # <<<<<<<<<<<<<<
@@ -20279,7 +20571,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
   switch (__pyx_v_col_spec.col_type) {
     case __pyx_e_19tabular_data_parser_double_col:
 
-    /* "tabular_data_parser.pyx":114
+    /* "tabular_data_parser.pyx":123
  * 
  *   if col_spec.col_type == ColumnType.double_col:
  *     double_buf = <double*> (col_spec.output_buffer)             # <<<<<<<<<<<<<<
@@ -20288,7 +20580,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
     __pyx_v_double_buf = ((double *)__pyx_v_col_spec.output_buffer);
 
-    /* "tabular_data_parser.pyx":115
+    /* "tabular_data_parser.pyx":124
  *   if col_spec.col_type == ColumnType.double_col:
  *     double_buf = <double*> (col_spec.output_buffer)
  *     return from_chars(p, end_of_block, double_buf[row])             # <<<<<<<<<<<<<<
@@ -20298,7 +20590,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
     __pyx_r = fast_float::from_chars(__pyx_v_p, __pyx_v_end_of_block, (__pyx_v_double_buf[__pyx_v_row]));
     goto __pyx_L0;
 
-    /* "tabular_data_parser.pyx":113
+    /* "tabular_data_parser.pyx":122
  *   cdef from_chars_result r
  * 
  *   if col_spec.col_type == ColumnType.double_col:             # <<<<<<<<<<<<<<
@@ -20308,7 +20600,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
     break;
     case __pyx_e_19tabular_data_parser_longlong_col:
 
-    /* "tabular_data_parser.pyx":118
+    /* "tabular_data_parser.pyx":127
  * 
  *   elif col_spec.col_type == ColumnType.longlong_col:
  *     longlong_buf = <long long*> (col_spec.output_buffer)             # <<<<<<<<<<<<<<
@@ -20317,7 +20609,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
     __pyx_v_longlong_buf = ((PY_LONG_LONG *)__pyx_v_col_spec.output_buffer);
 
-    /* "tabular_data_parser.pyx":119
+    /* "tabular_data_parser.pyx":128
  *   elif col_spec.col_type == ColumnType.longlong_col:
  *     longlong_buf = <long long*> (col_spec.output_buffer)
  *     return parse_longlong(p, &longlong_buf[row])             # <<<<<<<<<<<<<<
@@ -20327,7 +20619,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
     __pyx_r = __pyx_f_19tabular_data_parser_parse_longlong(__pyx_v_p, (&(__pyx_v_longlong_buf[__pyx_v_row])));
     goto __pyx_L0;
 
-    /* "tabular_data_parser.pyx":117
+    /* "tabular_data_parser.pyx":126
  *     return from_chars(p, end_of_block, double_buf[row])
  * 
  *   elif col_spec.col_type == ColumnType.longlong_col:             # <<<<<<<<<<<<<<
@@ -20337,7 +20629,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
     break;
     case __pyx_e_19tabular_data_parser_complex_col:
 
-    /* "tabular_data_parser.pyx":122
+    /* "tabular_data_parser.pyx":131
  * 
  *   elif col_spec.col_type == ColumnType.complex_col:
  *     double_buf = <double*> (col_spec.output_buffer)             # <<<<<<<<<<<<<<
@@ -20346,7 +20638,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
     __pyx_v_double_buf = ((double *)__pyx_v_col_spec.output_buffer);
 
-    /* "tabular_data_parser.pyx":125
+    /* "tabular_data_parser.pyx":134
  * 
  *     # Parse (presumably) real part
  *     r = from_chars(p, end_of_block, double_buf[2*row])             # <<<<<<<<<<<<<<
@@ -20355,7 +20647,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
     __pyx_v_r = fast_float::from_chars(__pyx_v_p, __pyx_v_end_of_block, (__pyx_v_double_buf[(2 * __pyx_v_row)]));
 
-    /* "tabular_data_parser.pyx":126
+    /* "tabular_data_parser.pyx":135
  *     # Parse (presumably) real part
  *     r = from_chars(p, end_of_block, double_buf[2*row])
  *     if r.ec != getSuccessErrc(): return r             # <<<<<<<<<<<<<<
@@ -20368,7 +20660,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
       goto __pyx_L0;
     }
 
-    /* "tabular_data_parser.pyx":129
+    /* "tabular_data_parser.pyx":138
  * 
  *     # Special cases:
  *     if r.ptr[0]==CHAR_j: # Real part is (implicitly) zero (e.g. "1.23e4j")             # <<<<<<<<<<<<<<
@@ -20378,7 +20670,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
     __pyx_t_1 = ((__pyx_v_r.ptr[0]) == __pyx_v_CHAR_j);
     if (__pyx_t_1) {
 
-      /* "tabular_data_parser.pyx":130
+      /* "tabular_data_parser.pyx":139
  *     # Special cases:
  *     if r.ptr[0]==CHAR_j: # Real part is (implicitly) zero (e.g. "1.23e4j")
  *       double_buf[2*row+1] = double_buf[2*row]             # <<<<<<<<<<<<<<
@@ -20387,7 +20679,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
       (__pyx_v_double_buf[((2 * __pyx_v_row) + 1)]) = (__pyx_v_double_buf[(2 * __pyx_v_row)]);
 
-      /* "tabular_data_parser.pyx":131
+      /* "tabular_data_parser.pyx":140
  *     if r.ptr[0]==CHAR_j: # Real part is (implicitly) zero (e.g. "1.23e4j")
  *       double_buf[2*row+1] = double_buf[2*row]
  *       double_buf[2*row] = 0.             # <<<<<<<<<<<<<<
@@ -20396,26 +20688,26 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
       (__pyx_v_double_buf[(2 * __pyx_v_row)]) = 0.;
 
-      /* "tabular_data_parser.pyx":132
+      /* "tabular_data_parser.pyx":141
  *       double_buf[2*row+1] = double_buf[2*row]
  *       double_buf[2*row] = 0.
  *       r.ptr += 1             # <<<<<<<<<<<<<<
  *       return r
- *     if r.ptr[0]==CHAR_TAB or r.ptr[0]==CHAR_NEWLINE: # Imag part is (implicitly) zero (e.g. "1.23e4")
+ * 
  */
       __pyx_v_r.ptr = (__pyx_v_r.ptr + 1);
 
-      /* "tabular_data_parser.pyx":133
+      /* "tabular_data_parser.pyx":142
  *       double_buf[2*row] = 0.
  *       r.ptr += 1
  *       return r             # <<<<<<<<<<<<<<
- *     if r.ptr[0]==CHAR_TAB or r.ptr[0]==CHAR_NEWLINE: # Imag part is (implicitly) zero (e.g. "1.23e4")
- *       double_buf[2*row+1] = 0.
+ * 
+ *     while r.ptr[0]==CHAR_CARRRET: r.ptr += 1 # In case line ends in \r\n
  */
       __pyx_r = __pyx_v_r;
       goto __pyx_L0;
 
-      /* "tabular_data_parser.pyx":129
+      /* "tabular_data_parser.pyx":138
  * 
  *     # Special cases:
  *     if r.ptr[0]==CHAR_j: # Real part is (implicitly) zero (e.g. "1.23e4j")             # <<<<<<<<<<<<<<
@@ -20424,9 +20716,22 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
     }
 
-    /* "tabular_data_parser.pyx":134
- *       r.ptr += 1
+    /* "tabular_data_parser.pyx":144
  *       return r
+ * 
+ *     while r.ptr[0]==CHAR_CARRRET: r.ptr += 1 # In case line ends in \r\n             # <<<<<<<<<<<<<<
+ *     if r.ptr[0]==CHAR_TAB or r.ptr[0]==CHAR_NEWLINE: # Imag part is (implicitly) zero (e.g. "1.23e4")
+ *       double_buf[2*row+1] = 0.
+ */
+    while (1) {
+      __pyx_t_1 = ((__pyx_v_r.ptr[0]) == __pyx_v_CHAR_CARRRET);
+      if (!__pyx_t_1) break;
+      __pyx_v_r.ptr = (__pyx_v_r.ptr + 1);
+    }
+
+    /* "tabular_data_parser.pyx":145
+ * 
+ *     while r.ptr[0]==CHAR_CARRRET: r.ptr += 1 # In case line ends in \r\n
  *     if r.ptr[0]==CHAR_TAB or r.ptr[0]==CHAR_NEWLINE: # Imag part is (implicitly) zero (e.g. "1.23e4")             # <<<<<<<<<<<<<<
  *       double_buf[2*row+1] = 0.
  *       return r
@@ -20435,15 +20740,15 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
     if (!__pyx_t_2) {
     } else {
       __pyx_t_1 = __pyx_t_2;
-      goto __pyx_L6_bool_binop_done;
+      goto __pyx_L8_bool_binop_done;
     }
     __pyx_t_2 = ((__pyx_v_r.ptr[0]) == __pyx_v_CHAR_NEWLINE);
     __pyx_t_1 = __pyx_t_2;
-    __pyx_L6_bool_binop_done:;
+    __pyx_L8_bool_binop_done:;
     if (__pyx_t_1) {
 
-      /* "tabular_data_parser.pyx":135
- *       return r
+      /* "tabular_data_parser.pyx":146
+ *     while r.ptr[0]==CHAR_CARRRET: r.ptr += 1 # In case line ends in \r\n
  *     if r.ptr[0]==CHAR_TAB or r.ptr[0]==CHAR_NEWLINE: # Imag part is (implicitly) zero (e.g. "1.23e4")
  *       double_buf[2*row+1] = 0.             # <<<<<<<<<<<<<<
  *       return r
@@ -20451,7 +20756,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
       (__pyx_v_double_buf[((2 * __pyx_v_row) + 1)]) = 0.;
 
-      /* "tabular_data_parser.pyx":136
+      /* "tabular_data_parser.pyx":147
  *     if r.ptr[0]==CHAR_TAB or r.ptr[0]==CHAR_NEWLINE: # Imag part is (implicitly) zero (e.g. "1.23e4")
  *       double_buf[2*row+1] = 0.
  *       return r             # <<<<<<<<<<<<<<
@@ -20461,16 +20766,16 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
       __pyx_r = __pyx_v_r;
       goto __pyx_L0;
 
-      /* "tabular_data_parser.pyx":134
- *       r.ptr += 1
- *       return r
+      /* "tabular_data_parser.pyx":145
+ * 
+ *     while r.ptr[0]==CHAR_CARRRET: r.ptr += 1 # In case line ends in \r\n
  *     if r.ptr[0]==CHAR_TAB or r.ptr[0]==CHAR_NEWLINE: # Imag part is (implicitly) zero (e.g. "1.23e4")             # <<<<<<<<<<<<<<
  *       double_buf[2*row+1] = 0.
  *       return r
  */
     }
 
-    /* "tabular_data_parser.pyx":139
+    /* "tabular_data_parser.pyx":150
  * 
  *     # Parse imaginary part
  *     if r.ptr[0]==CHAR_PLUS: r.ptr += 1 # skip leading +             # <<<<<<<<<<<<<<
@@ -20482,7 +20787,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
       __pyx_v_r.ptr = (__pyx_v_r.ptr + 1);
     }
 
-    /* "tabular_data_parser.pyx":140
+    /* "tabular_data_parser.pyx":151
  *     # Parse imaginary part
  *     if r.ptr[0]==CHAR_PLUS: r.ptr += 1 # skip leading +
  *     r = from_chars(r.ptr, end_of_block, double_buf[2*row + 1])             # <<<<<<<<<<<<<<
@@ -20491,7 +20796,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
     __pyx_v_r = fast_float::from_chars(__pyx_v_r.ptr, __pyx_v_end_of_block, (__pyx_v_double_buf[((2 * __pyx_v_row) + 1)]));
 
-    /* "tabular_data_parser.pyx":141
+    /* "tabular_data_parser.pyx":152
  *     if r.ptr[0]==CHAR_PLUS: r.ptr += 1 # skip leading +
  *     r = from_chars(r.ptr, end_of_block, double_buf[2*row + 1])
  *     if r.ec != getSuccessErrc() or r.ptr[0] != CHAR_j: return r # Expected j at the end of a complex number             # <<<<<<<<<<<<<<
@@ -20502,17 +20807,17 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
     if (!__pyx_t_2) {
     } else {
       __pyx_t_1 = __pyx_t_2;
-      goto __pyx_L10_bool_binop_done;
+      goto __pyx_L12_bool_binop_done;
     }
     __pyx_t_2 = ((__pyx_v_r.ptr[0]) != __pyx_v_CHAR_j);
     __pyx_t_1 = __pyx_t_2;
-    __pyx_L10_bool_binop_done:;
+    __pyx_L12_bool_binop_done:;
     if (__pyx_t_1) {
       __pyx_r = __pyx_v_r;
       goto __pyx_L0;
     }
 
-    /* "tabular_data_parser.pyx":142
+    /* "tabular_data_parser.pyx":153
  *     r = from_chars(r.ptr, end_of_block, double_buf[2*row + 1])
  *     if r.ec != getSuccessErrc() or r.ptr[0] != CHAR_j: return r # Expected j at the end of a complex number
  *     r.ptr += 1 # Skip j             # <<<<<<<<<<<<<<
@@ -20521,7 +20826,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
     __pyx_v_r.ptr = (__pyx_v_r.ptr + 1);
 
-    /* "tabular_data_parser.pyx":144
+    /* "tabular_data_parser.pyx":155
  *     r.ptr += 1 # Skip j
  * 
  *     return r             # <<<<<<<<<<<<<<
@@ -20531,7 +20836,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
     __pyx_r = __pyx_v_r;
     goto __pyx_L0;
 
-    /* "tabular_data_parser.pyx":121
+    /* "tabular_data_parser.pyx":130
  *     return parse_longlong(p, &longlong_buf[row])
  * 
  *   elif col_spec.col_type == ColumnType.complex_col:             # <<<<<<<<<<<<<<
@@ -20541,7 +20846,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
     break;
     case __pyx_e_19tabular_data_parser_char_col:
 
-    /* "tabular_data_parser.pyx":147
+    /* "tabular_data_parser.pyx":158
  * 
  *   elif col_spec.col_type == ColumnType.char_col:
  *     longlong_buf = <long long*> (col_spec.output_buffer)             # <<<<<<<<<<<<<<
@@ -20550,7 +20855,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
     __pyx_v_longlong_buf = ((PY_LONG_LONG *)__pyx_v_col_spec.output_buffer);
 
-    /* "tabular_data_parser.pyx":149
+    /* "tabular_data_parser.pyx":160
  *     longlong_buf = <long long*> (col_spec.output_buffer)
  * 
  *     longlong_buf[2*row] = p-start_of_block # index of start of value, relative to input block             # <<<<<<<<<<<<<<
@@ -20559,7 +20864,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
  */
     (__pyx_v_longlong_buf[(2 * __pyx_v_row)]) = (__pyx_v_p - __pyx_v_start_of_block);
 
-    /* "tabular_data_parser.pyx":150
+    /* "tabular_data_parser.pyx":161
  * 
  *     longlong_buf[2*row] = p-start_of_block # index of start of value, relative to input block
  *     while p<end_of_block and p[0]!=CHAR_NEWLINE and p[0]!=CHAR_TAB: p += 1             # <<<<<<<<<<<<<<
@@ -20571,43 +20876,64 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
       if (__pyx_t_2) {
       } else {
         __pyx_t_1 = __pyx_t_2;
-        goto __pyx_L14_bool_binop_done;
+        goto __pyx_L16_bool_binop_done;
       }
       __pyx_t_2 = ((__pyx_v_p[0]) != __pyx_v_CHAR_NEWLINE);
       if (__pyx_t_2) {
       } else {
         __pyx_t_1 = __pyx_t_2;
-        goto __pyx_L14_bool_binop_done;
+        goto __pyx_L16_bool_binop_done;
       }
       __pyx_t_2 = ((__pyx_v_p[0]) != __pyx_v_CHAR_TAB);
       __pyx_t_1 = __pyx_t_2;
-      __pyx_L14_bool_binop_done:;
+      __pyx_L16_bool_binop_done:;
       if (!__pyx_t_1) break;
       __pyx_v_p = (__pyx_v_p + 1);
     }
 
-    /* "tabular_data_parser.pyx":151
+    /* "tabular_data_parser.pyx":162
  *     longlong_buf[2*row] = p-start_of_block # index of start of value, relative to input block
  *     while p<end_of_block and p[0]!=CHAR_NEWLINE and p[0]!=CHAR_TAB: p += 1
  *     longlong_buf[2*row+1] = p-start_of_block # index of end of string, relative to input block             # <<<<<<<<<<<<<<
  * 
- *     return from_chars_result(p, getSuccessErrc())
+ *     # Strip possible \r at the end, in case the line ends in \r\n
  */
     (__pyx_v_longlong_buf[((2 * __pyx_v_row) + 1)]) = (__pyx_v_p - __pyx_v_start_of_block);
 
-    /* "tabular_data_parser.pyx":153
- *     longlong_buf[2*row+1] = p-start_of_block # index of end of string, relative to input block
+    /* "tabular_data_parser.pyx":165
+ * 
+ *     # Strip possible \r at the end, in case the line ends in \r\n
+ *     if p-1 >= start_of_block and (p-1)[0]==CHAR_CARRRET: longlong_buf[2*row+1] -= 1             # <<<<<<<<<<<<<<
+ * 
+ *     return from_chars_result(p, getSuccessErrc())
+ */
+    __pyx_t_2 = ((__pyx_v_p - 1) >= __pyx_v_start_of_block);
+    if (__pyx_t_2) {
+    } else {
+      __pyx_t_1 = __pyx_t_2;
+      goto __pyx_L20_bool_binop_done;
+    }
+    __pyx_t_2 = (((__pyx_v_p - 1)[0]) == __pyx_v_CHAR_CARRRET);
+    __pyx_t_1 = __pyx_t_2;
+    __pyx_L20_bool_binop_done:;
+    if (__pyx_t_1) {
+      __pyx_t_3 = ((2 * __pyx_v_row) + 1);
+      (__pyx_v_longlong_buf[__pyx_t_3]) = ((__pyx_v_longlong_buf[__pyx_t_3]) - 1);
+    }
+
+    /* "tabular_data_parser.pyx":167
+ *     if p-1 >= start_of_block and (p-1)[0]==CHAR_CARRRET: longlong_buf[2*row+1] -= 1
  * 
  *     return from_chars_result(p, getSuccessErrc())             # <<<<<<<<<<<<<<
  * 
  * cdef from_chars_result parse_up_to_max_rows(bytes block, size_t max_rows, const vector[ColumnSpec] col_specs, size_t &outNrows, ptrdiff_t &parsed_bytes):
  */
-    __pyx_t_3.ptr = __pyx_v_p;
-    __pyx_t_3.ec = getSuccessErrc();
-    __pyx_r = __pyx_t_3;
+    __pyx_t_4.ptr = __pyx_v_p;
+    __pyx_t_4.ec = getSuccessErrc();
+    __pyx_r = __pyx_t_4;
     goto __pyx_L0;
 
-    /* "tabular_data_parser.pyx":146
+    /* "tabular_data_parser.pyx":157
  *     return r
  * 
  *   elif col_spec.col_type == ColumnType.char_col:             # <<<<<<<<<<<<<<
@@ -20618,7 +20944,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
     default: break;
   }
 
-  /* "tabular_data_parser.pyx":101
+  /* "tabular_data_parser.pyx":109
  *   return from_chars_result(p, getSuccessErrc())
  * 
  * cdef inline from_chars_result parse_single_value(const char* p, const char* start_of_block, const char* end_of_block,             # <<<<<<<<<<<<<<
@@ -20633,7 +20959,7 @@ static CYTHON_INLINE fast_float::from_chars_result __pyx_f_19tabular_data_parser
   return __pyx_r;
 }
 
-/* "tabular_data_parser.pyx":155
+/* "tabular_data_parser.pyx":169
  *     return from_chars_result(p, getSuccessErrc())
  * 
  * cdef from_chars_result parse_up_to_max_rows(bytes block, size_t max_rows, const vector[ColumnSpec] col_specs, size_t &outNrows, ptrdiff_t &parsed_bytes):             # <<<<<<<<<<<<<<
@@ -20650,6 +20976,7 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
   size_t __pyx_v_ncols;
   char __pyx_v_CHAR_TAB;
   char __pyx_v_CHAR_NEWLINE;
+  char __pyx_v_CHAR_CARRRET;
   char __pyx_v_CHAR_HASH;
   __PYX_ENUM_CLASS_DECL std::errc __pyx_v_success;
   fast_float::from_chars_result __pyx_v_r;
@@ -20669,7 +20996,7 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("parse_up_to_max_rows", 0);
 
-  /* "tabular_data_parser.pyx":158
+  /* "tabular_data_parser.pyx":172
  *   """ Parse at most max_rows data rows from block. Returns the number of
  *       processed bytes. Number of parsed rows is stored in outNrows. """
  *   cdef size_t L = len(block)             # <<<<<<<<<<<<<<
@@ -20678,12 +21005,12 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
  */
   if (unlikely(__pyx_v_block == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "object of type 'NoneType' has no len()");
-    __PYX_ERR(0, 158, __pyx_L1_error)
+    __PYX_ERR(0, 172, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_PyBytes_GET_SIZE(__pyx_v_block); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 158, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyBytes_GET_SIZE(__pyx_v_block); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 172, __pyx_L1_error)
   __pyx_v_L = __pyx_t_1;
 
-  /* "tabular_data_parser.pyx":159
+  /* "tabular_data_parser.pyx":173
  *       processed bytes. Number of parsed rows is stored in outNrows. """
  *   cdef size_t L = len(block)
  *   cdef const char* start = block             # <<<<<<<<<<<<<<
@@ -20692,12 +21019,12 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
  */
   if (unlikely(__pyx_v_block == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "expected bytes, NoneType found");
-    __PYX_ERR(0, 159, __pyx_L1_error)
+    __PYX_ERR(0, 173, __pyx_L1_error)
   }
-  __pyx_t_2 = __Pyx_PyBytes_AsString(__pyx_v_block); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 159, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_AsString(__pyx_v_block); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 173, __pyx_L1_error)
   __pyx_v_start = __pyx_t_2;
 
-  /* "tabular_data_parser.pyx":160
+  /* "tabular_data_parser.pyx":174
  *   cdef size_t L = len(block)
  *   cdef const char* start = block
  *   cdef const char* end_of_block = start+L             # <<<<<<<<<<<<<<
@@ -20706,7 +21033,7 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
  */
   __pyx_v_end_of_block = (__pyx_v_start + __pyx_v_L);
 
-  /* "tabular_data_parser.pyx":161
+  /* "tabular_data_parser.pyx":175
  *   cdef const char* start = block
  *   cdef const char* end_of_block = start+L
  *   cdef size_t row = 0             # <<<<<<<<<<<<<<
@@ -20715,7 +21042,7 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
  */
   __pyx_v_row = 0;
 
-  /* "tabular_data_parser.pyx":163
+  /* "tabular_data_parser.pyx":177
  *   cdef size_t row = 0
  *   cdef size_t col
  *   cdef size_t ncols = col_specs.size()             # <<<<<<<<<<<<<<
@@ -20724,34 +21051,43 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
  */
   __pyx_v_ncols = __pyx_v_col_specs.size();
 
-  /* "tabular_data_parser.pyx":165
+  /* "tabular_data_parser.pyx":179
  *   cdef size_t ncols = col_specs.size()
  * 
  *   cdef char CHAR_TAB = <char> 9             # <<<<<<<<<<<<<<
  *   cdef char CHAR_NEWLINE = <char> 10
- *   cdef char CHAR_HASH = <char> 35
+ *   cdef char CHAR_CARRRET = <char> 13
  */
   __pyx_v_CHAR_TAB = ((char)9);
 
-  /* "tabular_data_parser.pyx":166
+  /* "tabular_data_parser.pyx":180
  * 
  *   cdef char CHAR_TAB = <char> 9
  *   cdef char CHAR_NEWLINE = <char> 10             # <<<<<<<<<<<<<<
+ *   cdef char CHAR_CARRRET = <char> 13
  *   cdef char CHAR_HASH = <char> 35
- * 
  */
   __pyx_v_CHAR_NEWLINE = ((char)10);
 
-  /* "tabular_data_parser.pyx":167
+  /* "tabular_data_parser.pyx":181
  *   cdef char CHAR_TAB = <char> 9
  *   cdef char CHAR_NEWLINE = <char> 10
+ *   cdef char CHAR_CARRRET = <char> 13             # <<<<<<<<<<<<<<
+ *   cdef char CHAR_HASH = <char> 35
+ * 
+ */
+  __pyx_v_CHAR_CARRRET = ((char)13);
+
+  /* "tabular_data_parser.pyx":182
+ *   cdef char CHAR_NEWLINE = <char> 10
+ *   cdef char CHAR_CARRRET = <char> 13
  *   cdef char CHAR_HASH = <char> 35             # <<<<<<<<<<<<<<
  * 
  *   cdef errc success = getSuccessErrc()
  */
   __pyx_v_CHAR_HASH = ((char)35);
 
-  /* "tabular_data_parser.pyx":169
+  /* "tabular_data_parser.pyx":184
  *   cdef char CHAR_HASH = <char> 35
  * 
  *   cdef errc success = getSuccessErrc()             # <<<<<<<<<<<<<<
@@ -20760,7 +21096,7 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
  */
   __pyx_v_success = getSuccessErrc();
 
-  /* "tabular_data_parser.pyx":171
+  /* "tabular_data_parser.pyx":186
  *   cdef errc success = getSuccessErrc()
  * 
  *   cdef from_chars_result r = from_chars_result(start, success)             # <<<<<<<<<<<<<<
@@ -20771,12 +21107,12 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
   __pyx_t_3.ec = __pyx_v_success;
   __pyx_v_r = __pyx_t_3;
 
-  /* "tabular_data_parser.pyx":173
+  /* "tabular_data_parser.pyx":188
  *   cdef from_chars_result r = from_chars_result(start, success)
  * 
  *   while r.ptr < end_of_block and row < max_rows:             # <<<<<<<<<<<<<<
  * 
- *     if r.ptr[0] == CHAR_NEWLINE: # skip empty lines
+ *     while r.ptr[0]==CHAR_CARRRET: r.ptr += 1 # In case line ends in \r\n
  */
   while (1) {
     __pyx_t_5 = (__pyx_v_r.ptr < __pyx_v_end_of_block);
@@ -20790,9 +21126,22 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
     __pyx_L5_bool_binop_done:;
     if (!__pyx_t_4) break;
 
-    /* "tabular_data_parser.pyx":175
+    /* "tabular_data_parser.pyx":190
  *   while r.ptr < end_of_block and row < max_rows:
  * 
+ *     while r.ptr[0]==CHAR_CARRRET: r.ptr += 1 # In case line ends in \r\n             # <<<<<<<<<<<<<<
+ *     if r.ptr[0] == CHAR_NEWLINE: # skip empty lines
+ *       r.ptr += 1
+ */
+    while (1) {
+      __pyx_t_4 = ((__pyx_v_r.ptr[0]) == __pyx_v_CHAR_CARRRET);
+      if (!__pyx_t_4) break;
+      __pyx_v_r.ptr = (__pyx_v_r.ptr + 1);
+    }
+
+    /* "tabular_data_parser.pyx":191
+ * 
+ *     while r.ptr[0]==CHAR_CARRRET: r.ptr += 1 # In case line ends in \r\n
  *     if r.ptr[0] == CHAR_NEWLINE: # skip empty lines             # <<<<<<<<<<<<<<
  *       r.ptr += 1
  *       continue
@@ -20800,8 +21149,8 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
     __pyx_t_4 = ((__pyx_v_r.ptr[0]) == __pyx_v_CHAR_NEWLINE);
     if (__pyx_t_4) {
 
-      /* "tabular_data_parser.pyx":176
- * 
+      /* "tabular_data_parser.pyx":192
+ *     while r.ptr[0]==CHAR_CARRRET: r.ptr += 1 # In case line ends in \r\n
  *     if r.ptr[0] == CHAR_NEWLINE: # skip empty lines
  *       r.ptr += 1             # <<<<<<<<<<<<<<
  *       continue
@@ -20809,7 +21158,7 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
  */
       __pyx_v_r.ptr = (__pyx_v_r.ptr + 1);
 
-      /* "tabular_data_parser.pyx":177
+      /* "tabular_data_parser.pyx":193
  *     if r.ptr[0] == CHAR_NEWLINE: # skip empty lines
  *       r.ptr += 1
  *       continue             # <<<<<<<<<<<<<<
@@ -20818,16 +21167,16 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
  */
       goto __pyx_L3_continue;
 
-      /* "tabular_data_parser.pyx":175
- *   while r.ptr < end_of_block and row < max_rows:
+      /* "tabular_data_parser.pyx":191
  * 
+ *     while r.ptr[0]==CHAR_CARRRET: r.ptr += 1 # In case line ends in \r\n
  *     if r.ptr[0] == CHAR_NEWLINE: # skip empty lines             # <<<<<<<<<<<<<<
  *       r.ptr += 1
  *       continue
  */
     }
 
-    /* "tabular_data_parser.pyx":179
+    /* "tabular_data_parser.pyx":195
  *       continue
  * 
  *     if r.ptr[0] == CHAR_HASH: # skip comment lines             # <<<<<<<<<<<<<<
@@ -20837,7 +21186,7 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
     __pyx_t_4 = ((__pyx_v_r.ptr[0]) == __pyx_v_CHAR_HASH);
     if (__pyx_t_4) {
 
-      /* "tabular_data_parser.pyx":180
+      /* "tabular_data_parser.pyx":196
  * 
  *     if r.ptr[0] == CHAR_HASH: # skip comment lines
  *       while r.ptr < end_of_block and r.ptr[0] != CHAR_NEWLINE: r.ptr += 1             # <<<<<<<<<<<<<<
@@ -20849,16 +21198,16 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
         if (__pyx_t_5) {
         } else {
           __pyx_t_4 = __pyx_t_5;
-          goto __pyx_L11_bool_binop_done;
+          goto __pyx_L13_bool_binop_done;
         }
         __pyx_t_5 = ((__pyx_v_r.ptr[0]) != __pyx_v_CHAR_NEWLINE);
         __pyx_t_4 = __pyx_t_5;
-        __pyx_L11_bool_binop_done:;
+        __pyx_L13_bool_binop_done:;
         if (!__pyx_t_4) break;
         __pyx_v_r.ptr = (__pyx_v_r.ptr + 1);
       }
 
-      /* "tabular_data_parser.pyx":181
+      /* "tabular_data_parser.pyx":197
  *     if r.ptr[0] == CHAR_HASH: # skip comment lines
  *       while r.ptr < end_of_block and r.ptr[0] != CHAR_NEWLINE: r.ptr += 1
  *       continue             # <<<<<<<<<<<<<<
@@ -20867,7 +21216,7 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
  */
       goto __pyx_L3_continue;
 
-      /* "tabular_data_parser.pyx":179
+      /* "tabular_data_parser.pyx":195
  *       continue
  * 
  *     if r.ptr[0] == CHAR_HASH: # skip comment lines             # <<<<<<<<<<<<<<
@@ -20876,45 +21225,44 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
  */
     }
 
-    /* "tabular_data_parser.pyx":184
+    /* "tabular_data_parser.pyx":200
  * 
  *     # Parse all but last column
  *     for col in range(ncols-1):             # <<<<<<<<<<<<<<
  *       r = parse_single_value(r.ptr, start, end_of_block, col_specs[col], row)
- *       if r.ec != success: return r
+ *       if r.ec != success: break
  */
     __pyx_t_6 = (__pyx_v_ncols - 1);
     __pyx_t_7 = __pyx_t_6;
     for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
       __pyx_v_col = __pyx_t_8;
 
-      /* "tabular_data_parser.pyx":185
+      /* "tabular_data_parser.pyx":201
  *     # Parse all but last column
  *     for col in range(ncols-1):
  *       r = parse_single_value(r.ptr, start, end_of_block, col_specs[col], row)             # <<<<<<<<<<<<<<
- *       if r.ec != success: return r
- *       if r.ptr[0] != CHAR_TAB: return from_chars_result(r.ptr, errc.protocol_error) # Expected a tab as column separator
+ *       if r.ec != success: break
+ *       if r.ptr[0] != CHAR_TAB: r = from_chars_result(r.ptr, errc.protocol_error); break # Expected a tab as column separator
  */
-      __pyx_t_3 = __pyx_f_19tabular_data_parser_parse_single_value(__pyx_v_r.ptr, __pyx_v_start, __pyx_v_end_of_block, (__pyx_v_col_specs[__pyx_v_col]), __pyx_v_row); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 185, __pyx_L1_error)
+      __pyx_t_3 = __pyx_f_19tabular_data_parser_parse_single_value(__pyx_v_r.ptr, __pyx_v_start, __pyx_v_end_of_block, (__pyx_v_col_specs[__pyx_v_col]), __pyx_v_row); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 201, __pyx_L1_error)
       __pyx_v_r = __pyx_t_3;
 
-      /* "tabular_data_parser.pyx":186
+      /* "tabular_data_parser.pyx":202
  *     for col in range(ncols-1):
  *       r = parse_single_value(r.ptr, start, end_of_block, col_specs[col], row)
- *       if r.ec != success: return r             # <<<<<<<<<<<<<<
- *       if r.ptr[0] != CHAR_TAB: return from_chars_result(r.ptr, errc.protocol_error) # Expected a tab as column separator
+ *       if r.ec != success: break             # <<<<<<<<<<<<<<
+ *       if r.ptr[0] != CHAR_TAB: r = from_chars_result(r.ptr, errc.protocol_error); break # Expected a tab as column separator
  *       r.ptr += 1
  */
       __pyx_t_4 = (__pyx_v_r.ec != __pyx_v_success);
       if (__pyx_t_4) {
-        __pyx_r = __pyx_v_r;
-        goto __pyx_L0;
+        goto __pyx_L16_break;
       }
 
-      /* "tabular_data_parser.pyx":187
+      /* "tabular_data_parser.pyx":203
  *       r = parse_single_value(r.ptr, start, end_of_block, col_specs[col], row)
- *       if r.ec != success: return r
- *       if r.ptr[0] != CHAR_TAB: return from_chars_result(r.ptr, errc.protocol_error) # Expected a tab as column separator             # <<<<<<<<<<<<<<
+ *       if r.ec != success: break
+ *       if r.ptr[0] != CHAR_TAB: r = from_chars_result(r.ptr, errc.protocol_error); break # Expected a tab as column separator             # <<<<<<<<<<<<<<
  *       r.ptr += 1
  * 
  */
@@ -20922,47 +21270,60 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
       if (__pyx_t_4) {
         __pyx_t_3.ptr = __pyx_v_r.ptr;
         __pyx_t_3.ec = std::errc::protocol_error;
-        __pyx_r = __pyx_t_3;
-        goto __pyx_L0;
+        __pyx_v_r = __pyx_t_3;
+        goto __pyx_L16_break;
       }
 
-      /* "tabular_data_parser.pyx":188
- *       if r.ec != success: return r
- *       if r.ptr[0] != CHAR_TAB: return from_chars_result(r.ptr, errc.protocol_error) # Expected a tab as column separator
+      /* "tabular_data_parser.pyx":204
+ *       if r.ec != success: break
+ *       if r.ptr[0] != CHAR_TAB: r = from_chars_result(r.ptr, errc.protocol_error); break # Expected a tab as column separator
  *       r.ptr += 1             # <<<<<<<<<<<<<<
  * 
  *     # Parse last column
  */
       __pyx_v_r.ptr = (__pyx_v_r.ptr + 1);
     }
+    __pyx_L16_break:;
 
-    /* "tabular_data_parser.pyx":191
+    /* "tabular_data_parser.pyx":207
  * 
  *     # Parse last column
  *     r = parse_single_value(r.ptr, start, end_of_block, col_specs[ncols-1], row)             # <<<<<<<<<<<<<<
- *     if r.ec != success: return r
- *     if r.ptr[0] != CHAR_NEWLINE: return from_chars_result(r.ptr, errc.protocol_not_supported) # Expected a new line to indicate the end of a row
+ *     if r.ec != success: break
+ *     while r.ptr[0]==CHAR_CARRRET: r.ptr += 1 # In case line ends in \r\n
  */
-    __pyx_t_3 = __pyx_f_19tabular_data_parser_parse_single_value(__pyx_v_r.ptr, __pyx_v_start, __pyx_v_end_of_block, (__pyx_v_col_specs[(__pyx_v_ncols - 1)]), __pyx_v_row); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 191, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_19tabular_data_parser_parse_single_value(__pyx_v_r.ptr, __pyx_v_start, __pyx_v_end_of_block, (__pyx_v_col_specs[(__pyx_v_ncols - 1)]), __pyx_v_row); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 207, __pyx_L1_error)
     __pyx_v_r = __pyx_t_3;
 
-    /* "tabular_data_parser.pyx":192
+    /* "tabular_data_parser.pyx":208
  *     # Parse last column
  *     r = parse_single_value(r.ptr, start, end_of_block, col_specs[ncols-1], row)
- *     if r.ec != success: return r             # <<<<<<<<<<<<<<
- *     if r.ptr[0] != CHAR_NEWLINE: return from_chars_result(r.ptr, errc.protocol_not_supported) # Expected a new line to indicate the end of a row
- *     r.ptr += 1
+ *     if r.ec != success: break             # <<<<<<<<<<<<<<
+ *     while r.ptr[0]==CHAR_CARRRET: r.ptr += 1 # In case line ends in \r\n
+ *     if r.ptr[0] != CHAR_NEWLINE: r = from_chars_result(r.ptr, errc.protocol_not_supported); break # Expected a new line to indicate the end of a row
  */
     __pyx_t_4 = (__pyx_v_r.ec != __pyx_v_success);
     if (__pyx_t_4) {
-      __pyx_r = __pyx_v_r;
-      goto __pyx_L0;
+      goto __pyx_L4_break;
     }
 
-    /* "tabular_data_parser.pyx":193
+    /* "tabular_data_parser.pyx":209
  *     r = parse_single_value(r.ptr, start, end_of_block, col_specs[ncols-1], row)
- *     if r.ec != success: return r
- *     if r.ptr[0] != CHAR_NEWLINE: return from_chars_result(r.ptr, errc.protocol_not_supported) # Expected a new line to indicate the end of a row             # <<<<<<<<<<<<<<
+ *     if r.ec != success: break
+ *     while r.ptr[0]==CHAR_CARRRET: r.ptr += 1 # In case line ends in \r\n             # <<<<<<<<<<<<<<
+ *     if r.ptr[0] != CHAR_NEWLINE: r = from_chars_result(r.ptr, errc.protocol_not_supported); break # Expected a new line to indicate the end of a row
+ *     r.ptr += 1
+ */
+    while (1) {
+      __pyx_t_4 = ((__pyx_v_r.ptr[0]) == __pyx_v_CHAR_CARRRET);
+      if (!__pyx_t_4) break;
+      __pyx_v_r.ptr = (__pyx_v_r.ptr + 1);
+    }
+
+    /* "tabular_data_parser.pyx":210
+ *     if r.ec != success: break
+ *     while r.ptr[0]==CHAR_CARRRET: r.ptr += 1 # In case line ends in \r\n
+ *     if r.ptr[0] != CHAR_NEWLINE: r = from_chars_result(r.ptr, errc.protocol_not_supported); break # Expected a new line to indicate the end of a row             # <<<<<<<<<<<<<<
  *     r.ptr += 1
  * 
  */
@@ -20970,20 +21331,20 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
     if (__pyx_t_4) {
       __pyx_t_3.ptr = __pyx_v_r.ptr;
       __pyx_t_3.ec = std::errc::protocol_not_supported;
-      __pyx_r = __pyx_t_3;
-      goto __pyx_L0;
+      __pyx_v_r = __pyx_t_3;
+      goto __pyx_L4_break;
     }
 
-    /* "tabular_data_parser.pyx":194
- *     if r.ec != success: return r
- *     if r.ptr[0] != CHAR_NEWLINE: return from_chars_result(r.ptr, errc.protocol_not_supported) # Expected a new line to indicate the end of a row
+    /* "tabular_data_parser.pyx":211
+ *     while r.ptr[0]==CHAR_CARRRET: r.ptr += 1 # In case line ends in \r\n
+ *     if r.ptr[0] != CHAR_NEWLINE: r = from_chars_result(r.ptr, errc.protocol_not_supported); break # Expected a new line to indicate the end of a row
  *     r.ptr += 1             # <<<<<<<<<<<<<<
  * 
  *     row += 1
  */
     __pyx_v_r.ptr = (__pyx_v_r.ptr + 1);
 
-    /* "tabular_data_parser.pyx":196
+    /* "tabular_data_parser.pyx":213
  *     r.ptr += 1
  * 
  *     row += 1             # <<<<<<<<<<<<<<
@@ -20993,8 +21354,9 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
     __pyx_v_row = (__pyx_v_row + 1);
     __pyx_L3_continue:;
   }
+  __pyx_L4_break:;
 
-  /* "tabular_data_parser.pyx":198
+  /* "tabular_data_parser.pyx":215
  *     row += 1
  * 
  *   outNrows = row             # <<<<<<<<<<<<<<
@@ -21003,7 +21365,7 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
  */
   __pyx_v_outNrows = __pyx_v_row;
 
-  /* "tabular_data_parser.pyx":199
+  /* "tabular_data_parser.pyx":216
  * 
  *   outNrows = row
  *   parsed_bytes = r.ptr - start if r.ptr!=NULL else -1             # <<<<<<<<<<<<<<
@@ -21018,7 +21380,7 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
   }
   __pyx_v_parsed_bytes = __pyx_t_9;
 
-  /* "tabular_data_parser.pyx":200
+  /* "tabular_data_parser.pyx":217
  *   outNrows = row
  *   parsed_bytes = r.ptr - start if r.ptr!=NULL else -1
  *   return r             # <<<<<<<<<<<<<<
@@ -21028,7 +21390,7 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
   __pyx_r = __pyx_v_r;
   goto __pyx_L0;
 
-  /* "tabular_data_parser.pyx":155
+  /* "tabular_data_parser.pyx":169
  *     return from_chars_result(p, getSuccessErrc())
  * 
  * cdef from_chars_result parse_up_to_max_rows(bytes block, size_t max_rows, const vector[ColumnSpec] col_specs, size_t &outNrows, ptrdiff_t &parsed_bytes):             # <<<<<<<<<<<<<<
@@ -21045,7 +21407,7 @@ static fast_float::from_chars_result __pyx_f_19tabular_data_parser_parse_up_to_m
   return __pyx_r;
 }
 
-/* "tabular_data_parser.pyx":202
+/* "tabular_data_parser.pyx":219
  *   return r
  * 
  * cdef inline double [:] getDoubleView(cnp.ndarray np_buf):             # <<<<<<<<<<<<<<
@@ -21063,19 +21425,19 @@ static CYTHON_INLINE __Pyx_memviewslice __pyx_f_19tabular_data_parser_getDoubleV
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("getDoubleView", 0);
 
-  /* "tabular_data_parser.pyx":204
+  /* "tabular_data_parser.pyx":221
  * cdef inline double [:] getDoubleView(cnp.ndarray np_buf):
  *   """ This is a workaround for creating a memory view inside a for loop. """
  *   cdef double[::1] v = np_buf             # <<<<<<<<<<<<<<
  *   return v
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(((PyObject *)__pyx_v_np_buf), PyBUF_WRITABLE); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 204, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(((PyObject *)__pyx_v_np_buf), PyBUF_WRITABLE); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 221, __pyx_L1_error)
   __pyx_v_v = __pyx_t_1;
   __pyx_t_1.memview = NULL;
   __pyx_t_1.data = NULL;
 
-  /* "tabular_data_parser.pyx":205
+  /* "tabular_data_parser.pyx":222
  *   """ This is a workaround for creating a memory view inside a for loop. """
  *   cdef double[::1] v = np_buf
  *   return v             # <<<<<<<<<<<<<<
@@ -21086,7 +21448,7 @@ static CYTHON_INLINE __Pyx_memviewslice __pyx_f_19tabular_data_parser_getDoubleV
   __pyx_r = __pyx_v_v;
   goto __pyx_L0;
 
-  /* "tabular_data_parser.pyx":202
+  /* "tabular_data_parser.pyx":219
  *   return r
  * 
  * cdef inline double [:] getDoubleView(cnp.ndarray np_buf):             # <<<<<<<<<<<<<<
@@ -21111,7 +21473,7 @@ static CYTHON_INLINE __Pyx_memviewslice __pyx_f_19tabular_data_parser_getDoubleV
   return __pyx_r;
 }
 
-/* "tabular_data_parser.pyx":207
+/* "tabular_data_parser.pyx":224
  *   return v
  * 
  * cdef inline long long [:] getLonglongView(cnp.ndarray np_buf):             # <<<<<<<<<<<<<<
@@ -21129,19 +21491,19 @@ static CYTHON_INLINE __Pyx_memviewslice __pyx_f_19tabular_data_parser_getLonglon
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("getLonglongView", 0);
 
-  /* "tabular_data_parser.pyx":209
+  /* "tabular_data_parser.pyx":226
  * cdef inline long long [:] getLonglongView(cnp.ndarray np_buf):
  *   """ This is a workaround for creating a memory view inside a for loop. """
  *   cdef long long[::1] v = np_buf             # <<<<<<<<<<<<<<
  *   return v
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_dc_PY_LONG_LONG(((PyObject *)__pyx_v_np_buf), PyBUF_WRITABLE); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 209, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_dc_PY_LONG_LONG(((PyObject *)__pyx_v_np_buf), PyBUF_WRITABLE); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 226, __pyx_L1_error)
   __pyx_v_v = __pyx_t_1;
   __pyx_t_1.memview = NULL;
   __pyx_t_1.data = NULL;
 
-  /* "tabular_data_parser.pyx":210
+  /* "tabular_data_parser.pyx":227
  *   """ This is a workaround for creating a memory view inside a for loop. """
  *   cdef long long[::1] v = np_buf
  *   return v             # <<<<<<<<<<<<<<
@@ -21152,7 +21514,7 @@ static CYTHON_INLINE __Pyx_memviewslice __pyx_f_19tabular_data_parser_getLonglon
   __pyx_r = __pyx_v_v;
   goto __pyx_L0;
 
-  /* "tabular_data_parser.pyx":207
+  /* "tabular_data_parser.pyx":224
  *   return v
  * 
  * cdef inline long long [:] getLonglongView(cnp.ndarray np_buf):             # <<<<<<<<<<<<<<
@@ -21177,7 +21539,7 @@ static CYTHON_INLINE __Pyx_memviewslice __pyx_f_19tabular_data_parser_getLonglon
   return __pyx_r;
 }
 
-/* "tabular_data_parser.pyx":212
+/* "tabular_data_parser.pyx":229
  *   return v
  * 
  * def parse_tabular_data(s, dtypes, chunk_size=1000000):             # <<<<<<<<<<<<<<
@@ -21221,7 +21583,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __pyx_nargs = PyTuple_GET_SIZE(__pyx_args);
   #else
   __pyx_nargs = PyTuple_Size(__pyx_args);
-  if (unlikely((__pyx_nargs < 0))) __PYX_ERR(0, 212, __pyx_L3_error)
+  if (unlikely((__pyx_nargs < 0))) __PYX_ERR(0, 229, __pyx_L3_error)
   #endif
   #endif
   __pyx_kwvalues = __Pyx_KwValues_FASTCALL(__pyx_args, __pyx_nargs);
@@ -21247,7 +21609,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 212, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 229, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -21255,21 +21617,21 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 212, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 229, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("parse_tabular_data", 0, 2, 3, 1); __PYX_ERR(0, 212, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("parse_tabular_data", 0, 2, 3, 1); __PYX_ERR(0, 229, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (kw_args > 0) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_chunk_size);
           if (value) { values[2] = __Pyx_Arg_NewRef_FASTCALL(value); kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 212, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 229, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "parse_tabular_data") < 0)) __PYX_ERR(0, 212, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "parse_tabular_data") < 0)) __PYX_ERR(0, 229, __pyx_L3_error)
       }
     } else {
       switch (__pyx_nargs) {
@@ -21287,7 +21649,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("parse_tabular_data", 0, 2, 3, __pyx_nargs); __PYX_ERR(0, 212, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("parse_tabular_data", 0, 2, 3, __pyx_nargs); __PYX_ERR(0, 229, __pyx_L3_error)
   goto __pyx_L3_error;
   __pyx_L3_error:;
   {
@@ -21314,7 +21676,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 }
 static PyObject *__pyx_gb_19tabular_data_parser_18parse_tabular_data_2generator(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value); /* proto */
 
-/* "tabular_data_parser.pyx":231
+/* "tabular_data_parser.pyx":248
  *     if dtypes[i] in [ np.complex128, np.complex64, np.cdouble, np.cfloat ]: dtypes[i] = complex
  * 
  *   assert all(dt in [ float, int, complex, str ] for dt in dtypes ), f"One or more unsupported datatypes: {dtypes}"             # <<<<<<<<<<<<<<
@@ -21334,7 +21696,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_18parse_tabular_data_genexpr(CYT
   if (unlikely(!__pyx_cur_scope)) {
     __pyx_cur_scope = ((struct __pyx_obj_19tabular_data_parser___pyx_scope_struct_1_genexpr *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(0, 231, __pyx_L1_error)
+    __PYX_ERR(0, 248, __pyx_L1_error)
   } else {
     __Pyx_GOTREF((PyObject *)__pyx_cur_scope);
   }
@@ -21342,7 +21704,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_18parse_tabular_data_genexpr(CYT
   __Pyx_INCREF(__pyx_cur_scope->__pyx_genexpr_arg_0);
   __Pyx_GIVEREF(__pyx_cur_scope->__pyx_genexpr_arg_0);
   {
-    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_19tabular_data_parser_18parse_tabular_data_2generator, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_parse_tabular_data_locals_genexp, __pyx_n_s_tabular_data_parser); if (unlikely(!gen)) __PYX_ERR(0, 231, __pyx_L1_error)
+    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_19tabular_data_parser_18parse_tabular_data_2generator, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_parse_tabular_data_locals_genexp, __pyx_n_s_tabular_data_parser); if (unlikely(!gen)) __PYX_ERR(0, 248, __pyx_L1_error)
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -21381,32 +21743,32 @@ static PyObject *__pyx_gb_19tabular_data_parser_18parse_tabular_data_2generator(
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 231, __pyx_L1_error)
-  if (unlikely(!__pyx_cur_scope->__pyx_genexpr_arg_0)) { __Pyx_RaiseUnboundLocalError(".0"); __PYX_ERR(0, 231, __pyx_L1_error) }
+  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 248, __pyx_L1_error)
+  if (unlikely(!__pyx_cur_scope->__pyx_genexpr_arg_0)) { __Pyx_RaiseUnboundLocalError(".0"); __PYX_ERR(0, 248, __pyx_L1_error) }
   if (likely(PyList_CheckExact(__pyx_cur_scope->__pyx_genexpr_arg_0)) || PyTuple_CheckExact(__pyx_cur_scope->__pyx_genexpr_arg_0)) {
     __pyx_t_1 = __pyx_cur_scope->__pyx_genexpr_arg_0; __Pyx_INCREF(__pyx_t_1); __pyx_t_2 = 0;
     __pyx_t_3 = NULL;
   } else {
-    __pyx_t_2 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_cur_scope->__pyx_genexpr_arg_0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 231, __pyx_L1_error)
+    __pyx_t_2 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_cur_scope->__pyx_genexpr_arg_0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 248, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 231, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 248, __pyx_L1_error)
   }
   for (;;) {
     if (likely(!__pyx_t_3)) {
       if (likely(PyList_CheckExact(__pyx_t_1))) {
         if (__pyx_t_2 >= PyList_GET_SIZE(__pyx_t_1)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely((0 < 0))) __PYX_ERR(0, 231, __pyx_L1_error)
+        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely((0 < 0))) __PYX_ERR(0, 248, __pyx_L1_error)
         #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 231, __pyx_L1_error)
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 248, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         #endif
       } else {
         if (__pyx_t_2 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely((0 < 0))) __PYX_ERR(0, 231, __pyx_L1_error)
+        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely((0 < 0))) __PYX_ERR(0, 248, __pyx_L1_error)
         #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 231, __pyx_L1_error)
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 248, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         #endif
       }
@@ -21416,7 +21778,7 @@ static PyObject *__pyx_gb_19tabular_data_parser_18parse_tabular_data_2generator(
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 231, __pyx_L1_error)
+          else __PYX_ERR(0, 248, __pyx_L1_error)
         }
         break;
       }
@@ -21428,32 +21790,32 @@ static PyObject *__pyx_gb_19tabular_data_parser_18parse_tabular_data_2generator(
     __pyx_t_4 = 0;
     __Pyx_INCREF(__pyx_cur_scope->__pyx_v_dt);
     __pyx_t_4 = __pyx_cur_scope->__pyx_v_dt;
-    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, ((PyObject *)(&PyFloat_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 231, __pyx_L1_error)
-    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 231, __pyx_L1_error)
+    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, ((PyObject *)(&PyFloat_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 248, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 248, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (!__pyx_t_7) {
     } else {
       __pyx_t_5 = __pyx_t_7;
       goto __pyx_L7_bool_binop_done;
     }
-    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, ((PyObject *)(&PyInt_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 231, __pyx_L1_error)
-    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 231, __pyx_L1_error)
+    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, ((PyObject *)(&PyInt_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 248, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 248, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (!__pyx_t_7) {
     } else {
       __pyx_t_5 = __pyx_t_7;
       goto __pyx_L7_bool_binop_done;
     }
-    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, ((PyObject *)(&PyComplex_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 231, __pyx_L1_error)
-    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 231, __pyx_L1_error)
+    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, ((PyObject *)(&PyComplex_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 248, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 248, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (!__pyx_t_7) {
     } else {
       __pyx_t_5 = __pyx_t_7;
       goto __pyx_L7_bool_binop_done;
     }
-    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, ((PyObject *)(&PyUnicode_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 231, __pyx_L1_error)
-    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 231, __pyx_L1_error)
+    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, ((PyObject *)(&PyUnicode_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 248, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 248, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __pyx_t_5 = __pyx_t_7;
     __pyx_L7_bool_binop_done:;
@@ -21496,7 +21858,7 @@ static PyObject *__pyx_gb_19tabular_data_parser_18parse_tabular_data_2generator(
 }
 static PyObject *__pyx_gb_19tabular_data_parser_18parse_tabular_data_5generator1(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value); /* proto */
 
-/* "tabular_data_parser.pyx":252
+/* "tabular_data_parser.pyx":269
  * 
  *   # For each column, concatenate values from all chunks into a single array
  *   return dict( (col,             # <<<<<<<<<<<<<<
@@ -21516,7 +21878,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_18parse_tabular_data_3genexpr(Py
   if (unlikely(!__pyx_cur_scope)) {
     __pyx_cur_scope = ((struct __pyx_obj_19tabular_data_parser___pyx_scope_struct_2_genexpr *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(0, 252, __pyx_L1_error)
+    __PYX_ERR(0, 269, __pyx_L1_error)
   } else {
     __Pyx_GOTREF((PyObject *)__pyx_cur_scope);
   }
@@ -21527,7 +21889,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_18parse_tabular_data_3genexpr(Py
   __Pyx_INCREF(__pyx_cur_scope->__pyx_genexpr_arg_0);
   __Pyx_GIVEREF(__pyx_cur_scope->__pyx_genexpr_arg_0);
   {
-    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_19tabular_data_parser_18parse_tabular_data_5generator1, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_parse_tabular_data_locals_genexp, __pyx_n_s_tabular_data_parser); if (unlikely(!gen)) __PYX_ERR(0, 252, __pyx_L1_error)
+    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_19tabular_data_parser_18parse_tabular_data_5generator1, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_parse_tabular_data_locals_genexp, __pyx_n_s_tabular_data_parser); if (unlikely(!gen)) __PYX_ERR(0, 269, __pyx_L1_error)
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -21570,11 +21932,11 @@ static PyObject *__pyx_gb_19tabular_data_parser_18parse_tabular_data_5generator1
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 252, __pyx_L1_error)
-  __pyx_r = PyDict_New(); if (unlikely(!__pyx_r)) __PYX_ERR(0, 252, __pyx_L1_error)
+  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 269, __pyx_L1_error)
+  __pyx_r = PyDict_New(); if (unlikely(!__pyx_r)) __PYX_ERR(0, 269, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_r);
 
-  /* "tabular_data_parser.pyx":254
+  /* "tabular_data_parser.pyx":271
  *   return dict( (col,
  *                 np.concatenate( [ ch[col] for ch in chunks ] )
  *                 ) for col in data.keys() )             # <<<<<<<<<<<<<<
@@ -21582,12 +21944,12 @@ static PyObject *__pyx_gb_19tabular_data_parser_18parse_tabular_data_5generator1
  * def parse_up_to_chunk_size(s, dtypes, chunk_size):
  */
   __pyx_t_2 = 0;
-  if (unlikely(!__pyx_cur_scope->__pyx_genexpr_arg_0)) { __Pyx_RaiseUnboundLocalError(".0"); __PYX_ERR(0, 254, __pyx_L1_error) }
+  if (unlikely(!__pyx_cur_scope->__pyx_genexpr_arg_0)) { __Pyx_RaiseUnboundLocalError(".0"); __PYX_ERR(0, 271, __pyx_L1_error) }
   if (unlikely(__pyx_cur_scope->__pyx_genexpr_arg_0 == Py_None)) {
     PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "keys");
-    __PYX_ERR(0, 254, __pyx_L1_error)
+    __PYX_ERR(0, 271, __pyx_L1_error)
   }
-  __pyx_t_5 = __Pyx_dict_iterator(__pyx_cur_scope->__pyx_genexpr_arg_0, 0, __pyx_n_s_keys, (&__pyx_t_3), (&__pyx_t_4)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 254, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_dict_iterator(__pyx_cur_scope->__pyx_genexpr_arg_0, 0, __pyx_n_s_keys, (&__pyx_t_3), (&__pyx_t_4)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 271, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_1);
   __pyx_t_1 = __pyx_t_5;
@@ -21595,49 +21957,49 @@ static PyObject *__pyx_gb_19tabular_data_parser_18parse_tabular_data_5generator1
   while (1) {
     __pyx_t_6 = __Pyx_dict_iter_next(__pyx_t_1, __pyx_t_3, &__pyx_t_2, &__pyx_t_5, NULL, NULL, __pyx_t_4);
     if (unlikely(__pyx_t_6 == 0)) break;
-    if (unlikely(__pyx_t_6 == -1)) __PYX_ERR(0, 254, __pyx_L1_error)
+    if (unlikely(__pyx_t_6 == -1)) __PYX_ERR(0, 271, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_col);
     __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_col, __pyx_t_5);
     __Pyx_GIVEREF(__pyx_t_5);
     __pyx_t_5 = 0;
 
-    /* "tabular_data_parser.pyx":253
+    /* "tabular_data_parser.pyx":270
  *   # For each column, concatenate values from all chunks into a single array
  *   return dict( (col,
  *                 np.concatenate( [ ch[col] for ch in chunks ] )             # <<<<<<<<<<<<<<
  *                 ) for col in data.keys() )
  * 
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_np); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 253, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_np); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 270, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_concatenate); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 253, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_concatenate); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 270, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     { /* enter inner scope */
-      __pyx_t_7 = PyList_New(0); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 253, __pyx_L1_error)
+      __pyx_t_7 = PyList_New(0); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 270, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_chunks)) { __Pyx_RaiseClosureNameError("chunks"); __PYX_ERR(0, 253, __pyx_L1_error) }
+      if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_chunks)) { __Pyx_RaiseClosureNameError("chunks"); __PYX_ERR(0, 270, __pyx_L1_error) }
       if (unlikely(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_chunks == Py_None)) {
         PyErr_SetString(PyExc_TypeError, "'NoneType' object is not iterable");
-        __PYX_ERR(0, 253, __pyx_L1_error)
+        __PYX_ERR(0, 270, __pyx_L1_error)
       }
       __pyx_t_9 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_chunks; __Pyx_INCREF(__pyx_t_9); __pyx_t_10 = 0;
       for (;;) {
         if (__pyx_t_10 >= PyList_GET_SIZE(__pyx_t_9)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_11 = PyList_GET_ITEM(__pyx_t_9, __pyx_t_10); __Pyx_INCREF(__pyx_t_11); __pyx_t_10++; if (unlikely((0 < 0))) __PYX_ERR(0, 253, __pyx_L1_error)
+        __pyx_t_11 = PyList_GET_ITEM(__pyx_t_9, __pyx_t_10); __Pyx_INCREF(__pyx_t_11); __pyx_t_10++; if (unlikely((0 < 0))) __PYX_ERR(0, 270, __pyx_L1_error)
         #else
-        __pyx_t_11 = PySequence_ITEM(__pyx_t_9, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 253, __pyx_L1_error)
+        __pyx_t_11 = PySequence_ITEM(__pyx_t_9, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 270, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_11);
         #endif
         __Pyx_XGOTREF(__pyx_cur_scope->__pyx_8genexpr2__pyx_v_ch);
         __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_8genexpr2__pyx_v_ch, __pyx_t_11);
         __Pyx_GIVEREF(__pyx_t_11);
         __pyx_t_11 = 0;
-        __pyx_t_11 = __Pyx_PyObject_GetItem(__pyx_cur_scope->__pyx_8genexpr2__pyx_v_ch, __pyx_cur_scope->__pyx_v_col); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 253, __pyx_L1_error)
+        __pyx_t_11 = __Pyx_PyObject_GetItem(__pyx_cur_scope->__pyx_8genexpr2__pyx_v_ch, __pyx_cur_scope->__pyx_v_col); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 270, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_11);
-        if (unlikely(__Pyx_ListComp_Append(__pyx_t_7, (PyObject*)__pyx_t_11))) __PYX_ERR(0, 253, __pyx_L1_error)
+        if (unlikely(__Pyx_ListComp_Append(__pyx_t_7, (PyObject*)__pyx_t_11))) __PYX_ERR(0, 270, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
       }
       __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
@@ -21661,17 +22023,17 @@ static PyObject *__pyx_gb_19tabular_data_parser_18parse_tabular_data_5generator1
       __pyx_t_5 = __Pyx_PyObject_FastCall(__pyx_t_8, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
       __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 253, __pyx_L1_error)
+      if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 270, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     }
-    if (unlikely(PyDict_SetItem(__pyx_r, (PyObject*)__pyx_cur_scope->__pyx_v_col, (PyObject*)__pyx_t_5))) __PYX_ERR(0, 252, __pyx_L1_error)
+    if (unlikely(PyDict_SetItem(__pyx_r, (PyObject*)__pyx_cur_scope->__pyx_v_col, (PyObject*)__pyx_t_5))) __PYX_ERR(0, 269, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   CYTHON_MAYBE_UNUSED_VAR(__pyx_cur_scope);
 
-  /* "tabular_data_parser.pyx":252
+  /* "tabular_data_parser.pyx":269
  * 
  *   # For each column, concatenate values from all chunks into a single array
  *   return dict( (col,             # <<<<<<<<<<<<<<
@@ -21702,7 +22064,7 @@ static PyObject *__pyx_gb_19tabular_data_parser_18parse_tabular_data_5generator1
   return __pyx_r;
 }
 
-/* "tabular_data_parser.pyx":212
+/* "tabular_data_parser.pyx":229
  *   return v
  * 
  * def parse_tabular_data(s, dtypes, chunk_size=1000000):             # <<<<<<<<<<<<<<
@@ -21741,229 +22103,229 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
   if (unlikely(!__pyx_cur_scope)) {
     __pyx_cur_scope = ((struct __pyx_obj_19tabular_data_parser___pyx_scope_struct__parse_tabular_data *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(0, 212, __pyx_L1_error)
+    __PYX_ERR(0, 229, __pyx_L1_error)
   } else {
     __Pyx_GOTREF((PyObject *)__pyx_cur_scope);
   }
 
-  /* "tabular_data_parser.pyx":226
+  /* "tabular_data_parser.pyx":243
  *   """
  *   # Map various float and int subtypes to float and int
  *   for i in range(len(dtypes)):             # <<<<<<<<<<<<<<
  *     if dtypes[i] in [ np.float64, np.float32, np.float16 ]: dtypes[i] = float
  *     if dtypes[i] in [ np.int64, np.int32, np.int16, np.int8, np.intc ]: dtypes[i] = int
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_dtypes); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 226, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_dtypes); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 243, __pyx_L1_error)
   __pyx_t_2 = __pyx_t_1;
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "tabular_data_parser.pyx":227
+    /* "tabular_data_parser.pyx":244
  *   # Map various float and int subtypes to float and int
  *   for i in range(len(dtypes)):
  *     if dtypes[i] in [ np.float64, np.float32, np.float16 ]: dtypes[i] = float             # <<<<<<<<<<<<<<
  *     if dtypes[i] in [ np.int64, np.int32, np.int16, np.int8, np.intc ]: dtypes[i] = int
  *     if dtypes[i] in [ np.complex128, np.complex64, np.cdouble, np.cfloat ]: dtypes[i] = complex
  */
-    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_dtypes, __pyx_v_i, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 227, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_dtypes, __pyx_v_i, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 244, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 227, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 244, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_float64); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 227, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_float64); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 244, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 227, __pyx_L1_error)
+    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 244, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 227, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 244, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (!__pyx_t_8) {
     } else {
       __pyx_t_5 = __pyx_t_8;
       goto __pyx_L6_bool_binop_done;
     }
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 227, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 244, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_float32); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 227, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_float32); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 244, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 227, __pyx_L1_error)
+    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 244, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 227, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 244, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (!__pyx_t_8) {
     } else {
       __pyx_t_5 = __pyx_t_8;
       goto __pyx_L6_bool_binop_done;
     }
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 227, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 244, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_float16); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 227, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_float16); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 244, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 227, __pyx_L1_error)
+    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 244, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 227, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 244, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __pyx_t_5 = __pyx_t_8;
     __pyx_L6_bool_binop_done:;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_8 = __pyx_t_5;
     if (__pyx_t_8) {
-      if (unlikely((__Pyx_SetItemInt(__pyx_v_dtypes, __pyx_v_i, ((PyObject *)(&PyFloat_Type)), Py_ssize_t, 1, PyInt_FromSsize_t, 0, 0, 0) < 0))) __PYX_ERR(0, 227, __pyx_L1_error)
+      if (unlikely((__Pyx_SetItemInt(__pyx_v_dtypes, __pyx_v_i, ((PyObject *)(&PyFloat_Type)), Py_ssize_t, 1, PyInt_FromSsize_t, 0, 0, 0) < 0))) __PYX_ERR(0, 244, __pyx_L1_error)
     }
 
-    /* "tabular_data_parser.pyx":228
+    /* "tabular_data_parser.pyx":245
  *   for i in range(len(dtypes)):
  *     if dtypes[i] in [ np.float64, np.float32, np.float16 ]: dtypes[i] = float
  *     if dtypes[i] in [ np.int64, np.int32, np.int16, np.int8, np.intc ]: dtypes[i] = int             # <<<<<<<<<<<<<<
  *     if dtypes[i] in [ np.complex128, np.complex64, np.cdouble, np.cfloat ]: dtypes[i] = complex
  * 
  */
-    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_dtypes, __pyx_v_i, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 228, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_dtypes, __pyx_v_i, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 228, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_int64); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 228, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_int64); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 228, __pyx_L1_error)
+    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 228, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (!__pyx_t_5) {
     } else {
       __pyx_t_8 = __pyx_t_5;
       goto __pyx_L10_bool_binop_done;
     }
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 228, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_int32); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 228, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_int32); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 228, __pyx_L1_error)
+    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 228, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (!__pyx_t_5) {
     } else {
       __pyx_t_8 = __pyx_t_5;
       goto __pyx_L10_bool_binop_done;
     }
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 228, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_int16); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 228, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_int16); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 228, __pyx_L1_error)
+    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 228, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (!__pyx_t_5) {
     } else {
       __pyx_t_8 = __pyx_t_5;
       goto __pyx_L10_bool_binop_done;
     }
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 228, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_int8); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 228, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_int8); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 228, __pyx_L1_error)
+    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 228, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (!__pyx_t_5) {
     } else {
       __pyx_t_8 = __pyx_t_5;
       goto __pyx_L10_bool_binop_done;
     }
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 228, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_intc); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 228, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_intc); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 228, __pyx_L1_error)
+    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 228, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 245, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __pyx_t_8 = __pyx_t_5;
     __pyx_L10_bool_binop_done:;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_5 = __pyx_t_8;
     if (__pyx_t_5) {
-      if (unlikely((__Pyx_SetItemInt(__pyx_v_dtypes, __pyx_v_i, ((PyObject *)(&PyInt_Type)), Py_ssize_t, 1, PyInt_FromSsize_t, 0, 0, 0) < 0))) __PYX_ERR(0, 228, __pyx_L1_error)
+      if (unlikely((__Pyx_SetItemInt(__pyx_v_dtypes, __pyx_v_i, ((PyObject *)(&PyInt_Type)), Py_ssize_t, 1, PyInt_FromSsize_t, 0, 0, 0) < 0))) __PYX_ERR(0, 245, __pyx_L1_error)
     }
 
-    /* "tabular_data_parser.pyx":229
+    /* "tabular_data_parser.pyx":246
  *     if dtypes[i] in [ np.float64, np.float32, np.float16 ]: dtypes[i] = float
  *     if dtypes[i] in [ np.int64, np.int32, np.int16, np.int8, np.intc ]: dtypes[i] = int
  *     if dtypes[i] in [ np.complex128, np.complex64, np.cdouble, np.cfloat ]: dtypes[i] = complex             # <<<<<<<<<<<<<<
  * 
  *   assert all(dt in [ float, int, complex, str ] for dt in dtypes ), f"One or more unsupported datatypes: {dtypes}"
  */
-    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_dtypes, __pyx_v_i, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 229, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_dtypes, __pyx_v_i, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 229, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_complex128); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 229, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_complex128); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 229, __pyx_L1_error)
+    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 229, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (!__pyx_t_8) {
     } else {
       __pyx_t_5 = __pyx_t_8;
       goto __pyx_L16_bool_binop_done;
     }
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 229, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_complex64); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 229, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_complex64); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 229, __pyx_L1_error)
+    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 229, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (!__pyx_t_8) {
     } else {
       __pyx_t_5 = __pyx_t_8;
       goto __pyx_L16_bool_binop_done;
     }
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 229, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_cdouble); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 229, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_cdouble); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 229, __pyx_L1_error)
+    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 229, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (!__pyx_t_8) {
     } else {
       __pyx_t_5 = __pyx_t_8;
       goto __pyx_L16_bool_binop_done;
     }
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 229, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_cfloat); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 229, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_cfloat); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 229, __pyx_L1_error)
+    __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 229, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __pyx_t_5 = __pyx_t_8;
     __pyx_L16_bool_binop_done:;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_8 = __pyx_t_5;
     if (__pyx_t_8) {
-      if (unlikely((__Pyx_SetItemInt(__pyx_v_dtypes, __pyx_v_i, ((PyObject *)(&PyComplex_Type)), Py_ssize_t, 1, PyInt_FromSsize_t, 0, 0, 0) < 0))) __PYX_ERR(0, 229, __pyx_L1_error)
+      if (unlikely((__Pyx_SetItemInt(__pyx_v_dtypes, __pyx_v_i, ((PyObject *)(&PyComplex_Type)), Py_ssize_t, 1, PyInt_FromSsize_t, 0, 0, 0) < 0))) __PYX_ERR(0, 246, __pyx_L1_error)
     }
   }
 
-  /* "tabular_data_parser.pyx":231
+  /* "tabular_data_parser.pyx":248
  *     if dtypes[i] in [ np.complex128, np.complex64, np.cdouble, np.cfloat ]: dtypes[i] = complex
  * 
  *   assert all(dt in [ float, int, complex, str ] for dt in dtypes ), f"One or more unsupported datatypes: {dtypes}"             # <<<<<<<<<<<<<<
@@ -21972,36 +22334,36 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
  */
   #ifndef CYTHON_WITHOUT_ASSERTIONS
   if (unlikely(__pyx_assertions_enabled())) {
-    __pyx_t_4 = __pyx_pf_19tabular_data_parser_18parse_tabular_data_genexpr(NULL, __pyx_v_dtypes); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 231, __pyx_L1_error)
+    __pyx_t_4 = __pyx_pf_19tabular_data_parser_18parse_tabular_data_genexpr(NULL, __pyx_v_dtypes); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 248, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_6 = __Pyx_Generator_Next(__pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 231, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_Generator_Next(__pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 248, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 231, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 248, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (unlikely(!__pyx_t_8)) {
-      __pyx_t_6 = __Pyx_PyObject_FormatSimple(__pyx_v_dtypes, __pyx_empty_unicode); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 231, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_FormatSimple(__pyx_v_dtypes, __pyx_empty_unicode); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 248, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
-      __pyx_t_4 = __Pyx_PyUnicode_Concat(__pyx_kp_u_One_or_more_unsupported_datatype, __pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 231, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyUnicode_Concat(__pyx_kp_u_One_or_more_unsupported_datatype, __pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 248, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_Raise(__pyx_builtin_AssertionError, __pyx_t_4, 0, 0);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __PYX_ERR(0, 231, __pyx_L1_error)
+      __PYX_ERR(0, 248, __pyx_L1_error)
     }
   }
   #else
-  if ((1)); else __PYX_ERR(0, 231, __pyx_L1_error)
+  if ((1)); else __PYX_ERR(0, 248, __pyx_L1_error)
   #endif
 
-  /* "tabular_data_parser.pyx":234
+  /* "tabular_data_parser.pyx":251
  * 
  *   # Parse first chunk
  *   parsed_bytes, data = parse_up_to_chunk_size(s, dtypes, chunk_size)             # <<<<<<<<<<<<<<
  *   if parsed_bytes == len(s): return data
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_parse_up_to_chunk_size); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 234, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_parse_up_to_chunk_size); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 251, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_t_7 = NULL;
   __pyx_t_9 = 0;
@@ -22021,7 +22383,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
     PyObject *__pyx_callargs[4] = {__pyx_t_7, __pyx_v_s, __pyx_v_dtypes, __pyx_v_chunk_size};
     __pyx_t_4 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_9, 3+__pyx_t_9);
     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 234, __pyx_L1_error)
+    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 251, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   }
@@ -22031,7 +22393,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
     if (unlikely(size != 2)) {
       if (size > 2) __Pyx_RaiseTooManyValuesError(2);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(0, 234, __pyx_L1_error)
+      __PYX_ERR(0, 251, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -22044,15 +22406,15 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
     __Pyx_INCREF(__pyx_t_6);
     __Pyx_INCREF(__pyx_t_7);
     #else
-    __pyx_t_6 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 234, __pyx_L1_error)
+    __pyx_t_6 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 251, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 234, __pyx_L1_error)
+    __pyx_t_7 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 251, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     #endif
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_10 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 234, __pyx_L1_error)
+    __pyx_t_10 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 251, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_10);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_11 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_10);
@@ -22060,7 +22422,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
     __Pyx_GOTREF(__pyx_t_6);
     index = 1; __pyx_t_7 = __pyx_t_11(__pyx_t_10); if (unlikely(!__pyx_t_7)) goto __pyx_L20_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_7);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_11(__pyx_t_10), 2) < 0) __PYX_ERR(0, 234, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_11(__pyx_t_10), 2) < 0) __PYX_ERR(0, 251, __pyx_L1_error)
     __pyx_t_11 = NULL;
     __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
     goto __pyx_L21_unpacking_done;
@@ -22068,7 +22430,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
     __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
     __pyx_t_11 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(0, 234, __pyx_L1_error)
+    __PYX_ERR(0, 251, __pyx_L1_error)
     __pyx_L21_unpacking_done:;
   }
   __pyx_v_parsed_bytes = __pyx_t_6;
@@ -22076,19 +22438,19 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
   __pyx_v_data = __pyx_t_7;
   __pyx_t_7 = 0;
 
-  /* "tabular_data_parser.pyx":235
+  /* "tabular_data_parser.pyx":252
  *   # Parse first chunk
  *   parsed_bytes, data = parse_up_to_chunk_size(s, dtypes, chunk_size)
  *   if parsed_bytes == len(s): return data             # <<<<<<<<<<<<<<
  * 
  *   # Data didn't fit into a single chunk --> Read more chunks. Could
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_s); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 235, __pyx_L1_error)
-  __pyx_t_4 = PyInt_FromSsize_t(__pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 235, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_s); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 252, __pyx_L1_error)
+  __pyx_t_4 = PyInt_FromSsize_t(__pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 252, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_7 = PyObject_RichCompare(__pyx_v_parsed_bytes, __pyx_t_4, Py_EQ); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 235, __pyx_L1_error)
+  __pyx_t_7 = PyObject_RichCompare(__pyx_v_parsed_bytes, __pyx_t_4, Py_EQ); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 252, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 235, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 252, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   if (__pyx_t_8) {
     __Pyx_XDECREF(__pyx_r);
@@ -22097,23 +22459,23 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
     goto __pyx_L0;
   }
 
-  /* "tabular_data_parser.pyx":240
+  /* "tabular_data_parser.pyx":257
  *   # do this in C++ but there's little benefit as long as chunk_size is
  *   # reasonably large.
  *   chunks = [ data ]             # <<<<<<<<<<<<<<
  *   prev_parsed_bytes = parsed_bytes
  *   while prev_parsed_bytes < len(s)-1:
  */
-  __pyx_t_7 = PyList_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 240, __pyx_L1_error)
+  __pyx_t_7 = PyList_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 257, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_INCREF(__pyx_v_data);
   __Pyx_GIVEREF(__pyx_v_data);
-  if (__Pyx_PyList_SET_ITEM(__pyx_t_7, 0, __pyx_v_data)) __PYX_ERR(0, 240, __pyx_L1_error);
+  if (__Pyx_PyList_SET_ITEM(__pyx_t_7, 0, __pyx_v_data)) __PYX_ERR(0, 257, __pyx_L1_error);
   __Pyx_GIVEREF(__pyx_t_7);
   __pyx_cur_scope->__pyx_v_chunks = ((PyObject*)__pyx_t_7);
   __pyx_t_7 = 0;
 
-  /* "tabular_data_parser.pyx":241
+  /* "tabular_data_parser.pyx":258
  *   # reasonably large.
  *   chunks = [ data ]
  *   prev_parsed_bytes = parsed_bytes             # <<<<<<<<<<<<<<
@@ -22123,7 +22485,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
   __Pyx_INCREF(__pyx_v_parsed_bytes);
   __pyx_v_prev_parsed_bytes = __pyx_v_parsed_bytes;
 
-  /* "tabular_data_parser.pyx":242
+  /* "tabular_data_parser.pyx":259
  *   chunks = [ data ]
  *   prev_parsed_bytes = parsed_bytes
  *   while prev_parsed_bytes < len(s)-1:             # <<<<<<<<<<<<<<
@@ -22131,25 +22493,25 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
  *     assert parsed_bytes != 0, "parse_up_to_chunk_size() didn't parse anything"
  */
   while (1) {
-    __pyx_t_1 = PyObject_Length(__pyx_v_s); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 242, __pyx_L1_error)
-    __pyx_t_7 = PyInt_FromSsize_t((__pyx_t_1 - 1)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 242, __pyx_L1_error)
+    __pyx_t_1 = PyObject_Length(__pyx_v_s); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 259, __pyx_L1_error)
+    __pyx_t_7 = PyInt_FromSsize_t((__pyx_t_1 - 1)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 259, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_4 = PyObject_RichCompare(__pyx_v_prev_parsed_bytes, __pyx_t_7, Py_LT); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 242, __pyx_L1_error)
+    __pyx_t_4 = PyObject_RichCompare(__pyx_v_prev_parsed_bytes, __pyx_t_7, Py_LT); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 259, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 242, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 259, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     if (!__pyx_t_8) break;
 
-    /* "tabular_data_parser.pyx":243
+    /* "tabular_data_parser.pyx":260
  *   prev_parsed_bytes = parsed_bytes
  *   while prev_parsed_bytes < len(s)-1:
  *     parsed_bytes, data = parse_up_to_chunk_size(s[prev_parsed_bytes:], dtypes, chunk_size)             # <<<<<<<<<<<<<<
  *     assert parsed_bytes != 0, "parse_up_to_chunk_size() didn't parse anything"
  * 
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_parse_up_to_chunk_size); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 243, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_parse_up_to_chunk_size); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 260, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_6 = __Pyx_PyObject_GetSlice(__pyx_v_s, 0, 0, &__pyx_v_prev_parsed_bytes, NULL, NULL, 0, 0, 0); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 243, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetSlice(__pyx_v_s, 0, 0, &__pyx_v_prev_parsed_bytes, NULL, NULL, 0, 0, 0); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 260, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_10 = NULL;
     __pyx_t_9 = 0;
@@ -22170,7 +22532,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
       __pyx_t_4 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 3+__pyx_t_9);
       __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 243, __pyx_L1_error)
+      if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 260, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     }
@@ -22180,7 +22542,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
       if (unlikely(size != 2)) {
         if (size > 2) __Pyx_RaiseTooManyValuesError(2);
         else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-        __PYX_ERR(0, 243, __pyx_L1_error)
+        __PYX_ERR(0, 260, __pyx_L1_error)
       }
       #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
       if (likely(PyTuple_CheckExact(sequence))) {
@@ -22193,15 +22555,15 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
       __Pyx_INCREF(__pyx_t_7);
       __Pyx_INCREF(__pyx_t_6);
       #else
-      __pyx_t_7 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 243, __pyx_L1_error)
+      __pyx_t_7 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 260, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_6 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 243, __pyx_L1_error)
+      __pyx_t_6 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 260, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       #endif
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     } else {
       Py_ssize_t index = -1;
-      __pyx_t_10 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 243, __pyx_L1_error)
+      __pyx_t_10 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 260, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __pyx_t_11 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_10);
@@ -22209,7 +22571,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
       __Pyx_GOTREF(__pyx_t_7);
       index = 1; __pyx_t_6 = __pyx_t_11(__pyx_t_10); if (unlikely(!__pyx_t_6)) goto __pyx_L25_unpacking_failed;
       __Pyx_GOTREF(__pyx_t_6);
-      if (__Pyx_IternextUnpackEndCheck(__pyx_t_11(__pyx_t_10), 2) < 0) __PYX_ERR(0, 243, __pyx_L1_error)
+      if (__Pyx_IternextUnpackEndCheck(__pyx_t_11(__pyx_t_10), 2) < 0) __PYX_ERR(0, 260, __pyx_L1_error)
       __pyx_t_11 = NULL;
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       goto __pyx_L26_unpacking_done;
@@ -22217,7 +22579,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       __pyx_t_11 = NULL;
       if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-      __PYX_ERR(0, 243, __pyx_L1_error)
+      __PYX_ERR(0, 260, __pyx_L1_error)
       __pyx_L26_unpacking_done:;
     }
     __Pyx_DECREF_SET(__pyx_v_parsed_bytes, __pyx_t_7);
@@ -22225,7 +22587,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
     __Pyx_DECREF_SET(__pyx_v_data, __pyx_t_6);
     __pyx_t_6 = 0;
 
-    /* "tabular_data_parser.pyx":244
+    /* "tabular_data_parser.pyx":261
  *   while prev_parsed_bytes < len(s)-1:
  *     parsed_bytes, data = parse_up_to_chunk_size(s[prev_parsed_bytes:], dtypes, chunk_size)
  *     assert parsed_bytes != 0, "parse_up_to_chunk_size() didn't parse anything"             # <<<<<<<<<<<<<<
@@ -22234,39 +22596,39 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
  */
     #ifndef CYTHON_WITHOUT_ASSERTIONS
     if (unlikely(__pyx_assertions_enabled())) {
-      __pyx_t_8 = (__Pyx_PyInt_BoolNeObjC(__pyx_v_parsed_bytes, __pyx_int_0, 0, 0)); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 244, __pyx_L1_error)
+      __pyx_t_8 = (__Pyx_PyInt_BoolNeObjC(__pyx_v_parsed_bytes, __pyx_int_0, 0, 0)); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 261, __pyx_L1_error)
       if (unlikely(!__pyx_t_8)) {
         __Pyx_Raise(__pyx_builtin_AssertionError, __pyx_kp_u_parse_up_to_chunk_size_didn_t_pa, 0, 0);
-        __PYX_ERR(0, 244, __pyx_L1_error)
+        __PYX_ERR(0, 261, __pyx_L1_error)
       }
     }
     #else
-    if ((1)); else __PYX_ERR(0, 244, __pyx_L1_error)
+    if ((1)); else __PYX_ERR(0, 261, __pyx_L1_error)
     #endif
 
-    /* "tabular_data_parser.pyx":246
+    /* "tabular_data_parser.pyx":263
  *     assert parsed_bytes != 0, "parse_up_to_chunk_size() didn't parse anything"
  * 
  *     chunks.append(data)             # <<<<<<<<<<<<<<
  *     prev_parsed_bytes += parsed_bytes
  * 
  */
-    __pyx_t_12 = __Pyx_PyList_Append(__pyx_cur_scope->__pyx_v_chunks, __pyx_v_data); if (unlikely(__pyx_t_12 == ((int)-1))) __PYX_ERR(0, 246, __pyx_L1_error)
+    __pyx_t_12 = __Pyx_PyList_Append(__pyx_cur_scope->__pyx_v_chunks, __pyx_v_data); if (unlikely(__pyx_t_12 == ((int)-1))) __PYX_ERR(0, 263, __pyx_L1_error)
 
-    /* "tabular_data_parser.pyx":247
+    /* "tabular_data_parser.pyx":264
  * 
  *     chunks.append(data)
  *     prev_parsed_bytes += parsed_bytes             # <<<<<<<<<<<<<<
  * 
  *   assert prev_parsed_bytes == len(s), f'Input not fully parsed. chunk_size={chunk_size}, parsed_bytes={parsed_bytes}'
  */
-    __pyx_t_4 = PyNumber_InPlaceAdd(__pyx_v_prev_parsed_bytes, __pyx_v_parsed_bytes); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 247, __pyx_L1_error)
+    __pyx_t_4 = PyNumber_InPlaceAdd(__pyx_v_prev_parsed_bytes, __pyx_v_parsed_bytes); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 264, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF_SET(__pyx_v_prev_parsed_bytes, __pyx_t_4);
     __pyx_t_4 = 0;
   }
 
-  /* "tabular_data_parser.pyx":249
+  /* "tabular_data_parser.pyx":266
  *     prev_parsed_bytes += parsed_bytes
  * 
  *   assert prev_parsed_bytes == len(s), f'Input not fully parsed. chunk_size={chunk_size}, parsed_bytes={parsed_bytes}'             # <<<<<<<<<<<<<<
@@ -22275,15 +22637,15 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
  */
   #ifndef CYTHON_WITHOUT_ASSERTIONS
   if (unlikely(__pyx_assertions_enabled())) {
-    __pyx_t_1 = PyObject_Length(__pyx_v_s); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 249, __pyx_L1_error)
-    __pyx_t_4 = PyInt_FromSsize_t(__pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 249, __pyx_L1_error)
+    __pyx_t_1 = PyObject_Length(__pyx_v_s); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 266, __pyx_L1_error)
+    __pyx_t_4 = PyInt_FromSsize_t(__pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 266, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_6 = PyObject_RichCompare(__pyx_v_prev_parsed_bytes, __pyx_t_4, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 249, __pyx_L1_error)
+    __pyx_t_6 = PyObject_RichCompare(__pyx_v_prev_parsed_bytes, __pyx_t_4, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 266, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 249, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 266, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (unlikely(!__pyx_t_8)) {
-      __pyx_t_6 = PyTuple_New(4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 249, __pyx_L1_error)
+      __pyx_t_6 = PyTuple_New(4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 266, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __pyx_t_1 = 0;
       __pyx_t_13 = 127;
@@ -22291,7 +22653,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
       __pyx_t_1 += 35;
       __Pyx_GIVEREF(__pyx_kp_u_Input_not_fully_parsed_chunk_siz);
       PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_kp_u_Input_not_fully_parsed_chunk_siz);
-      __pyx_t_4 = __Pyx_PyObject_FormatSimple(__pyx_v_chunk_size, __pyx_empty_unicode); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 249, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_FormatSimple(__pyx_v_chunk_size, __pyx_empty_unicode); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 266, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_t_13 = (__Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_4) > __pyx_t_13) ? __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_4) : __pyx_t_13;
       __pyx_t_1 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_4);
@@ -22302,26 +22664,26 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
       __pyx_t_1 += 15;
       __Pyx_GIVEREF(__pyx_kp_u_parsed_bytes);
       PyTuple_SET_ITEM(__pyx_t_6, 2, __pyx_kp_u_parsed_bytes);
-      __pyx_t_4 = __Pyx_PyObject_FormatSimple(__pyx_v_parsed_bytes, __pyx_empty_unicode); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 249, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_FormatSimple(__pyx_v_parsed_bytes, __pyx_empty_unicode); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 266, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_t_13 = (__Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_4) > __pyx_t_13) ? __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_4) : __pyx_t_13;
       __pyx_t_1 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_4);
       __Pyx_GIVEREF(__pyx_t_4);
       PyTuple_SET_ITEM(__pyx_t_6, 3, __pyx_t_4);
       __pyx_t_4 = 0;
-      __pyx_t_4 = __Pyx_PyUnicode_Join(__pyx_t_6, 4, __pyx_t_1, __pyx_t_13); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 249, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyUnicode_Join(__pyx_t_6, 4, __pyx_t_1, __pyx_t_13); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 266, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_Raise(__pyx_builtin_AssertionError, __pyx_t_4, 0, 0);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __PYX_ERR(0, 249, __pyx_L1_error)
+      __PYX_ERR(0, 266, __pyx_L1_error)
     }
   }
   #else
-  if ((1)); else __PYX_ERR(0, 249, __pyx_L1_error)
+  if ((1)); else __PYX_ERR(0, 266, __pyx_L1_error)
   #endif
 
-  /* "tabular_data_parser.pyx":252
+  /* "tabular_data_parser.pyx":269
  * 
  *   # For each column, concatenate values from all chunks into a single array
  *   return dict( (col,             # <<<<<<<<<<<<<<
@@ -22330,31 +22692,31 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
  */
   __Pyx_XDECREF(__pyx_r);
 
-  /* "tabular_data_parser.pyx":254
+  /* "tabular_data_parser.pyx":271
  *   return dict( (col,
  *                 np.concatenate( [ ch[col] for ch in chunks ] )
  *                 ) for col in data.keys() )             # <<<<<<<<<<<<<<
  * 
  * def parse_up_to_chunk_size(s, dtypes, chunk_size):
  */
-  __pyx_t_4 = __pyx_pf_19tabular_data_parser_18parse_tabular_data_3genexpr(((PyObject*)__pyx_cur_scope), __pyx_v_data); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 252, __pyx_L1_error)
+  __pyx_t_4 = __pyx_pf_19tabular_data_parser_18parse_tabular_data_3genexpr(((PyObject*)__pyx_cur_scope), __pyx_v_data); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 269, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
 
-  /* "tabular_data_parser.pyx":252
+  /* "tabular_data_parser.pyx":269
  * 
  *   # For each column, concatenate values from all chunks into a single array
  *   return dict( (col,             # <<<<<<<<<<<<<<
  *                 np.concatenate( [ ch[col] for ch in chunks ] )
  *                 ) for col in data.keys() )
  */
-  __pyx_t_6 = __Pyx_Generator_Next(__pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 252, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_Generator_Next(__pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 269, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_r = __pyx_t_6;
   __pyx_t_6 = 0;
   goto __pyx_L0;
 
-  /* "tabular_data_parser.pyx":212
+  /* "tabular_data_parser.pyx":229
  *   return v
  * 
  * def parse_tabular_data(s, dtypes, chunk_size=1000000):             # <<<<<<<<<<<<<<
@@ -22382,7 +22744,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_parse_tabular_data(CYTHON_UNUSED
   return __pyx_r;
 }
 
-/* "tabular_data_parser.pyx":256
+/* "tabular_data_parser.pyx":273
  *                 ) for col in data.keys() )
  * 
  * def parse_up_to_chunk_size(s, dtypes, chunk_size):             # <<<<<<<<<<<<<<
@@ -22425,7 +22787,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __pyx_nargs = PyTuple_GET_SIZE(__pyx_args);
   #else
   __pyx_nargs = PyTuple_Size(__pyx_args);
-  if (unlikely((__pyx_nargs < 0))) __PYX_ERR(0, 256, __pyx_L3_error)
+  if (unlikely((__pyx_nargs < 0))) __PYX_ERR(0, 273, __pyx_L3_error)
   #endif
   #endif
   __pyx_kwvalues = __Pyx_KwValues_FASTCALL(__pyx_args, __pyx_nargs);
@@ -22450,7 +22812,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 256, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 273, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -22458,9 +22820,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 256, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 273, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("parse_up_to_chunk_size", 1, 3, 3, 1); __PYX_ERR(0, 256, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("parse_up_to_chunk_size", 1, 3, 3, 1); __PYX_ERR(0, 273, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -22468,14 +22830,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 256, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 273, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("parse_up_to_chunk_size", 1, 3, 3, 2); __PYX_ERR(0, 256, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("parse_up_to_chunk_size", 1, 3, 3, 2); __PYX_ERR(0, 273, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "parse_up_to_chunk_size") < 0)) __PYX_ERR(0, 256, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "parse_up_to_chunk_size") < 0)) __PYX_ERR(0, 273, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 3)) {
       goto __pyx_L5_argtuple_error;
@@ -22490,7 +22852,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("parse_up_to_chunk_size", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 256, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("parse_up_to_chunk_size", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 273, __pyx_L3_error)
   goto __pyx_L3_error;
   __pyx_L3_error:;
   {
@@ -22517,7 +22879,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 }
 static PyObject *__pyx_gb_19tabular_data_parser_22parse_up_to_chunk_size_2generator2(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value); /* proto */
 
-/* "tabular_data_parser.pyx":316
+/* "tabular_data_parser.pyx":339
  *   # Strip the uninitialized rows beyond n_parsed_rows.
  *   # Give the columns names "col<i>", as expected by PDataSingle/DataView.
  *   return parsed_bytes, dict( (f"col{j}", np_buf[:n_parsed_rows]) for j,np_buf in enumerate(output_buffers) )             # <<<<<<<<<<<<<<
@@ -22535,7 +22897,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_22parse_up_to_chunk_size_genexpr
   if (unlikely(!__pyx_cur_scope)) {
     __pyx_cur_scope = ((struct __pyx_obj_19tabular_data_parser___pyx_scope_struct_4_genexpr *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(0, 316, __pyx_L1_error)
+    __PYX_ERR(0, 339, __pyx_L1_error)
   } else {
     __Pyx_GOTREF((PyObject *)__pyx_cur_scope);
   }
@@ -22546,7 +22908,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_22parse_up_to_chunk_size_genexpr
   __Pyx_INCREF(__pyx_cur_scope->__pyx_genexpr_arg_0);
   __Pyx_GIVEREF(__pyx_cur_scope->__pyx_genexpr_arg_0);
   {
-    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_19tabular_data_parser_22parse_up_to_chunk_size_2generator2, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_parse_up_to_chunk_size_locals_ge, __pyx_n_s_tabular_data_parser); if (unlikely(!gen)) __PYX_ERR(0, 316, __pyx_L1_error)
+    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_19tabular_data_parser_22parse_up_to_chunk_size_2generator2, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_parse_up_to_chunk_size_locals_ge, __pyx_n_s_tabular_data_parser); if (unlikely(!gen)) __PYX_ERR(0, 339, __pyx_L1_error)
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -22583,19 +22945,19 @@ static PyObject *__pyx_gb_19tabular_data_parser_22parse_up_to_chunk_size_2genera
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 316, __pyx_L1_error)
-  __pyx_r = PyDict_New(); if (unlikely(!__pyx_r)) __PYX_ERR(0, 316, __pyx_L1_error)
+  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 339, __pyx_L1_error)
+  __pyx_r = PyDict_New(); if (unlikely(!__pyx_r)) __PYX_ERR(0, 339, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_r);
   __Pyx_INCREF(__pyx_int_0);
   __pyx_t_1 = __pyx_int_0;
-  if (unlikely(!__pyx_cur_scope->__pyx_genexpr_arg_0)) { __Pyx_RaiseUnboundLocalError(".0"); __PYX_ERR(0, 316, __pyx_L1_error) }
+  if (unlikely(!__pyx_cur_scope->__pyx_genexpr_arg_0)) { __Pyx_RaiseUnboundLocalError(".0"); __PYX_ERR(0, 339, __pyx_L1_error) }
   __pyx_t_2 = __pyx_cur_scope->__pyx_genexpr_arg_0; __Pyx_INCREF(__pyx_t_2); __pyx_t_3 = 0;
   for (;;) {
     if (__pyx_t_3 >= PyList_GET_SIZE(__pyx_t_2)) break;
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-    __pyx_t_4 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_3); __Pyx_INCREF(__pyx_t_4); __pyx_t_3++; if (unlikely((0 < 0))) __PYX_ERR(0, 316, __pyx_L1_error)
+    __pyx_t_4 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_3); __Pyx_INCREF(__pyx_t_4); __pyx_t_3++; if (unlikely((0 < 0))) __PYX_ERR(0, 339, __pyx_L1_error)
     #else
-    __pyx_t_4 = PySequence_ITEM(__pyx_t_2, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 316, __pyx_L1_error)
+    __pyx_t_4 = PySequence_ITEM(__pyx_t_2, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 339, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     #endif
     __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_np_buf);
@@ -22606,19 +22968,19 @@ static PyObject *__pyx_gb_19tabular_data_parser_22parse_up_to_chunk_size_2genera
     __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_j);
     __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_j, __pyx_t_1);
     __Pyx_GIVEREF(__pyx_t_1);
-    __pyx_t_4 = __Pyx_PyInt_AddObjC(__pyx_t_1, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 316, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_AddObjC(__pyx_t_1, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 339, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_1);
     __pyx_t_1 = __pyx_t_4;
     __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_FormatSimple(__pyx_cur_scope->__pyx_v_j, __pyx_empty_unicode); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 316, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_FormatSimple(__pyx_cur_scope->__pyx_v_j, __pyx_empty_unicode); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 339, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = __Pyx_PyUnicode_Concat(__pyx_n_u_col, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 316, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyUnicode_Concat(__pyx_n_u_col, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 339, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_GetSlice(__pyx_cur_scope->__pyx_v_np_buf, 0, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_n_parsed_rows, NULL, NULL, NULL, 0, 1, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 316, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetSlice(__pyx_cur_scope->__pyx_v_np_buf, 0, __pyx_cur_scope->__pyx_outer_scope->__pyx_v_n_parsed_rows, NULL, NULL, NULL, 0, 1, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 339, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    if (unlikely(PyDict_SetItem(__pyx_r, (PyObject*)__pyx_t_5, (PyObject*)__pyx_t_4))) __PYX_ERR(0, 316, __pyx_L1_error)
+    if (unlikely(PyDict_SetItem(__pyx_r, (PyObject*)__pyx_t_5, (PyObject*)__pyx_t_4))) __PYX_ERR(0, 339, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
@@ -22647,7 +23009,7 @@ static PyObject *__pyx_gb_19tabular_data_parser_22parse_up_to_chunk_size_2genera
   return __pyx_r;
 }
 
-/* "tabular_data_parser.pyx":256
+/* "tabular_data_parser.pyx":273
  *                 ) for col in data.keys() )
  * 
  * def parse_up_to_chunk_size(s, dtypes, chunk_size):             # <<<<<<<<<<<<<<
@@ -22665,6 +23027,8 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
   char const *__pyx_v_start;
   fast_float::from_chars_result __pyx_v_r;
   PyObject *__pyx_v_error_code = NULL;
+  PyObject *__pyx_v_error_message = NULL;
+  PyObject *__pyx_v_error_message_bytes = NULL;
   Py_ssize_t __pyx_v_j;
   PyObject *__pyx_v_b = NULL;
   PyObject *__pyx_8genexpr3__pyx_v_dtp = NULL;
@@ -22696,11 +23060,19 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
   ptrdiff_t __pyx_t_22;
   Py_ssize_t __pyx_t_23;
   ptrdiff_t __pyx_t_24;
-  Py_ssize_t __pyx_t_25;
+  int __pyx_t_25;
   int __pyx_t_26;
-  size_t __pyx_t_27;
-  size_t __pyx_t_28;
-  size_t __pyx_t_29;
+  char const *__pyx_t_27;
+  PyObject *__pyx_t_28 = NULL;
+  PyObject *__pyx_t_29 = NULL;
+  PyObject *__pyx_t_30 = NULL;
+  PyObject *__pyx_t_31 = NULL;
+  PyObject *__pyx_t_32 = NULL;
+  PyObject *__pyx_t_33 = NULL;
+  Py_ssize_t __pyx_t_34;
+  size_t __pyx_t_35;
+  size_t __pyx_t_36;
+  size_t __pyx_t_37;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -22709,12 +23081,12 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
   if (unlikely(!__pyx_cur_scope)) {
     __pyx_cur_scope = ((struct __pyx_obj_19tabular_data_parser___pyx_scope_struct_3_parse_up_to_chunk_size *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(0, 256, __pyx_L1_error)
+    __PYX_ERR(0, 273, __pyx_L1_error)
   } else {
     __Pyx_GOTREF((PyObject *)__pyx_cur_scope);
   }
 
-  /* "tabular_data_parser.pyx":259
+  /* "tabular_data_parser.pyx":276
  * 
  *   # Allocate output buffers
  *   output_buffers = [ np.empty(chunk_size*(2 if dtp==complex or dtp==str else 1),             # <<<<<<<<<<<<<<
@@ -22722,10 +23094,10 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
  *                      for dtp in dtypes ]
  */
   { /* enter inner scope */
-    __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 259, __pyx_L5_error)
+    __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 276, __pyx_L5_error)
     __Pyx_GOTREF(__pyx_t_1);
 
-    /* "tabular_data_parser.pyx":261
+    /* "tabular_data_parser.pyx":278
  *   output_buffers = [ np.empty(chunk_size*(2 if dtp==complex or dtp==str else 1),
  *                               dtype={float: np.double, int: np.longlong, complex: np.double, str:np.intp}[dtp])
  *                      for dtp in dtypes ]             # <<<<<<<<<<<<<<
@@ -22736,26 +23108,26 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
       __pyx_t_2 = __pyx_v_dtypes; __Pyx_INCREF(__pyx_t_2); __pyx_t_3 = 0;
       __pyx_t_4 = NULL;
     } else {
-      __pyx_t_3 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_v_dtypes); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 261, __pyx_L5_error)
+      __pyx_t_3 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_v_dtypes); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 278, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_4 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 261, __pyx_L5_error)
+      __pyx_t_4 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 278, __pyx_L5_error)
     }
     for (;;) {
       if (likely(!__pyx_t_4)) {
         if (likely(PyList_CheckExact(__pyx_t_2))) {
           if (__pyx_t_3 >= PyList_GET_SIZE(__pyx_t_2)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_5 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_3); __Pyx_INCREF(__pyx_t_5); __pyx_t_3++; if (unlikely((0 < 0))) __PYX_ERR(0, 261, __pyx_L5_error)
+          __pyx_t_5 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_3); __Pyx_INCREF(__pyx_t_5); __pyx_t_3++; if (unlikely((0 < 0))) __PYX_ERR(0, 278, __pyx_L5_error)
           #else
-          __pyx_t_5 = PySequence_ITEM(__pyx_t_2, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 261, __pyx_L5_error)
+          __pyx_t_5 = PySequence_ITEM(__pyx_t_2, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 278, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_5);
           #endif
         } else {
           if (__pyx_t_3 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_5 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_3); __Pyx_INCREF(__pyx_t_5); __pyx_t_3++; if (unlikely((0 < 0))) __PYX_ERR(0, 261, __pyx_L5_error)
+          __pyx_t_5 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_3); __Pyx_INCREF(__pyx_t_5); __pyx_t_3++; if (unlikely((0 < 0))) __PYX_ERR(0, 278, __pyx_L5_error)
           #else
-          __pyx_t_5 = PySequence_ITEM(__pyx_t_2, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 261, __pyx_L5_error)
+          __pyx_t_5 = PySequence_ITEM(__pyx_t_2, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 278, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_5);
           #endif
         }
@@ -22765,7 +23137,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 261, __pyx_L5_error)
+            else __PYX_ERR(0, 278, __pyx_L5_error)
           }
           break;
         }
@@ -22774,28 +23146,28 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
       __Pyx_XDECREF_SET(__pyx_8genexpr3__pyx_v_dtp, __pyx_t_5);
       __pyx_t_5 = 0;
 
-      /* "tabular_data_parser.pyx":259
+      /* "tabular_data_parser.pyx":276
  * 
  *   # Allocate output buffers
  *   output_buffers = [ np.empty(chunk_size*(2 if dtp==complex or dtp==str else 1),             # <<<<<<<<<<<<<<
  *                               dtype={float: np.double, int: np.longlong, complex: np.double, str:np.intp}[dtp])
  *                      for dtp in dtypes ]
  */
-      __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 259, __pyx_L5_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 276, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_empty); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 259, __pyx_L5_error)
+      __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_empty); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 276, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __pyx_t_8 = PyObject_RichCompare(__pyx_8genexpr3__pyx_v_dtp, ((PyObject *)(&PyComplex_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 259, __pyx_L5_error)
-      __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_9 < 0))) __PYX_ERR(0, 259, __pyx_L5_error)
+      __pyx_t_8 = PyObject_RichCompare(__pyx_8genexpr3__pyx_v_dtp, ((PyObject *)(&PyComplex_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 276, __pyx_L5_error)
+      __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_9 < 0))) __PYX_ERR(0, 276, __pyx_L5_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       if (!__pyx_t_9) {
       } else {
         __pyx_t_7 = __pyx_t_9;
         goto __pyx_L8_bool_binop_done;
       }
-      __pyx_t_8 = PyObject_RichCompare(__pyx_8genexpr3__pyx_v_dtp, ((PyObject *)(&PyUnicode_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 259, __pyx_L5_error)
-      __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_9 < 0))) __PYX_ERR(0, 259, __pyx_L5_error)
+      __pyx_t_8 = PyObject_RichCompare(__pyx_8genexpr3__pyx_v_dtp, ((PyObject *)(&PyUnicode_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 276, __pyx_L5_error)
+      __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_9 < 0))) __PYX_ERR(0, 276, __pyx_L5_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __pyx_t_7 = __pyx_t_9;
       __pyx_L8_bool_binop_done:;
@@ -22806,76 +23178,76 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
         __Pyx_INCREF(__pyx_int_1);
         __pyx_t_5 = __pyx_int_1;
       }
-      __pyx_t_8 = PyNumber_Multiply(__pyx_v_chunk_size, __pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 259, __pyx_L5_error)
+      __pyx_t_8 = PyNumber_Multiply(__pyx_v_chunk_size, __pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 276, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 259, __pyx_L5_error)
+      __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 276, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_GIVEREF(__pyx_t_8);
-      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_8)) __PYX_ERR(0, 259, __pyx_L5_error);
+      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_8)) __PYX_ERR(0, 276, __pyx_L5_error);
       __pyx_t_8 = 0;
 
-      /* "tabular_data_parser.pyx":260
+      /* "tabular_data_parser.pyx":277
  *   # Allocate output buffers
  *   output_buffers = [ np.empty(chunk_size*(2 if dtp==complex or dtp==str else 1),
  *                               dtype={float: np.double, int: np.longlong, complex: np.double, str:np.intp}[dtp])             # <<<<<<<<<<<<<<
  *                      for dtp in dtypes ]
  * 
  */
-      __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 260, __pyx_L5_error)
+      __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 277, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_8);
-      __pyx_t_10 = __Pyx_PyDict_NewPresized(4); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 260, __pyx_L5_error)
+      __pyx_t_10 = __Pyx_PyDict_NewPresized(4); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 277, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_10);
-      __Pyx_GetModuleGlobalName(__pyx_t_11, __pyx_n_s_np); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 260, __pyx_L5_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_11, __pyx_n_s_np); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 277, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_11);
-      __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_t_11, __pyx_n_s_double); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 260, __pyx_L5_error)
+      __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_t_11, __pyx_n_s_double); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 277, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_12);
       __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-      if (PyDict_SetItem(__pyx_t_10, ((PyObject *)(&PyFloat_Type)), __pyx_t_12) < 0) __PYX_ERR(0, 260, __pyx_L5_error)
+      if (PyDict_SetItem(__pyx_t_10, ((PyObject *)(&PyFloat_Type)), __pyx_t_12) < 0) __PYX_ERR(0, 277, __pyx_L5_error)
       __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-      __Pyx_GetModuleGlobalName(__pyx_t_12, __pyx_n_s_np); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 260, __pyx_L5_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_12, __pyx_n_s_np); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 277, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_12);
-      __pyx_t_11 = __Pyx_PyObject_GetAttrStr(__pyx_t_12, __pyx_n_s_longlong); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 260, __pyx_L5_error)
+      __pyx_t_11 = __Pyx_PyObject_GetAttrStr(__pyx_t_12, __pyx_n_s_longlong); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 277, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_11);
       __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-      if (PyDict_SetItem(__pyx_t_10, ((PyObject *)(&PyInt_Type)), __pyx_t_11) < 0) __PYX_ERR(0, 260, __pyx_L5_error)
+      if (PyDict_SetItem(__pyx_t_10, ((PyObject *)(&PyInt_Type)), __pyx_t_11) < 0) __PYX_ERR(0, 277, __pyx_L5_error)
       __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-      __Pyx_GetModuleGlobalName(__pyx_t_11, __pyx_n_s_np); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 260, __pyx_L5_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_11, __pyx_n_s_np); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 277, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_11);
-      __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_t_11, __pyx_n_s_double); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 260, __pyx_L5_error)
+      __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_t_11, __pyx_n_s_double); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 277, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_12);
       __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-      if (PyDict_SetItem(__pyx_t_10, ((PyObject *)(&PyComplex_Type)), __pyx_t_12) < 0) __PYX_ERR(0, 260, __pyx_L5_error)
+      if (PyDict_SetItem(__pyx_t_10, ((PyObject *)(&PyComplex_Type)), __pyx_t_12) < 0) __PYX_ERR(0, 277, __pyx_L5_error)
       __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-      __Pyx_GetModuleGlobalName(__pyx_t_12, __pyx_n_s_np); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 260, __pyx_L5_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_12, __pyx_n_s_np); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 277, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_12);
-      __pyx_t_11 = __Pyx_PyObject_GetAttrStr(__pyx_t_12, __pyx_n_s_intp); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 260, __pyx_L5_error)
+      __pyx_t_11 = __Pyx_PyObject_GetAttrStr(__pyx_t_12, __pyx_n_s_intp); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 277, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_11);
       __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-      if (PyDict_SetItem(__pyx_t_10, ((PyObject *)(&PyUnicode_Type)), __pyx_t_11) < 0) __PYX_ERR(0, 260, __pyx_L5_error)
+      if (PyDict_SetItem(__pyx_t_10, ((PyObject *)(&PyUnicode_Type)), __pyx_t_11) < 0) __PYX_ERR(0, 277, __pyx_L5_error)
       __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-      __pyx_t_11 = __Pyx_PyDict_GetItem(__pyx_t_10, __pyx_8genexpr3__pyx_v_dtp); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 260, __pyx_L5_error)
+      __pyx_t_11 = __Pyx_PyDict_GetItem(__pyx_t_10, __pyx_8genexpr3__pyx_v_dtp); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 277, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_11);
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_dtype, __pyx_t_11) < 0) __PYX_ERR(0, 260, __pyx_L5_error)
+      if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_dtype, __pyx_t_11) < 0) __PYX_ERR(0, 277, __pyx_L5_error)
       __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
 
-      /* "tabular_data_parser.pyx":259
+      /* "tabular_data_parser.pyx":276
  * 
  *   # Allocate output buffers
  *   output_buffers = [ np.empty(chunk_size*(2 if dtp==complex or dtp==str else 1),             # <<<<<<<<<<<<<<
  *                               dtype={float: np.double, int: np.longlong, complex: np.double, str:np.intp}[dtp])
  *                      for dtp in dtypes ]
  */
-      __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_5, __pyx_t_8); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 259, __pyx_L5_error)
+      __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_5, __pyx_t_8); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 276, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_11);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_11))) __PYX_ERR(0, 259, __pyx_L5_error)
+      if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_11))) __PYX_ERR(0, 276, __pyx_L5_error)
       __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
 
-      /* "tabular_data_parser.pyx":261
+      /* "tabular_data_parser.pyx":278
  *   output_buffers = [ np.empty(chunk_size*(2 if dtp==complex or dtp==str else 1),
  *                               dtype={float: np.double, int: np.longlong, complex: np.double, str:np.intp}[dtp])
  *                      for dtp in dtypes ]             # <<<<<<<<<<<<<<
@@ -22894,31 +23266,31 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
   __pyx_v_output_buffers = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "tabular_data_parser.pyx":265
+  /* "tabular_data_parser.pyx":282
  *   cdef vector[ColumnSpec] col_specs
  * 
  *   for dt,np_buf in zip(dtypes, output_buffers):             # <<<<<<<<<<<<<<
  * 
  *     # This should always be the case for 1D buffers from np.empty(), but double check just in case
  */
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 265, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 282, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_v_dtypes);
   __Pyx_GIVEREF(__pyx_v_dtypes);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_v_dtypes)) __PYX_ERR(0, 265, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_v_dtypes)) __PYX_ERR(0, 282, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_output_buffers);
   __Pyx_GIVEREF(__pyx_v_output_buffers);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_output_buffers)) __PYX_ERR(0, 265, __pyx_L1_error);
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_zip, __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 265, __pyx_L1_error)
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_output_buffers)) __PYX_ERR(0, 282, __pyx_L1_error);
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_zip, __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 282, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (likely(PyList_CheckExact(__pyx_t_2)) || PyTuple_CheckExact(__pyx_t_2)) {
     __pyx_t_1 = __pyx_t_2; __Pyx_INCREF(__pyx_t_1); __pyx_t_3 = 0;
     __pyx_t_4 = NULL;
   } else {
-    __pyx_t_3 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 265, __pyx_L1_error)
+    __pyx_t_3 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 282, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_4 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 265, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 282, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   for (;;) {
@@ -22926,17 +23298,17 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
       if (likely(PyList_CheckExact(__pyx_t_1))) {
         if (__pyx_t_3 >= PyList_GET_SIZE(__pyx_t_1)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_2 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_3); __Pyx_INCREF(__pyx_t_2); __pyx_t_3++; if (unlikely((0 < 0))) __PYX_ERR(0, 265, __pyx_L1_error)
+        __pyx_t_2 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_3); __Pyx_INCREF(__pyx_t_2); __pyx_t_3++; if (unlikely((0 < 0))) __PYX_ERR(0, 282, __pyx_L1_error)
         #else
-        __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 265, __pyx_L1_error)
+        __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 282, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         #endif
       } else {
         if (__pyx_t_3 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_2 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_3); __Pyx_INCREF(__pyx_t_2); __pyx_t_3++; if (unlikely((0 < 0))) __PYX_ERR(0, 265, __pyx_L1_error)
+        __pyx_t_2 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_3); __Pyx_INCREF(__pyx_t_2); __pyx_t_3++; if (unlikely((0 < 0))) __PYX_ERR(0, 282, __pyx_L1_error)
         #else
-        __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 265, __pyx_L1_error)
+        __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 282, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         #endif
       }
@@ -22946,7 +23318,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 265, __pyx_L1_error)
+          else __PYX_ERR(0, 282, __pyx_L1_error)
         }
         break;
       }
@@ -22958,7 +23330,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
       if (unlikely(size != 2)) {
         if (size > 2) __Pyx_RaiseTooManyValuesError(2);
         else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-        __PYX_ERR(0, 265, __pyx_L1_error)
+        __PYX_ERR(0, 282, __pyx_L1_error)
       }
       #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
       if (likely(PyTuple_CheckExact(sequence))) {
@@ -22971,15 +23343,15 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
       __Pyx_INCREF(__pyx_t_11);
       __Pyx_INCREF(__pyx_t_8);
       #else
-      __pyx_t_11 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 265, __pyx_L1_error)
+      __pyx_t_11 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 282, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_11);
-      __pyx_t_8 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 265, __pyx_L1_error)
+      __pyx_t_8 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 282, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       #endif
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     } else {
       Py_ssize_t index = -1;
-      __pyx_t_5 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 265, __pyx_L1_error)
+      __pyx_t_5 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 282, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __pyx_t_13 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_5);
@@ -22987,7 +23359,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
       __Pyx_GOTREF(__pyx_t_11);
       index = 1; __pyx_t_8 = __pyx_t_13(__pyx_t_5); if (unlikely(!__pyx_t_8)) goto __pyx_L14_unpacking_failed;
       __Pyx_GOTREF(__pyx_t_8);
-      if (__Pyx_IternextUnpackEndCheck(__pyx_t_13(__pyx_t_5), 2) < 0) __PYX_ERR(0, 265, __pyx_L1_error)
+      if (__Pyx_IternextUnpackEndCheck(__pyx_t_13(__pyx_t_5), 2) < 0) __PYX_ERR(0, 282, __pyx_L1_error)
       __pyx_t_13 = NULL;
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       goto __pyx_L15_unpacking_done;
@@ -22995,7 +23367,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __pyx_t_13 = NULL;
       if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-      __PYX_ERR(0, 265, __pyx_L1_error)
+      __PYX_ERR(0, 282, __pyx_L1_error)
       __pyx_L15_unpacking_done:;
     }
     __Pyx_XDECREF_SET(__pyx_v_dt, __pyx_t_11);
@@ -23003,7 +23375,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
     __Pyx_XDECREF_SET(__pyx_v_np_buf, __pyx_t_8);
     __pyx_t_8 = 0;
 
-    /* "tabular_data_parser.pyx":268
+    /* "tabular_data_parser.pyx":285
  * 
  *     # This should always be the case for 1D buffers from np.empty(), but double check just in case
  *     assert np_buf.flags['C_CONTIGUOUS'], "The parser assumes that output buffers are contiguous in memory."             # <<<<<<<<<<<<<<
@@ -23012,35 +23384,35 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
  */
     #ifndef CYTHON_WITHOUT_ASSERTIONS
     if (unlikely(__pyx_assertions_enabled())) {
-      __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_np_buf, __pyx_n_s_flags); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 268, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_np_buf, __pyx_n_s_flags); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 285, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_8 = __Pyx_PyObject_Dict_GetItem(__pyx_t_2, __pyx_n_u_C_CONTIGUOUS); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 268, __pyx_L1_error)
+      __pyx_t_8 = __Pyx_PyObject_Dict_GetItem(__pyx_t_2, __pyx_n_u_C_CONTIGUOUS); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 285, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 268, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 285, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       if (unlikely(!__pyx_t_7)) {
         __Pyx_Raise(__pyx_builtin_AssertionError, __pyx_kp_u_The_parser_assumes_that_output_b, 0, 0);
-        __PYX_ERR(0, 268, __pyx_L1_error)
+        __PYX_ERR(0, 285, __pyx_L1_error)
       }
     }
     #else
-    if ((1)); else __PYX_ERR(0, 268, __pyx_L1_error)
+    if ((1)); else __PYX_ERR(0, 285, __pyx_L1_error)
     #endif
 
-    /* "tabular_data_parser.pyx":270
+    /* "tabular_data_parser.pyx":287
  *     assert np_buf.flags['C_CONTIGUOUS'], "The parser assumes that output buffers are contiguous in memory."
  * 
  *     if   dt==float:             # <<<<<<<<<<<<<<
  *       col_specs.push_back(
  *         ColumnSpec(ColumnType.double_col, &(getDoubleView(np_buf)[0]))
  */
-    __pyx_t_8 = PyObject_RichCompare(__pyx_v_dt, ((PyObject *)(&PyFloat_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 270, __pyx_L1_error)
-    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 270, __pyx_L1_error)
+    __pyx_t_8 = PyObject_RichCompare(__pyx_v_dt, ((PyObject *)(&PyFloat_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 287, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 287, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     if (__pyx_t_7) {
 
-      /* "tabular_data_parser.pyx":272
+      /* "tabular_data_parser.pyx":289
  *     if   dt==float:
  *       col_specs.push_back(
  *         ColumnSpec(ColumnType.double_col, &(getDoubleView(np_buf)[0]))             # <<<<<<<<<<<<<<
@@ -23048,14 +23420,14 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
  *     elif dt==complex:
  */
       __pyx_t_14.col_type = __pyx_e_19tabular_data_parser_double_col;
-      if (!(likely(((__pyx_v_np_buf) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_np_buf, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 272, __pyx_L1_error)
-      __pyx_t_15 = __pyx_f_19tabular_data_parser_getDoubleView(((PyArrayObject *)__pyx_v_np_buf)); if (unlikely(!__pyx_t_15.memview)) __PYX_ERR(0, 272, __pyx_L1_error)
+      if (!(likely(((__pyx_v_np_buf) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_np_buf, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 289, __pyx_L1_error)
+      __pyx_t_15 = __pyx_f_19tabular_data_parser_getDoubleView(((PyArrayObject *)__pyx_v_np_buf)); if (unlikely(!__pyx_t_15.memview)) __PYX_ERR(0, 289, __pyx_L1_error)
       __pyx_t_16 = 0;
       __pyx_t_14.output_buffer = (&(*((double *) ( /* dim=0 */ (__pyx_t_15.data + __pyx_t_16 * __pyx_t_15.strides[0]) ))));
       __PYX_XCLEAR_MEMVIEW(&__pyx_t_15, 1);
       __pyx_t_15.memview = NULL; __pyx_t_15.data = NULL;
 
-      /* "tabular_data_parser.pyx":271
+      /* "tabular_data_parser.pyx":288
  * 
  *     if   dt==float:
  *       col_specs.push_back(             # <<<<<<<<<<<<<<
@@ -23066,10 +23438,10 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
         __pyx_v_col_specs.push_back(__pyx_t_14);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 271, __pyx_L1_error)
+        __PYX_ERR(0, 288, __pyx_L1_error)
       }
 
-      /* "tabular_data_parser.pyx":270
+      /* "tabular_data_parser.pyx":287
  *     assert np_buf.flags['C_CONTIGUOUS'], "The parser assumes that output buffers are contiguous in memory."
  * 
  *     if   dt==float:             # <<<<<<<<<<<<<<
@@ -23079,19 +23451,19 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
       goto __pyx_L16;
     }
 
-    /* "tabular_data_parser.pyx":274
+    /* "tabular_data_parser.pyx":291
  *         ColumnSpec(ColumnType.double_col, &(getDoubleView(np_buf)[0]))
  *         )
  *     elif dt==complex:             # <<<<<<<<<<<<<<
  *       col_specs.push_back(
  *         ColumnSpec(ColumnType.complex_col, &(getDoubleView(np_buf)[0]))
  */
-    __pyx_t_8 = PyObject_RichCompare(__pyx_v_dt, ((PyObject *)(&PyComplex_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 274, __pyx_L1_error)
-    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 274, __pyx_L1_error)
+    __pyx_t_8 = PyObject_RichCompare(__pyx_v_dt, ((PyObject *)(&PyComplex_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 291, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 291, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     if (__pyx_t_7) {
 
-      /* "tabular_data_parser.pyx":276
+      /* "tabular_data_parser.pyx":293
  *     elif dt==complex:
  *       col_specs.push_back(
  *         ColumnSpec(ColumnType.complex_col, &(getDoubleView(np_buf)[0]))             # <<<<<<<<<<<<<<
@@ -23099,14 +23471,14 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
  *     elif dt==int:
  */
       __pyx_t_14.col_type = __pyx_e_19tabular_data_parser_complex_col;
-      if (!(likely(((__pyx_v_np_buf) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_np_buf, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 276, __pyx_L1_error)
-      __pyx_t_15 = __pyx_f_19tabular_data_parser_getDoubleView(((PyArrayObject *)__pyx_v_np_buf)); if (unlikely(!__pyx_t_15.memview)) __PYX_ERR(0, 276, __pyx_L1_error)
+      if (!(likely(((__pyx_v_np_buf) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_np_buf, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 293, __pyx_L1_error)
+      __pyx_t_15 = __pyx_f_19tabular_data_parser_getDoubleView(((PyArrayObject *)__pyx_v_np_buf)); if (unlikely(!__pyx_t_15.memview)) __PYX_ERR(0, 293, __pyx_L1_error)
       __pyx_t_16 = 0;
       __pyx_t_14.output_buffer = (&(*((double *) ( /* dim=0 */ (__pyx_t_15.data + __pyx_t_16 * __pyx_t_15.strides[0]) ))));
       __PYX_XCLEAR_MEMVIEW(&__pyx_t_15, 1);
       __pyx_t_15.memview = NULL; __pyx_t_15.data = NULL;
 
-      /* "tabular_data_parser.pyx":275
+      /* "tabular_data_parser.pyx":292
  *         )
  *     elif dt==complex:
  *       col_specs.push_back(             # <<<<<<<<<<<<<<
@@ -23117,10 +23489,10 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
         __pyx_v_col_specs.push_back(__pyx_t_14);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 275, __pyx_L1_error)
+        __PYX_ERR(0, 292, __pyx_L1_error)
       }
 
-      /* "tabular_data_parser.pyx":274
+      /* "tabular_data_parser.pyx":291
  *         ColumnSpec(ColumnType.double_col, &(getDoubleView(np_buf)[0]))
  *         )
  *     elif dt==complex:             # <<<<<<<<<<<<<<
@@ -23130,19 +23502,19 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
       goto __pyx_L16;
     }
 
-    /* "tabular_data_parser.pyx":278
+    /* "tabular_data_parser.pyx":295
  *         ColumnSpec(ColumnType.complex_col, &(getDoubleView(np_buf)[0]))
  *         )
  *     elif dt==int:             # <<<<<<<<<<<<<<
  *       col_specs.push_back(
  *         ColumnSpec(ColumnType.longlong_col, &(getLonglongView(np_buf)[0]))
  */
-    __pyx_t_8 = PyObject_RichCompare(__pyx_v_dt, ((PyObject *)(&PyInt_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 278, __pyx_L1_error)
-    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 278, __pyx_L1_error)
+    __pyx_t_8 = PyObject_RichCompare(__pyx_v_dt, ((PyObject *)(&PyInt_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 295, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 295, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     if (__pyx_t_7) {
 
-      /* "tabular_data_parser.pyx":280
+      /* "tabular_data_parser.pyx":297
  *     elif dt==int:
  *       col_specs.push_back(
  *         ColumnSpec(ColumnType.longlong_col, &(getLonglongView(np_buf)[0]))             # <<<<<<<<<<<<<<
@@ -23150,14 +23522,14 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
  *     elif dt==str:
  */
       __pyx_t_14.col_type = __pyx_e_19tabular_data_parser_longlong_col;
-      if (!(likely(((__pyx_v_np_buf) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_np_buf, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 280, __pyx_L1_error)
-      __pyx_t_17 = __pyx_f_19tabular_data_parser_getLonglongView(((PyArrayObject *)__pyx_v_np_buf)); if (unlikely(!__pyx_t_17.memview)) __PYX_ERR(0, 280, __pyx_L1_error)
+      if (!(likely(((__pyx_v_np_buf) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_np_buf, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 297, __pyx_L1_error)
+      __pyx_t_17 = __pyx_f_19tabular_data_parser_getLonglongView(((PyArrayObject *)__pyx_v_np_buf)); if (unlikely(!__pyx_t_17.memview)) __PYX_ERR(0, 297, __pyx_L1_error)
       __pyx_t_16 = 0;
       __pyx_t_14.output_buffer = (&(*((PY_LONG_LONG *) ( /* dim=0 */ (__pyx_t_17.data + __pyx_t_16 * __pyx_t_17.strides[0]) ))));
       __PYX_XCLEAR_MEMVIEW(&__pyx_t_17, 1);
       __pyx_t_17.memview = NULL; __pyx_t_17.data = NULL;
 
-      /* "tabular_data_parser.pyx":279
+      /* "tabular_data_parser.pyx":296
  *         )
  *     elif dt==int:
  *       col_specs.push_back(             # <<<<<<<<<<<<<<
@@ -23168,10 +23540,10 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
         __pyx_v_col_specs.push_back(__pyx_t_14);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 279, __pyx_L1_error)
+        __PYX_ERR(0, 296, __pyx_L1_error)
       }
 
-      /* "tabular_data_parser.pyx":278
+      /* "tabular_data_parser.pyx":295
  *         ColumnSpec(ColumnType.complex_col, &(getDoubleView(np_buf)[0]))
  *         )
  *     elif dt==int:             # <<<<<<<<<<<<<<
@@ -23181,19 +23553,19 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
       goto __pyx_L16;
     }
 
-    /* "tabular_data_parser.pyx":282
+    /* "tabular_data_parser.pyx":299
  *         ColumnSpec(ColumnType.longlong_col, &(getLonglongView(np_buf)[0]))
  *         )
  *     elif dt==str:             # <<<<<<<<<<<<<<
  *       col_specs.push_back(
  *         ColumnSpec(ColumnType.char_col, &(getLonglongView(np_buf)[0]))
  */
-    __pyx_t_8 = PyObject_RichCompare(__pyx_v_dt, ((PyObject *)(&PyUnicode_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 282, __pyx_L1_error)
-    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 282, __pyx_L1_error)
+    __pyx_t_8 = PyObject_RichCompare(__pyx_v_dt, ((PyObject *)(&PyUnicode_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 299, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 299, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     if (__pyx_t_7) {
 
-      /* "tabular_data_parser.pyx":284
+      /* "tabular_data_parser.pyx":301
  *     elif dt==str:
  *       col_specs.push_back(
  *         ColumnSpec(ColumnType.char_col, &(getLonglongView(np_buf)[0]))             # <<<<<<<<<<<<<<
@@ -23201,14 +23573,14 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
  * 
  */
       __pyx_t_14.col_type = __pyx_e_19tabular_data_parser_char_col;
-      if (!(likely(((__pyx_v_np_buf) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_np_buf, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 284, __pyx_L1_error)
-      __pyx_t_17 = __pyx_f_19tabular_data_parser_getLonglongView(((PyArrayObject *)__pyx_v_np_buf)); if (unlikely(!__pyx_t_17.memview)) __PYX_ERR(0, 284, __pyx_L1_error)
+      if (!(likely(((__pyx_v_np_buf) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_np_buf, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 301, __pyx_L1_error)
+      __pyx_t_17 = __pyx_f_19tabular_data_parser_getLonglongView(((PyArrayObject *)__pyx_v_np_buf)); if (unlikely(!__pyx_t_17.memview)) __PYX_ERR(0, 301, __pyx_L1_error)
       __pyx_t_16 = 0;
       __pyx_t_14.output_buffer = (&(*((PY_LONG_LONG *) ( /* dim=0 */ (__pyx_t_17.data + __pyx_t_16 * __pyx_t_17.strides[0]) ))));
       __PYX_XCLEAR_MEMVIEW(&__pyx_t_17, 1);
       __pyx_t_17.memview = NULL; __pyx_t_17.data = NULL;
 
-      /* "tabular_data_parser.pyx":283
+      /* "tabular_data_parser.pyx":300
  *         )
  *     elif dt==str:
  *       col_specs.push_back(             # <<<<<<<<<<<<<<
@@ -23219,10 +23591,10 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
         __pyx_v_col_specs.push_back(__pyx_t_14);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 283, __pyx_L1_error)
+        __PYX_ERR(0, 300, __pyx_L1_error)
       }
 
-      /* "tabular_data_parser.pyx":282
+      /* "tabular_data_parser.pyx":299
  *         ColumnSpec(ColumnType.longlong_col, &(getLonglongView(np_buf)[0]))
  *         )
  *     elif dt==str:             # <<<<<<<<<<<<<<
@@ -23232,7 +23604,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
     }
     __pyx_L16:;
 
-    /* "tabular_data_parser.pyx":265
+    /* "tabular_data_parser.pyx":282
  *   cdef vector[ColumnSpec] col_specs
  * 
  *   for dt,np_buf in zip(dtypes, output_buffers):             # <<<<<<<<<<<<<<
@@ -23242,7 +23614,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "tabular_data_parser.pyx":287
+  /* "tabular_data_parser.pyx":304
  *         )
  * 
  *   cdef size_t n_parsed_rows = 0             # <<<<<<<<<<<<<<
@@ -23251,7 +23623,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
  */
   __pyx_cur_scope->__pyx_v_n_parsed_rows = 0;
 
-  /* "tabular_data_parser.pyx":288
+  /* "tabular_data_parser.pyx":305
  * 
  *   cdef size_t n_parsed_rows = 0
  *   cdef ptrdiff_t parsed_bytes = 0             # <<<<<<<<<<<<<<
@@ -23260,70 +23632,58 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
  */
   __pyx_v_parsed_bytes = 0;
 
-  /* "tabular_data_parser.pyx":289
+  /* "tabular_data_parser.pyx":306
  *   cdef size_t n_parsed_rows = 0
  *   cdef ptrdiff_t parsed_bytes = 0
  *   cdef const char* start = s             # <<<<<<<<<<<<<<
  *   cdef from_chars_result r = parse_up_to_max_rows(start, chunk_size, col_specs, n_parsed_rows, parsed_bytes)
  * 
  */
-  __pyx_t_18 = __Pyx_PyObject_AsString(__pyx_v_s); if (unlikely((!__pyx_t_18) && PyErr_Occurred())) __PYX_ERR(0, 289, __pyx_L1_error)
+  __pyx_t_18 = __Pyx_PyObject_AsString(__pyx_v_s); if (unlikely((!__pyx_t_18) && PyErr_Occurred())) __PYX_ERR(0, 306, __pyx_L1_error)
   __pyx_v_start = __pyx_t_18;
 
-  /* "tabular_data_parser.pyx":290
+  /* "tabular_data_parser.pyx":307
  *   cdef ptrdiff_t parsed_bytes = 0
  *   cdef const char* start = s
  *   cdef from_chars_result r = parse_up_to_max_rows(start, chunk_size, col_specs, n_parsed_rows, parsed_bytes)             # <<<<<<<<<<<<<<
  * 
  *   # Sanity checks and error handling
  */
-  __pyx_t_1 = __Pyx_PyBytes_FromString(__pyx_v_start); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 290, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyBytes_FromString(__pyx_v_start); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 307, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_19 = __Pyx_PyInt_As_size_t(__pyx_v_chunk_size); if (unlikely((__pyx_t_19 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 290, __pyx_L1_error)
-  __pyx_t_20 = __pyx_f_19tabular_data_parser_parse_up_to_max_rows(((PyObject*)__pyx_t_1), __pyx_t_19, __pyx_v_col_specs, __pyx_cur_scope->__pyx_v_n_parsed_rows, __pyx_v_parsed_bytes); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 290, __pyx_L1_error)
+  __pyx_t_19 = __Pyx_PyInt_As_size_t(__pyx_v_chunk_size); if (unlikely((__pyx_t_19 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 307, __pyx_L1_error)
+  __pyx_t_20 = __pyx_f_19tabular_data_parser_parse_up_to_max_rows(((PyObject*)__pyx_t_1), __pyx_t_19, __pyx_v_col_specs, __pyx_cur_scope->__pyx_v_n_parsed_rows, __pyx_v_parsed_bytes); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 307, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_r = __pyx_t_20;
 
-  /* "tabular_data_parser.pyx":293
+  /* "tabular_data_parser.pyx":310
  * 
  *   # Sanity checks and error handling
  *   if r.ec != getSuccessErrc():             # <<<<<<<<<<<<<<
- *     error_code = r.ec
  *     if parsed_bytes >= 0:
+ *       print(f"Parsing error near character {parsed_bytes}: {s[parsed_bytes:min(len(s), parsed_bytes+30)]}")
  */
   __pyx_t_7 = (__pyx_v_r.ec != getSuccessErrc());
   if (__pyx_t_7) {
 
-    /* "tabular_data_parser.pyx":294
+    /* "tabular_data_parser.pyx":311
  *   # Sanity checks and error handling
  *   if r.ec != getSuccessErrc():
- *     error_code = r.ec             # <<<<<<<<<<<<<<
- *     if parsed_bytes >= 0:
- *       print(f"Parsing error near character {parsed_bytes}: {s[parsed_bytes:min(len(s), parsed_bytes+30)]}")
- */
-    __pyx_t_1 = [](const std::errc& x){return __Pyx_PyInt_From_int((int)x);}(__pyx_v_r.ec); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 294, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_v_error_code = __pyx_t_1;
-    __pyx_t_1 = 0;
-
-    /* "tabular_data_parser.pyx":295
- *   if r.ec != getSuccessErrc():
- *     error_code = r.ec
  *     if parsed_bytes >= 0:             # <<<<<<<<<<<<<<
  *       print(f"Parsing error near character {parsed_bytes}: {s[parsed_bytes:min(len(s), parsed_bytes+30)]}")
- *     assert False, (f"Got error code {error_code} from parse_up_to_max_rows()")
+ * 
  */
     __pyx_t_7 = (__pyx_v_parsed_bytes >= 0);
     if (__pyx_t_7) {
 
-      /* "tabular_data_parser.pyx":296
- *     error_code = r.ec
+      /* "tabular_data_parser.pyx":312
+ *   if r.ec != getSuccessErrc():
  *     if parsed_bytes >= 0:
  *       print(f"Parsing error near character {parsed_bytes}: {s[parsed_bytes:min(len(s), parsed_bytes+30)]}")             # <<<<<<<<<<<<<<
- *     assert False, (f"Got error code {error_code} from parse_up_to_max_rows()")
  * 
+ *     error_code = r.ec
  */
-      __pyx_t_1 = PyTuple_New(4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 296, __pyx_L1_error)
+      __pyx_t_1 = PyTuple_New(4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 312, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __pyx_t_3 = 0;
       __pyx_t_21 = 127;
@@ -23331,7 +23691,7 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
       __pyx_t_3 += 29;
       __Pyx_GIVEREF(__pyx_kp_u_Parsing_error_near_character);
       PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_kp_u_Parsing_error_near_character);
-      __pyx_t_8 = __Pyx_PyUnicode_From_ptrdiff_t(__pyx_v_parsed_bytes, 0, ' ', 'd'); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 296, __pyx_L1_error)
+      __pyx_t_8 = __Pyx_PyUnicode_From_ptrdiff_t(__pyx_v_parsed_bytes, 0, ' ', 'd'); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 312, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __pyx_t_3 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_8);
       __Pyx_GIVEREF(__pyx_t_8);
@@ -23342,16 +23702,16 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
       __Pyx_GIVEREF(__pyx_kp_u_);
       PyTuple_SET_ITEM(__pyx_t_1, 2, __pyx_kp_u_);
       __pyx_t_22 = (__pyx_v_parsed_bytes + 30);
-      __pyx_t_23 = PyObject_Length(__pyx_v_s); if (unlikely(__pyx_t_23 == ((Py_ssize_t)-1))) __PYX_ERR(0, 296, __pyx_L1_error)
+      __pyx_t_23 = PyObject_Length(__pyx_v_s); if (unlikely(__pyx_t_23 == ((Py_ssize_t)-1))) __PYX_ERR(0, 312, __pyx_L1_error)
       __pyx_t_7 = (__pyx_t_22 < __pyx_t_23);
       if (__pyx_t_7) {
         __pyx_t_24 = __pyx_t_22;
       } else {
         __pyx_t_24 = __pyx_t_23;
       }
-      __pyx_t_8 = __Pyx_PyObject_GetSlice(__pyx_v_s, __pyx_v_parsed_bytes, __pyx_t_24, NULL, NULL, NULL, 1, 1, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 296, __pyx_L1_error)
+      __pyx_t_8 = __Pyx_PyObject_GetSlice(__pyx_v_s, __pyx_v_parsed_bytes, __pyx_t_24, NULL, NULL, NULL, 1, 1, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 312, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
-      __pyx_t_2 = __Pyx_PyObject_FormatSimple(__pyx_t_8, __pyx_empty_unicode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 296, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_FormatSimple(__pyx_t_8, __pyx_empty_unicode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 312, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __pyx_t_21 = (__Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) > __pyx_t_21) ? __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) : __pyx_t_21;
@@ -23359,115 +23719,243 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
       __Pyx_GIVEREF(__pyx_t_2);
       PyTuple_SET_ITEM(__pyx_t_1, 3, __pyx_t_2);
       __pyx_t_2 = 0;
-      __pyx_t_2 = __Pyx_PyUnicode_Join(__pyx_t_1, 4, __pyx_t_3, __pyx_t_21); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 296, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyUnicode_Join(__pyx_t_1, 4, __pyx_t_3, __pyx_t_21); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 312, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 296, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 312, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-      /* "tabular_data_parser.pyx":295
+      /* "tabular_data_parser.pyx":311
+ *   # Sanity checks and error handling
  *   if r.ec != getSuccessErrc():
- *     error_code = r.ec
  *     if parsed_bytes >= 0:             # <<<<<<<<<<<<<<
  *       print(f"Parsing error near character {parsed_bytes}: {s[parsed_bytes:min(len(s), parsed_bytes+30)]}")
- *     assert False, (f"Got error code {error_code} from parse_up_to_max_rows()")
+ * 
  */
     }
 
-    /* "tabular_data_parser.pyx":297
- *     if parsed_bytes >= 0:
+    /* "tabular_data_parser.pyx":314
  *       print(f"Parsing error near character {parsed_bytes}: {s[parsed_bytes:min(len(s), parsed_bytes+30)]}")
- *     assert False, (f"Got error code {error_code} from parse_up_to_max_rows()")             # <<<<<<<<<<<<<<
+ * 
+ *     error_code = r.ec             # <<<<<<<<<<<<<<
+ *     try:
+ *       error_message = getErrcMessage(r.ec)
+ */
+    __pyx_t_1 = [](const std::errc& x){return __Pyx_PyInt_From_int((int)x);}(__pyx_v_r.ec); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 314, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_v_error_code = __pyx_t_1;
+    __pyx_t_1 = 0;
+
+    /* "tabular_data_parser.pyx":315
+ * 
+ *     error_code = r.ec
+ *     try:             # <<<<<<<<<<<<<<
+ *       error_message = getErrcMessage(r.ec)
+ *       error_message_bytes= <bytes> error_message
+ */
+    /*try:*/ {
+
+      /* "tabular_data_parser.pyx":316
+ *     error_code = r.ec
+ *     try:
+ *       error_message = getErrcMessage(r.ec)             # <<<<<<<<<<<<<<
+ *       error_message_bytes= <bytes> error_message
+ *       assert False, (f"Got error code {error_code} ({error_message_bytes}) from parse_up_to_max_rows()")
+ */
+      __pyx_t_1 = __pyx_convert_PyBytes_string_to_py_std__in_string(getErrcMessage(__pyx_v_r.ec)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 316, __pyx_L21_error)
+      __Pyx_GOTREF(__pyx_t_1);
+      __pyx_v_error_message = __pyx_t_1;
+      __pyx_t_1 = 0;
+
+      /* "tabular_data_parser.pyx":317
+ *     try:
+ *       error_message = getErrcMessage(r.ec)
+ *       error_message_bytes= <bytes> error_message             # <<<<<<<<<<<<<<
+ *       assert False, (f"Got error code {error_code} ({error_message_bytes}) from parse_up_to_max_rows()")
+ *     finally:
+ */
+      __pyx_t_1 = __pyx_v_error_message;
+      __Pyx_INCREF(__pyx_t_1);
+      __pyx_v_error_message_bytes = ((PyObject*)__pyx_t_1);
+      __pyx_t_1 = 0;
+
+      /* "tabular_data_parser.pyx":318
+ *       error_message = getErrcMessage(r.ec)
+ *       error_message_bytes= <bytes> error_message
+ *       assert False, (f"Got error code {error_code} ({error_message_bytes}) from parse_up_to_max_rows()")             # <<<<<<<<<<<<<<
+ *     finally:
+ *       del error_message
+ */
+      #ifndef CYTHON_WITHOUT_ASSERTIONS
+      if (unlikely(__pyx_assertions_enabled())) {
+        if (unlikely(!0)) {
+          __pyx_t_1 = PyTuple_New(5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 318, __pyx_L21_error)
+          __Pyx_GOTREF(__pyx_t_1);
+          __pyx_t_3 = 0;
+          __pyx_t_21 = 127;
+          __Pyx_INCREF(__pyx_kp_u_Got_error_code);
+          __pyx_t_3 += 15;
+          __Pyx_GIVEREF(__pyx_kp_u_Got_error_code);
+          PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_kp_u_Got_error_code);
+          __pyx_t_2 = __Pyx_PyObject_FormatSimple(__pyx_v_error_code, __pyx_empty_unicode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 318, __pyx_L21_error)
+          __Pyx_GOTREF(__pyx_t_2);
+          __pyx_t_21 = (__Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) > __pyx_t_21) ? __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) : __pyx_t_21;
+          __pyx_t_3 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_2);
+          __Pyx_GIVEREF(__pyx_t_2);
+          PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_2);
+          __pyx_t_2 = 0;
+          __Pyx_INCREF(__pyx_kp_u__11);
+          __pyx_t_3 += 2;
+          __Pyx_GIVEREF(__pyx_kp_u__11);
+          PyTuple_SET_ITEM(__pyx_t_1, 2, __pyx_kp_u__11);
+          __pyx_t_2 = __Pyx_PyObject_FormatSimple(__pyx_v_error_message_bytes, __pyx_empty_unicode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 318, __pyx_L21_error)
+          __Pyx_GOTREF(__pyx_t_2);
+          __pyx_t_21 = (__Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) > __pyx_t_21) ? __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) : __pyx_t_21;
+          __pyx_t_3 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_2);
+          __Pyx_GIVEREF(__pyx_t_2);
+          PyTuple_SET_ITEM(__pyx_t_1, 3, __pyx_t_2);
+          __pyx_t_2 = 0;
+          __Pyx_INCREF(__pyx_kp_u_from_parse_up_to_max_rows);
+          __pyx_t_3 += 29;
+          __Pyx_GIVEREF(__pyx_kp_u_from_parse_up_to_max_rows);
+          PyTuple_SET_ITEM(__pyx_t_1, 4, __pyx_kp_u_from_parse_up_to_max_rows);
+          __pyx_t_2 = __Pyx_PyUnicode_Join(__pyx_t_1, 5, __pyx_t_3, __pyx_t_21); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 318, __pyx_L21_error)
+          __Pyx_GOTREF(__pyx_t_2);
+          __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+          __Pyx_Raise(__pyx_builtin_AssertionError, __pyx_t_2, 0, 0);
+          __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+          __PYX_ERR(0, 318, __pyx_L21_error)
+        }
+      }
+      #else
+      if ((1)); else __PYX_ERR(0, 318, __pyx_L21_error)
+      #endif
+    }
+
+    /* "tabular_data_parser.pyx":320
+ *       assert False, (f"Got error code {error_code} ({error_message_bytes}) from parse_up_to_max_rows()")
+ *     finally:
+ *       del error_message             # <<<<<<<<<<<<<<
  * 
  *   # Postprocess certain dtypes
  */
-    #ifndef CYTHON_WITHOUT_ASSERTIONS
-    if (unlikely(__pyx_assertions_enabled())) {
-      if (unlikely(!0)) {
-        __pyx_t_1 = PyTuple_New(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 297, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_1);
-        __pyx_t_3 = 0;
-        __pyx_t_21 = 127;
-        __Pyx_INCREF(__pyx_kp_u_Got_error_code);
-        __pyx_t_3 += 15;
-        __Pyx_GIVEREF(__pyx_kp_u_Got_error_code);
-        PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_kp_u_Got_error_code);
-        __pyx_t_2 = __Pyx_PyObject_FormatSimple(__pyx_v_error_code, __pyx_empty_unicode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 297, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_2);
-        __pyx_t_21 = (__Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) > __pyx_t_21) ? __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) : __pyx_t_21;
-        __pyx_t_3 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_2);
-        __Pyx_GIVEREF(__pyx_t_2);
-        PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_2);
-        __pyx_t_2 = 0;
-        __Pyx_INCREF(__pyx_kp_u_from_parse_up_to_max_rows);
-        __pyx_t_3 += 28;
-        __Pyx_GIVEREF(__pyx_kp_u_from_parse_up_to_max_rows);
-        PyTuple_SET_ITEM(__pyx_t_1, 2, __pyx_kp_u_from_parse_up_to_max_rows);
-        __pyx_t_2 = __Pyx_PyUnicode_Join(__pyx_t_1, 3, __pyx_t_3, __pyx_t_21); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 297, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_2);
-        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-        __Pyx_Raise(__pyx_builtin_AssertionError, __pyx_t_2, 0, 0);
-        __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-        __PYX_ERR(0, 297, __pyx_L1_error)
+    /*finally:*/ {
+      /*normal exit:*/{
+        __Pyx_DECREF(__pyx_v_error_message); __pyx_v_error_message = 0;
+        goto __pyx_L22;
       }
+      __pyx_L21_error:;
+      /*exception exit:*/{
+        __Pyx_PyThreadState_declare
+        __Pyx_PyThreadState_assign
+        __pyx_t_28 = 0; __pyx_t_29 = 0; __pyx_t_30 = 0; __pyx_t_31 = 0; __pyx_t_32 = 0; __pyx_t_33 = 0;
+        __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
+        __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
+        __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
+        __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
+        __PYX_XCLEAR_MEMVIEW(&__pyx_t_15, 1);
+        __pyx_t_15.memview = NULL; __pyx_t_15.data = NULL;
+        __PYX_XCLEAR_MEMVIEW(&__pyx_t_17, 1);
+        __pyx_t_17.memview = NULL; __pyx_t_17.data = NULL;
+        __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+        __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+        __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
+        __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+        if (PY_MAJOR_VERSION >= 3) __Pyx_ExceptionSwap(&__pyx_t_31, &__pyx_t_32, &__pyx_t_33);
+        if ((PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_28, &__pyx_t_29, &__pyx_t_30) < 0)) __Pyx_ErrFetch(&__pyx_t_28, &__pyx_t_29, &__pyx_t_30);
+        __Pyx_XGOTREF(__pyx_t_28);
+        __Pyx_XGOTREF(__pyx_t_29);
+        __Pyx_XGOTREF(__pyx_t_30);
+        __Pyx_XGOTREF(__pyx_t_31);
+        __Pyx_XGOTREF(__pyx_t_32);
+        __Pyx_XGOTREF(__pyx_t_33);
+        __pyx_t_25 = __pyx_lineno; __pyx_t_26 = __pyx_clineno; __pyx_t_27 = __pyx_filename;
+        {
+          if (unlikely(!__pyx_v_error_message)) { __Pyx_RaiseUnboundLocalError("error_message"); __PYX_ERR(0, 320, __pyx_L24_error) }
+          __Pyx_DECREF(__pyx_v_error_message); __pyx_v_error_message = 0;
+        }
+        if (PY_MAJOR_VERSION >= 3) {
+          __Pyx_XGIVEREF(__pyx_t_31);
+          __Pyx_XGIVEREF(__pyx_t_32);
+          __Pyx_XGIVEREF(__pyx_t_33);
+          __Pyx_ExceptionReset(__pyx_t_31, __pyx_t_32, __pyx_t_33);
+        }
+        __Pyx_XGIVEREF(__pyx_t_28);
+        __Pyx_XGIVEREF(__pyx_t_29);
+        __Pyx_XGIVEREF(__pyx_t_30);
+        __Pyx_ErrRestore(__pyx_t_28, __pyx_t_29, __pyx_t_30);
+        __pyx_t_28 = 0; __pyx_t_29 = 0; __pyx_t_30 = 0; __pyx_t_31 = 0; __pyx_t_32 = 0; __pyx_t_33 = 0;
+        __pyx_lineno = __pyx_t_25; __pyx_clineno = __pyx_t_26; __pyx_filename = __pyx_t_27;
+        goto __pyx_L1_error;
+        __pyx_L24_error:;
+        if (PY_MAJOR_VERSION >= 3) {
+          __Pyx_XGIVEREF(__pyx_t_31);
+          __Pyx_XGIVEREF(__pyx_t_32);
+          __Pyx_XGIVEREF(__pyx_t_33);
+          __Pyx_ExceptionReset(__pyx_t_31, __pyx_t_32, __pyx_t_33);
+        }
+        __Pyx_XDECREF(__pyx_t_28); __pyx_t_28 = 0;
+        __Pyx_XDECREF(__pyx_t_29); __pyx_t_29 = 0;
+        __Pyx_XDECREF(__pyx_t_30); __pyx_t_30 = 0;
+        __pyx_t_31 = 0; __pyx_t_32 = 0; __pyx_t_33 = 0;
+        goto __pyx_L1_error;
+      }
+      __pyx_L22:;
     }
-    #else
-    if ((1)); else __PYX_ERR(0, 297, __pyx_L1_error)
-    #endif
 
-    /* "tabular_data_parser.pyx":293
+    /* "tabular_data_parser.pyx":310
  * 
  *   # Sanity checks and error handling
  *   if r.ec != getSuccessErrc():             # <<<<<<<<<<<<<<
- *     error_code = r.ec
  *     if parsed_bytes >= 0:
+ *       print(f"Parsing error near character {parsed_bytes}: {s[parsed_bytes:min(len(s), parsed_bytes+30)]}")
  */
   }
 
-  /* "tabular_data_parser.pyx":300
+  /* "tabular_data_parser.pyx":323
  * 
  *   # Postprocess certain dtypes
  *   for j in range(len(output_buffers)):             # <<<<<<<<<<<<<<
  *     if dtypes[j] == complex:
  *       # Reinterpret complex numbers, which are parsed above as two doubles
  */
-  __pyx_t_3 = __Pyx_PyList_GET_SIZE(__pyx_v_output_buffers); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(0, 300, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyList_GET_SIZE(__pyx_v_output_buffers); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(0, 323, __pyx_L1_error)
   __pyx_t_23 = __pyx_t_3;
-  for (__pyx_t_25 = 0; __pyx_t_25 < __pyx_t_23; __pyx_t_25+=1) {
-    __pyx_v_j = __pyx_t_25;
+  for (__pyx_t_34 = 0; __pyx_t_34 < __pyx_t_23; __pyx_t_34+=1) {
+    __pyx_v_j = __pyx_t_34;
 
-    /* "tabular_data_parser.pyx":301
+    /* "tabular_data_parser.pyx":324
  *   # Postprocess certain dtypes
  *   for j in range(len(output_buffers)):
  *     if dtypes[j] == complex:             # <<<<<<<<<<<<<<
  *       # Reinterpret complex numbers, which are parsed above as two doubles
  *       output_buffers[j] = output_buffers[j][:2*n_parsed_rows].view(np.cdouble)
  */
-    __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_dtypes, __pyx_v_j, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 301, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_dtypes, __pyx_v_j, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 324, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyObject_RichCompare(__pyx_t_2, ((PyObject *)(&PyComplex_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 301, __pyx_L1_error)
+    __pyx_t_1 = PyObject_RichCompare(__pyx_t_2, ((PyObject *)(&PyComplex_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 324, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 301, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 324, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     if (__pyx_t_7) {
 
-      /* "tabular_data_parser.pyx":303
+      /* "tabular_data_parser.pyx":326
  *     if dtypes[j] == complex:
  *       # Reinterpret complex numbers, which are parsed above as two doubles
  *       output_buffers[j] = output_buffers[j][:2*n_parsed_rows].view(np.cdouble)             # <<<<<<<<<<<<<<
  * 
  *     if dtypes[j] == str:
  */
-      __pyx_t_2 = __Pyx_PyObject_GetSlice(PyList_GET_ITEM(__pyx_v_output_buffers, __pyx_v_j), 0, (2 * __pyx_cur_scope->__pyx_v_n_parsed_rows), NULL, NULL, NULL, 0, 1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 303, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_GetSlice(PyList_GET_ITEM(__pyx_v_output_buffers, __pyx_v_j), 0, (2 * __pyx_cur_scope->__pyx_v_n_parsed_rows), NULL, NULL, NULL, 0, 1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 326, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_view); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 303, __pyx_L1_error)
+      __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_view); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 326, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 303, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 326, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_11 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_cdouble); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 303, __pyx_L1_error)
+      __pyx_t_11 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_cdouble); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 326, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_11);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __pyx_t_2 = NULL;
@@ -23489,14 +23977,14 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
         __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_8, __pyx_callargs+1-__pyx_t_26, 1+__pyx_t_26);
         __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
         __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-        if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 303, __pyx_L1_error)
+        if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 326, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_1);
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       }
-      if (unlikely((__Pyx_SetItemInt(__pyx_v_output_buffers, __pyx_v_j, __pyx_t_1, Py_ssize_t, 1, PyInt_FromSsize_t, 1, 0, 0) < 0))) __PYX_ERR(0, 303, __pyx_L1_error)
+      if (unlikely((__Pyx_SetItemInt(__pyx_v_output_buffers, __pyx_v_j, __pyx_t_1, Py_ssize_t, 1, PyInt_FromSsize_t, 1, 0, 0) < 0))) __PYX_ERR(0, 326, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-      /* "tabular_data_parser.pyx":301
+      /* "tabular_data_parser.pyx":324
  *   # Postprocess certain dtypes
  *   for j in range(len(output_buffers)):
  *     if dtypes[j] == complex:             # <<<<<<<<<<<<<<
@@ -23505,22 +23993,22 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
  */
     }
 
-    /* "tabular_data_parser.pyx":305
+    /* "tabular_data_parser.pyx":328
  *       output_buffers[j] = output_buffers[j][:2*n_parsed_rows].view(np.cdouble)
  * 
  *     if dtypes[j] == str:             # <<<<<<<<<<<<<<
  *       # Copy strings to new Python str objects. They are parsed above as
  *       # start and end pointers, within the original input string s.
  */
-    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_dtypes, __pyx_v_j, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 305, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_dtypes, __pyx_v_j, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 328, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_8 = PyObject_RichCompare(__pyx_t_1, ((PyObject *)(&PyUnicode_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 305, __pyx_L1_error)
+    __pyx_t_8 = PyObject_RichCompare(__pyx_t_1, ((PyObject *)(&PyUnicode_Type)), Py_EQ); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 328, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 305, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 328, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     if (__pyx_t_7) {
 
-      /* "tabular_data_parser.pyx":308
+      /* "tabular_data_parser.pyx":331
  *       # Copy strings to new Python str objects. They are parsed above as
  *       # start and end pointers, within the original input string s.
  *       b = output_buffers[j]             # <<<<<<<<<<<<<<
@@ -23532,23 +24020,23 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
       __Pyx_XDECREF_SET(__pyx_v_b, __pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "tabular_data_parser.pyx":309
+      /* "tabular_data_parser.pyx":332
  *       # start and end pointers, within the original input string s.
  *       b = output_buffers[j]
  *       output_buffers[j] = np.array([             # <<<<<<<<<<<<<<
  *           s[b[2*k]:b[2*k+1]].decode('utf-8')
  *         for k in range(n_parsed_rows)], dtype=object)
  */
-      __Pyx_GetModuleGlobalName(__pyx_t_8, __pyx_n_s_np); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 309, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_8, __pyx_n_s_np); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 332, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 309, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 332, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       { /* enter inner scope */
-        __pyx_t_8 = PyList_New(0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 309, __pyx_L1_error)
+        __pyx_t_8 = PyList_New(0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 332, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
 
-        /* "tabular_data_parser.pyx":311
+        /* "tabular_data_parser.pyx":334
  *       output_buffers[j] = np.array([
  *           s[b[2*k]:b[2*k+1]].decode('utf-8')
  *         for k in range(n_parsed_rows)], dtype=object)             # <<<<<<<<<<<<<<
@@ -23556,28 +24044,28 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
  *   # output_buffers now contain the parsed values.
  */
         __pyx_t_19 = __pyx_cur_scope->__pyx_v_n_parsed_rows;
-        __pyx_t_27 = __pyx_t_19;
-        for (__pyx_t_28 = 0; __pyx_t_28 < __pyx_t_27; __pyx_t_28+=1) {
-          __pyx_8genexpr4__pyx_v_k = __pyx_t_28;
+        __pyx_t_35 = __pyx_t_19;
+        for (__pyx_t_36 = 0; __pyx_t_36 < __pyx_t_35; __pyx_t_36+=1) {
+          __pyx_8genexpr4__pyx_v_k = __pyx_t_36;
 
-          /* "tabular_data_parser.pyx":310
+          /* "tabular_data_parser.pyx":333
  *       b = output_buffers[j]
  *       output_buffers[j] = np.array([
  *           s[b[2*k]:b[2*k+1]].decode('utf-8')             # <<<<<<<<<<<<<<
  *         for k in range(n_parsed_rows)], dtype=object)
  * 
  */
-          __pyx_t_29 = (2 * __pyx_8genexpr4__pyx_v_k);
-          __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_b, __pyx_t_29, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 310, __pyx_L1_error)
+          __pyx_t_37 = (2 * __pyx_8genexpr4__pyx_v_k);
+          __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_b, __pyx_t_37, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 333, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
-          __pyx_t_29 = ((2 * __pyx_8genexpr4__pyx_v_k) + 1);
-          __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_b, __pyx_t_29, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 310, __pyx_L1_error)
+          __pyx_t_37 = ((2 * __pyx_8genexpr4__pyx_v_k) + 1);
+          __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_b, __pyx_t_37, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 333, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_6 = __Pyx_PyObject_GetSlice(__pyx_v_s, 0, 0, &__pyx_t_2, &__pyx_t_5, NULL, 0, 0, 0); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 310, __pyx_L1_error)
+          __pyx_t_6 = __Pyx_PyObject_GetSlice(__pyx_v_s, 0, 0, &__pyx_t_2, &__pyx_t_5, NULL, 0, 0, 0); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 333, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_decode); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 310, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_decode); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 333, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
           __pyx_t_6 = NULL;
@@ -23598,55 +24086,55 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
             PyObject *__pyx_callargs[2] = {__pyx_t_6, __pyx_kp_u_utf_8};
             __pyx_t_11 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_26, 1+__pyx_t_26);
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-            if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 310, __pyx_L1_error)
+            if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 333, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_11);
             __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
           }
-          if (unlikely(__Pyx_ListComp_Append(__pyx_t_8, (PyObject*)__pyx_t_11))) __PYX_ERR(0, 309, __pyx_L1_error)
+          if (unlikely(__Pyx_ListComp_Append(__pyx_t_8, (PyObject*)__pyx_t_11))) __PYX_ERR(0, 332, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
         }
       } /* exit inner scope */
 
-      /* "tabular_data_parser.pyx":309
+      /* "tabular_data_parser.pyx":332
  *       # start and end pointers, within the original input string s.
  *       b = output_buffers[j]
  *       output_buffers[j] = np.array([             # <<<<<<<<<<<<<<
  *           s[b[2*k]:b[2*k+1]].decode('utf-8')
  *         for k in range(n_parsed_rows)], dtype=object)
  */
-      __pyx_t_11 = PyTuple_New(1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 309, __pyx_L1_error)
+      __pyx_t_11 = PyTuple_New(1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 332, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_11);
       __Pyx_GIVEREF(__pyx_t_8);
-      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_8)) __PYX_ERR(0, 309, __pyx_L1_error);
+      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_8)) __PYX_ERR(0, 332, __pyx_L1_error);
       __pyx_t_8 = 0;
 
-      /* "tabular_data_parser.pyx":311
+      /* "tabular_data_parser.pyx":334
  *       output_buffers[j] = np.array([
  *           s[b[2*k]:b[2*k+1]].decode('utf-8')
  *         for k in range(n_parsed_rows)], dtype=object)             # <<<<<<<<<<<<<<
  * 
  *   # output_buffers now contain the parsed values.
  */
-      __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 311, __pyx_L1_error)
+      __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 334, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
-      if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_dtype, __pyx_builtin_object) < 0) __PYX_ERR(0, 311, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_dtype, __pyx_builtin_object) < 0) __PYX_ERR(0, 334, __pyx_L1_error)
 
-      /* "tabular_data_parser.pyx":309
+      /* "tabular_data_parser.pyx":332
  *       # start and end pointers, within the original input string s.
  *       b = output_buffers[j]
  *       output_buffers[j] = np.array([             # <<<<<<<<<<<<<<
  *           s[b[2*k]:b[2*k+1]].decode('utf-8')
  *         for k in range(n_parsed_rows)], dtype=object)
  */
-      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_11, __pyx_t_8); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 309, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_11, __pyx_t_8); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 332, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      if (unlikely((__Pyx_SetItemInt(__pyx_v_output_buffers, __pyx_v_j, __pyx_t_5, Py_ssize_t, 1, PyInt_FromSsize_t, 1, 0, 0) < 0))) __PYX_ERR(0, 309, __pyx_L1_error)
+      if (unlikely((__Pyx_SetItemInt(__pyx_v_output_buffers, __pyx_v_j, __pyx_t_5, Py_ssize_t, 1, PyInt_FromSsize_t, 1, 0, 0) < 0))) __PYX_ERR(0, 332, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-      /* "tabular_data_parser.pyx":305
+      /* "tabular_data_parser.pyx":328
  *       output_buffers[j] = output_buffers[j][:2*n_parsed_rows].view(np.cdouble)
  * 
  *     if dtypes[j] == str:             # <<<<<<<<<<<<<<
@@ -23656,32 +24144,32 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
     }
   }
 
-  /* "tabular_data_parser.pyx":316
+  /* "tabular_data_parser.pyx":339
  *   # Strip the uninitialized rows beyond n_parsed_rows.
  *   # Give the columns names "col<i>", as expected by PDataSingle/DataView.
  *   return parsed_bytes, dict( (f"col{j}", np_buf[:n_parsed_rows]) for j,np_buf in enumerate(output_buffers) )             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_5 = __Pyx_PyInt_From_ptrdiff_t(__pyx_v_parsed_bytes); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 316, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_ptrdiff_t(__pyx_v_parsed_bytes); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 339, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_8 = __pyx_pf_19tabular_data_parser_22parse_up_to_chunk_size_genexpr(((PyObject*)__pyx_cur_scope), __pyx_v_output_buffers); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 316, __pyx_L1_error)
+  __pyx_t_8 = __pyx_pf_19tabular_data_parser_22parse_up_to_chunk_size_genexpr(((PyObject*)__pyx_cur_scope), __pyx_v_output_buffers); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 339, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_11 = __Pyx_Generator_Next(__pyx_t_8); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 316, __pyx_L1_error)
+  __pyx_t_11 = __Pyx_Generator_Next(__pyx_t_8); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 339, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_11);
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 316, __pyx_L1_error)
+  __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 339, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_GIVEREF(__pyx_t_5);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_5)) __PYX_ERR(0, 316, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_5)) __PYX_ERR(0, 339, __pyx_L1_error);
   __Pyx_GIVEREF(__pyx_t_11);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_8, 1, __pyx_t_11)) __PYX_ERR(0, 316, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_8, 1, __pyx_t_11)) __PYX_ERR(0, 339, __pyx_L1_error);
   __pyx_t_5 = 0;
   __pyx_t_11 = 0;
   __pyx_r = __pyx_t_8;
   __pyx_t_8 = 0;
   goto __pyx_L0;
 
-  /* "tabular_data_parser.pyx":256
+  /* "tabular_data_parser.pyx":273
  *                 ) for col in data.keys() )
  * 
  * def parse_up_to_chunk_size(s, dtypes, chunk_size):             # <<<<<<<<<<<<<<
@@ -23708,6 +24196,8 @@ static PyObject *__pyx_pf_19tabular_data_parser_2parse_up_to_chunk_size(CYTHON_U
   __Pyx_XDECREF(__pyx_v_dt);
   __Pyx_XDECREF(__pyx_v_np_buf);
   __Pyx_XDECREF(__pyx_v_error_code);
+  __Pyx_XDECREF(__pyx_v_error_message);
+  __Pyx_XDECREF(__pyx_v_error_message_bytes);
   __Pyx_XDECREF(__pyx_v_b);
   __Pyx_XDECREF(__pyx_8genexpr3__pyx_v_dtp);
   __Pyx_XDECREF(__pyx_gb_19tabular_data_parser_22parse_up_to_chunk_size_2generator2);
@@ -25538,8 +26028,9 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_kp_s_Unable_to_convert_item_to_object, __pyx_k_Unable_to_convert_item_to_object, sizeof(__pyx_k_Unable_to_convert_item_to_object), 0, 0, 1, 0},
     {&__pyx_n_s_ValueError, __pyx_k_ValueError, sizeof(__pyx_k_ValueError), 0, 0, 1, 1},
     {&__pyx_n_s_View_MemoryView, __pyx_k_View_MemoryView, sizeof(__pyx_k_View_MemoryView), 0, 0, 1, 1},
+    {&__pyx_kp_u__11, __pyx_k__11, sizeof(__pyx_k__11), 0, 1, 0, 0},
     {&__pyx_kp_u__2, __pyx_k__2, sizeof(__pyx_k__2), 0, 1, 0, 0},
-    {&__pyx_n_s__27, __pyx_k__27, sizeof(__pyx_k__27), 0, 0, 1, 1},
+    {&__pyx_n_s__28, __pyx_k__28, sizeof(__pyx_k__28), 0, 0, 1, 1},
     {&__pyx_n_s__3, __pyx_k__3, sizeof(__pyx_k__3), 0, 0, 1, 1},
     {&__pyx_kp_u__6, __pyx_k__6, sizeof(__pyx_k__6), 0, 1, 0, 0},
     {&__pyx_kp_u__7, __pyx_k__7, sizeof(__pyx_k__7), 0, 1, 0, 0},
@@ -25589,6 +26080,8 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_enumerate, __pyx_k_enumerate, sizeof(__pyx_k_enumerate), 0, 0, 1, 1},
     {&__pyx_n_s_error, __pyx_k_error, sizeof(__pyx_k_error), 0, 0, 1, 1},
     {&__pyx_n_s_error_code, __pyx_k_error_code, sizeof(__pyx_k_error_code), 0, 0, 1, 1},
+    {&__pyx_n_s_error_message, __pyx_k_error_message, sizeof(__pyx_k_error_message), 0, 0, 1, 1},
+    {&__pyx_n_s_error_message_bytes, __pyx_k_error_message_bytes, sizeof(__pyx_k_error_message_bytes), 0, 0, 1, 1},
     {&__pyx_n_s_flags, __pyx_k_flags, sizeof(__pyx_k_flags), 0, 0, 1, 1},
     {&__pyx_n_s_float16, __pyx_k_float16, sizeof(__pyx_k_float16), 0, 0, 1, 1},
     {&__pyx_n_s_float32, __pyx_k_float32, sizeof(__pyx_k_float32), 0, 0, 1, 1},
@@ -25698,12 +26191,12 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
 }
 /* #### Code section: cached_builtins ### */
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 184, __pyx_L1_error)
-  __pyx_builtin_AssertionError = __Pyx_GetBuiltinName(__pyx_n_s_AssertionError); if (!__pyx_builtin_AssertionError) __PYX_ERR(0, 231, __pyx_L1_error)
-  __pyx_builtin_zip = __Pyx_GetBuiltinName(__pyx_n_s_zip); if (!__pyx_builtin_zip) __PYX_ERR(0, 265, __pyx_L1_error)
-  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 296, __pyx_L1_error)
-  __pyx_builtin_object = __Pyx_GetBuiltinName(__pyx_n_s_object); if (!__pyx_builtin_object) __PYX_ERR(0, 311, __pyx_L1_error)
-  __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) __PYX_ERR(0, 316, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 200, __pyx_L1_error)
+  __pyx_builtin_AssertionError = __Pyx_GetBuiltinName(__pyx_n_s_AssertionError); if (!__pyx_builtin_AssertionError) __PYX_ERR(0, 248, __pyx_L1_error)
+  __pyx_builtin_zip = __Pyx_GetBuiltinName(__pyx_n_s_zip); if (!__pyx_builtin_zip) __PYX_ERR(0, 282, __pyx_L1_error)
+  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 312, __pyx_L1_error)
+  __pyx_builtin_object = __Pyx_GetBuiltinName(__pyx_n_s_object); if (!__pyx_builtin_object) __PYX_ERR(0, 334, __pyx_L1_error)
+  __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) __PYX_ERR(0, 339, __pyx_L1_error)
   __pyx_builtin___import__ = __Pyx_GetBuiltinName(__pyx_n_s_import); if (!__pyx_builtin___import__) __PYX_ERR(1, 100, __pyx_L1_error)
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(1, 141, __pyx_L1_error)
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(1, 156, __pyx_L1_error)
@@ -25787,12 +26280,12 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         __pyx_collections_abc_Sequence = __import__("collections.abc").abc.Sequence
  *     else:
  */
-  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_n_s_sys); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(1, 100, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__11);
-  __Pyx_GIVEREF(__pyx_tuple__11);
-  __pyx_tuple__12 = PyTuple_Pack(2, __pyx_int_3, __pyx_int_3); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(1, 100, __pyx_L1_error)
+  __pyx_tuple__12 = PyTuple_Pack(1, __pyx_n_s_sys); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(1, 100, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__12);
   __Pyx_GIVEREF(__pyx_tuple__12);
+  __pyx_tuple__13 = PyTuple_Pack(2, __pyx_int_3, __pyx_int_3); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(1, 100, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__13);
+  __Pyx_GIVEREF(__pyx_tuple__13);
 
   /* "View.MemoryView":101
  * try:
@@ -25801,9 +26294,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *     else:
  *         __pyx_collections_abc_Sequence = __import__("collections").Sequence
  */
-  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_kp_s_collections_abc); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(1, 101, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__13);
-  __Pyx_GIVEREF(__pyx_tuple__13);
+  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_kp_s_collections_abc); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(1, 101, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__14);
+  __Pyx_GIVEREF(__pyx_tuple__14);
 
   /* "View.MemoryView":103
  *         __pyx_collections_abc_Sequence = __import__("collections.abc").abc.Sequence
@@ -25812,9 +26305,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * except:
  * 
  */
-  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_n_s_collections); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(1, 103, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__14);
-  __Pyx_GIVEREF(__pyx_tuple__14);
+  __pyx_tuple__15 = PyTuple_Pack(1, __pyx_n_s_collections); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(1, 103, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__15);
+  __Pyx_GIVEREF(__pyx_tuple__15);
 
   /* "View.MemoryView":309
  *         return self.name
@@ -25823,9 +26316,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * cdef strided = Enum("<strided and direct>") # default
  * cdef indirect = Enum("<strided and indirect>")
  */
-  __pyx_tuple__15 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct_or_indirect); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(1, 309, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__15);
-  __Pyx_GIVEREF(__pyx_tuple__15);
+  __pyx_tuple__16 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct_or_indirect); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(1, 309, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__16);
+  __Pyx_GIVEREF(__pyx_tuple__16);
 
   /* "View.MemoryView":310
  * 
@@ -25834,9 +26327,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * cdef indirect = Enum("<strided and indirect>")
  * 
  */
-  __pyx_tuple__16 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(1, 310, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__16);
-  __Pyx_GIVEREF(__pyx_tuple__16);
+  __pyx_tuple__17 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(1, 310, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__17);
+  __Pyx_GIVEREF(__pyx_tuple__17);
 
   /* "View.MemoryView":311
  * cdef generic = Enum("<strided and direct or indirect>")
@@ -25845,9 +26338,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__17 = PyTuple_Pack(1, __pyx_kp_s_strided_and_indirect); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(1, 311, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__17);
-  __Pyx_GIVEREF(__pyx_tuple__17);
+  __pyx_tuple__18 = PyTuple_Pack(1, __pyx_kp_s_strided_and_indirect); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(1, 311, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__18);
+  __Pyx_GIVEREF(__pyx_tuple__18);
 
   /* "View.MemoryView":314
  * 
@@ -25856,9 +26349,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * cdef indirect_contiguous = Enum("<contiguous and indirect>")
  * 
  */
-  __pyx_tuple__18 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_direct); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(1, 314, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__18);
-  __Pyx_GIVEREF(__pyx_tuple__18);
+  __pyx_tuple__19 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_direct); if (unlikely(!__pyx_tuple__19)) __PYX_ERR(1, 314, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__19);
+  __Pyx_GIVEREF(__pyx_tuple__19);
 
   /* "View.MemoryView":315
  * 
@@ -25867,46 +26360,46 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__19 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_indirect); if (unlikely(!__pyx_tuple__19)) __PYX_ERR(1, 315, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__19);
-  __Pyx_GIVEREF(__pyx_tuple__19);
+  __pyx_tuple__20 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_indirect); if (unlikely(!__pyx_tuple__20)) __PYX_ERR(1, 315, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__20);
+  __Pyx_GIVEREF(__pyx_tuple__20);
 
   /* "(tree fragment)":1
  * def __pyx_unpickle_Enum(__pyx_type, long __pyx_checksum, __pyx_state):             # <<<<<<<<<<<<<<
  *     cdef object __pyx_PickleError
  *     cdef object __pyx_result
  */
-  __pyx_tuple__20 = PyTuple_Pack(5, __pyx_n_s_pyx_type, __pyx_n_s_pyx_checksum, __pyx_n_s_pyx_state, __pyx_n_s_pyx_PickleError, __pyx_n_s_pyx_result); if (unlikely(!__pyx_tuple__20)) __PYX_ERR(1, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__20);
-  __Pyx_GIVEREF(__pyx_tuple__20);
-  __pyx_codeobj__21 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__20, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_Enum, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__21)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_tuple__21 = PyTuple_Pack(5, __pyx_n_s_pyx_type, __pyx_n_s_pyx_checksum, __pyx_n_s_pyx_state, __pyx_n_s_pyx_PickleError, __pyx_n_s_pyx_result); if (unlikely(!__pyx_tuple__21)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__21);
+  __Pyx_GIVEREF(__pyx_tuple__21);
+  __pyx_codeobj__22 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__21, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_Enum, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__22)) __PYX_ERR(1, 1, __pyx_L1_error)
 
-  /* "tabular_data_parser.pyx":212
+  /* "tabular_data_parser.pyx":229
  *   return v
  * 
  * def parse_tabular_data(s, dtypes, chunk_size=1000000):             # <<<<<<<<<<<<<<
  *   """Parse tabular data contained in a byte string s, containing columns
  *      with data types given by dtypes.
  */
-  __pyx_tuple__22 = PyTuple_Pack(11, __pyx_n_s_s, __pyx_n_s_dtypes, __pyx_n_s_chunk_size, __pyx_n_s_i, __pyx_n_s_parsed_bytes_2, __pyx_n_s_data, __pyx_n_s_chunks, __pyx_n_s_prev_parsed_bytes, __pyx_n_s_genexpr, __pyx_n_s_genexpr, __pyx_n_s_genexpr); if (unlikely(!__pyx_tuple__22)) __PYX_ERR(0, 212, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__22);
-  __Pyx_GIVEREF(__pyx_tuple__22);
-  __pyx_codeobj__23 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 11, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__22, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_tabular_data_parser_pyx, __pyx_n_s_parse_tabular_data, 212, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__23)) __PYX_ERR(0, 212, __pyx_L1_error)
-  __pyx_tuple__24 = PyTuple_Pack(1, ((PyObject *)__pyx_int_1000000)); if (unlikely(!__pyx_tuple__24)) __PYX_ERR(0, 212, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__24);
-  __Pyx_GIVEREF(__pyx_tuple__24);
+  __pyx_tuple__23 = PyTuple_Pack(11, __pyx_n_s_s, __pyx_n_s_dtypes, __pyx_n_s_chunk_size, __pyx_n_s_i, __pyx_n_s_parsed_bytes_2, __pyx_n_s_data, __pyx_n_s_chunks, __pyx_n_s_prev_parsed_bytes, __pyx_n_s_genexpr, __pyx_n_s_genexpr, __pyx_n_s_genexpr); if (unlikely(!__pyx_tuple__23)) __PYX_ERR(0, 229, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__23);
+  __Pyx_GIVEREF(__pyx_tuple__23);
+  __pyx_codeobj__24 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 11, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__23, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_tabular_data_parser_pyx, __pyx_n_s_parse_tabular_data, 229, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__24)) __PYX_ERR(0, 229, __pyx_L1_error)
+  __pyx_tuple__25 = PyTuple_Pack(1, ((PyObject *)__pyx_int_1000000)); if (unlikely(!__pyx_tuple__25)) __PYX_ERR(0, 229, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__25);
+  __Pyx_GIVEREF(__pyx_tuple__25);
 
-  /* "tabular_data_parser.pyx":256
+  /* "tabular_data_parser.pyx":273
  *                 ) for col in data.keys() )
  * 
  * def parse_up_to_chunk_size(s, dtypes, chunk_size):             # <<<<<<<<<<<<<<
  * 
  *   # Allocate output buffers
  */
-  __pyx_tuple__25 = PyTuple_Pack(18, __pyx_n_s_s, __pyx_n_s_dtypes, __pyx_n_s_chunk_size, __pyx_n_s_output_buffers, __pyx_n_s_col_specs, __pyx_n_s_dt, __pyx_n_s_np_buf, __pyx_n_s_n_parsed_rows, __pyx_n_s_parsed_bytes_2, __pyx_n_s_start, __pyx_n_s_r, __pyx_n_s_error_code, __pyx_n_s_j, __pyx_n_s_b, __pyx_n_s_dtp, __pyx_n_s_k, __pyx_n_s_genexpr, __pyx_n_s_genexpr); if (unlikely(!__pyx_tuple__25)) __PYX_ERR(0, 256, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__25);
-  __Pyx_GIVEREF(__pyx_tuple__25);
-  __pyx_codeobj__26 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 18, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__25, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_tabular_data_parser_pyx, __pyx_n_s_parse_up_to_chunk_size, 256, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__26)) __PYX_ERR(0, 256, __pyx_L1_error)
+  __pyx_tuple__26 = PyTuple_Pack(20, __pyx_n_s_s, __pyx_n_s_dtypes, __pyx_n_s_chunk_size, __pyx_n_s_output_buffers, __pyx_n_s_col_specs, __pyx_n_s_dt, __pyx_n_s_np_buf, __pyx_n_s_n_parsed_rows, __pyx_n_s_parsed_bytes_2, __pyx_n_s_start, __pyx_n_s_r, __pyx_n_s_error_code, __pyx_n_s_error_message, __pyx_n_s_error_message_bytes, __pyx_n_s_j, __pyx_n_s_b, __pyx_n_s_dtp, __pyx_n_s_k, __pyx_n_s_genexpr, __pyx_n_s_genexpr); if (unlikely(!__pyx_tuple__26)) __PYX_ERR(0, 273, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__26);
+  __Pyx_GIVEREF(__pyx_tuple__26);
+  __pyx_codeobj__27 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 20, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__26, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_tabular_data_parser_pyx, __pyx_n_s_parse_up_to_chunk_size, 273, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__27)) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -26010,15 +26503,15 @@ static int __Pyx_modinit_type_init_code(void) {
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_init_code", 0);
   /*--- Type init code ---*/
   #if CYTHON_USE_TYPE_SPECS
-  __pyx_ptype_19tabular_data_parser___pyx_scope_struct__parse_tabular_data = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_19tabular_data_parser___pyx_scope_struct__parse_tabular_data_spec, NULL); if (unlikely(!__pyx_ptype_19tabular_data_parser___pyx_scope_struct__parse_tabular_data)) __PYX_ERR(0, 212, __pyx_L1_error)
-  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_19tabular_data_parser___pyx_scope_struct__parse_tabular_data_spec, __pyx_ptype_19tabular_data_parser___pyx_scope_struct__parse_tabular_data) < 0) __PYX_ERR(0, 212, __pyx_L1_error)
+  __pyx_ptype_19tabular_data_parser___pyx_scope_struct__parse_tabular_data = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_19tabular_data_parser___pyx_scope_struct__parse_tabular_data_spec, NULL); if (unlikely(!__pyx_ptype_19tabular_data_parser___pyx_scope_struct__parse_tabular_data)) __PYX_ERR(0, 229, __pyx_L1_error)
+  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_19tabular_data_parser___pyx_scope_struct__parse_tabular_data_spec, __pyx_ptype_19tabular_data_parser___pyx_scope_struct__parse_tabular_data) < 0) __PYX_ERR(0, 229, __pyx_L1_error)
   #else
   __pyx_ptype_19tabular_data_parser___pyx_scope_struct__parse_tabular_data = &__pyx_type_19tabular_data_parser___pyx_scope_struct__parse_tabular_data;
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
   #endif
   #if !CYTHON_USE_TYPE_SPECS
-  if (__Pyx_PyType_Ready(__pyx_ptype_19tabular_data_parser___pyx_scope_struct__parse_tabular_data) < 0) __PYX_ERR(0, 212, __pyx_L1_error)
+  if (__Pyx_PyType_Ready(__pyx_ptype_19tabular_data_parser___pyx_scope_struct__parse_tabular_data) < 0) __PYX_ERR(0, 229, __pyx_L1_error)
   #endif
   #if PY_MAJOR_VERSION < 3
   __pyx_ptype_19tabular_data_parser___pyx_scope_struct__parse_tabular_data->tp_print = 0;
@@ -26029,15 +26522,15 @@ static int __Pyx_modinit_type_init_code(void) {
   }
   #endif
   #if CYTHON_USE_TYPE_SPECS
-  __pyx_ptype_19tabular_data_parser___pyx_scope_struct_1_genexpr = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_19tabular_data_parser___pyx_scope_struct_1_genexpr_spec, NULL); if (unlikely(!__pyx_ptype_19tabular_data_parser___pyx_scope_struct_1_genexpr)) __PYX_ERR(0, 231, __pyx_L1_error)
-  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_19tabular_data_parser___pyx_scope_struct_1_genexpr_spec, __pyx_ptype_19tabular_data_parser___pyx_scope_struct_1_genexpr) < 0) __PYX_ERR(0, 231, __pyx_L1_error)
+  __pyx_ptype_19tabular_data_parser___pyx_scope_struct_1_genexpr = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_19tabular_data_parser___pyx_scope_struct_1_genexpr_spec, NULL); if (unlikely(!__pyx_ptype_19tabular_data_parser___pyx_scope_struct_1_genexpr)) __PYX_ERR(0, 248, __pyx_L1_error)
+  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_19tabular_data_parser___pyx_scope_struct_1_genexpr_spec, __pyx_ptype_19tabular_data_parser___pyx_scope_struct_1_genexpr) < 0) __PYX_ERR(0, 248, __pyx_L1_error)
   #else
   __pyx_ptype_19tabular_data_parser___pyx_scope_struct_1_genexpr = &__pyx_type_19tabular_data_parser___pyx_scope_struct_1_genexpr;
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
   #endif
   #if !CYTHON_USE_TYPE_SPECS
-  if (__Pyx_PyType_Ready(__pyx_ptype_19tabular_data_parser___pyx_scope_struct_1_genexpr) < 0) __PYX_ERR(0, 231, __pyx_L1_error)
+  if (__Pyx_PyType_Ready(__pyx_ptype_19tabular_data_parser___pyx_scope_struct_1_genexpr) < 0) __PYX_ERR(0, 248, __pyx_L1_error)
   #endif
   #if PY_MAJOR_VERSION < 3
   __pyx_ptype_19tabular_data_parser___pyx_scope_struct_1_genexpr->tp_print = 0;
@@ -26048,15 +26541,15 @@ static int __Pyx_modinit_type_init_code(void) {
   }
   #endif
   #if CYTHON_USE_TYPE_SPECS
-  __pyx_ptype_19tabular_data_parser___pyx_scope_struct_2_genexpr = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_19tabular_data_parser___pyx_scope_struct_2_genexpr_spec, NULL); if (unlikely(!__pyx_ptype_19tabular_data_parser___pyx_scope_struct_2_genexpr)) __PYX_ERR(0, 252, __pyx_L1_error)
-  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_19tabular_data_parser___pyx_scope_struct_2_genexpr_spec, __pyx_ptype_19tabular_data_parser___pyx_scope_struct_2_genexpr) < 0) __PYX_ERR(0, 252, __pyx_L1_error)
+  __pyx_ptype_19tabular_data_parser___pyx_scope_struct_2_genexpr = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_19tabular_data_parser___pyx_scope_struct_2_genexpr_spec, NULL); if (unlikely(!__pyx_ptype_19tabular_data_parser___pyx_scope_struct_2_genexpr)) __PYX_ERR(0, 269, __pyx_L1_error)
+  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_19tabular_data_parser___pyx_scope_struct_2_genexpr_spec, __pyx_ptype_19tabular_data_parser___pyx_scope_struct_2_genexpr) < 0) __PYX_ERR(0, 269, __pyx_L1_error)
   #else
   __pyx_ptype_19tabular_data_parser___pyx_scope_struct_2_genexpr = &__pyx_type_19tabular_data_parser___pyx_scope_struct_2_genexpr;
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
   #endif
   #if !CYTHON_USE_TYPE_SPECS
-  if (__Pyx_PyType_Ready(__pyx_ptype_19tabular_data_parser___pyx_scope_struct_2_genexpr) < 0) __PYX_ERR(0, 252, __pyx_L1_error)
+  if (__Pyx_PyType_Ready(__pyx_ptype_19tabular_data_parser___pyx_scope_struct_2_genexpr) < 0) __PYX_ERR(0, 269, __pyx_L1_error)
   #endif
   #if PY_MAJOR_VERSION < 3
   __pyx_ptype_19tabular_data_parser___pyx_scope_struct_2_genexpr->tp_print = 0;
@@ -26067,15 +26560,15 @@ static int __Pyx_modinit_type_init_code(void) {
   }
   #endif
   #if CYTHON_USE_TYPE_SPECS
-  __pyx_ptype_19tabular_data_parser___pyx_scope_struct_3_parse_up_to_chunk_size = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_19tabular_data_parser___pyx_scope_struct_3_parse_up_to_chunk_size_spec, NULL); if (unlikely(!__pyx_ptype_19tabular_data_parser___pyx_scope_struct_3_parse_up_to_chunk_size)) __PYX_ERR(0, 256, __pyx_L1_error)
-  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_19tabular_data_parser___pyx_scope_struct_3_parse_up_to_chunk_size_spec, __pyx_ptype_19tabular_data_parser___pyx_scope_struct_3_parse_up_to_chunk_size) < 0) __PYX_ERR(0, 256, __pyx_L1_error)
+  __pyx_ptype_19tabular_data_parser___pyx_scope_struct_3_parse_up_to_chunk_size = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_19tabular_data_parser___pyx_scope_struct_3_parse_up_to_chunk_size_spec, NULL); if (unlikely(!__pyx_ptype_19tabular_data_parser___pyx_scope_struct_3_parse_up_to_chunk_size)) __PYX_ERR(0, 273, __pyx_L1_error)
+  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_19tabular_data_parser___pyx_scope_struct_3_parse_up_to_chunk_size_spec, __pyx_ptype_19tabular_data_parser___pyx_scope_struct_3_parse_up_to_chunk_size) < 0) __PYX_ERR(0, 273, __pyx_L1_error)
   #else
   __pyx_ptype_19tabular_data_parser___pyx_scope_struct_3_parse_up_to_chunk_size = &__pyx_type_19tabular_data_parser___pyx_scope_struct_3_parse_up_to_chunk_size;
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
   #endif
   #if !CYTHON_USE_TYPE_SPECS
-  if (__Pyx_PyType_Ready(__pyx_ptype_19tabular_data_parser___pyx_scope_struct_3_parse_up_to_chunk_size) < 0) __PYX_ERR(0, 256, __pyx_L1_error)
+  if (__Pyx_PyType_Ready(__pyx_ptype_19tabular_data_parser___pyx_scope_struct_3_parse_up_to_chunk_size) < 0) __PYX_ERR(0, 273, __pyx_L1_error)
   #endif
   #if PY_MAJOR_VERSION < 3
   __pyx_ptype_19tabular_data_parser___pyx_scope_struct_3_parse_up_to_chunk_size->tp_print = 0;
@@ -26086,15 +26579,15 @@ static int __Pyx_modinit_type_init_code(void) {
   }
   #endif
   #if CYTHON_USE_TYPE_SPECS
-  __pyx_ptype_19tabular_data_parser___pyx_scope_struct_4_genexpr = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_19tabular_data_parser___pyx_scope_struct_4_genexpr_spec, NULL); if (unlikely(!__pyx_ptype_19tabular_data_parser___pyx_scope_struct_4_genexpr)) __PYX_ERR(0, 316, __pyx_L1_error)
-  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_19tabular_data_parser___pyx_scope_struct_4_genexpr_spec, __pyx_ptype_19tabular_data_parser___pyx_scope_struct_4_genexpr) < 0) __PYX_ERR(0, 316, __pyx_L1_error)
+  __pyx_ptype_19tabular_data_parser___pyx_scope_struct_4_genexpr = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_19tabular_data_parser___pyx_scope_struct_4_genexpr_spec, NULL); if (unlikely(!__pyx_ptype_19tabular_data_parser___pyx_scope_struct_4_genexpr)) __PYX_ERR(0, 339, __pyx_L1_error)
+  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_19tabular_data_parser___pyx_scope_struct_4_genexpr_spec, __pyx_ptype_19tabular_data_parser___pyx_scope_struct_4_genexpr) < 0) __PYX_ERR(0, 339, __pyx_L1_error)
   #else
   __pyx_ptype_19tabular_data_parser___pyx_scope_struct_4_genexpr = &__pyx_type_19tabular_data_parser___pyx_scope_struct_4_genexpr;
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
   #endif
   #if !CYTHON_USE_TYPE_SPECS
-  if (__Pyx_PyType_Ready(__pyx_ptype_19tabular_data_parser___pyx_scope_struct_4_genexpr) < 0) __PYX_ERR(0, 316, __pyx_L1_error)
+  if (__Pyx_PyType_Ready(__pyx_ptype_19tabular_data_parser___pyx_scope_struct_4_genexpr) < 0) __PYX_ERR(0, 339, __pyx_L1_error)
   #endif
   #if PY_MAJOR_VERSION < 3
   __pyx_ptype_19tabular_data_parser___pyx_scope_struct_4_genexpr->tp_print = 0;
@@ -26623,12 +27116,12 @@ if (!__Pyx_RefNanny) {
  *         __pyx_collections_abc_Sequence = __import__("collections.abc").abc.Sequence
  *     else:
  */
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin___import__, __pyx_tuple__11, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 100, __pyx_L2_error)
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin___import__, __pyx_tuple__12, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 100, __pyx_L2_error)
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_version_info); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 100, __pyx_L2_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __pyx_t_4 = PyObject_RichCompare(__pyx_t_5, __pyx_tuple__12, Py_GE); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 100, __pyx_L2_error)
+      __pyx_t_4 = PyObject_RichCompare(__pyx_t_5, __pyx_tuple__13, Py_GE); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 100, __pyx_L2_error)
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely((__pyx_t_6 < 0))) __PYX_ERR(1, 100, __pyx_L2_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -26641,7 +27134,7 @@ if (!__Pyx_RefNanny) {
  *     else:
  *         __pyx_collections_abc_Sequence = __import__("collections").Sequence
  */
-        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin___import__, __pyx_tuple__13, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 101, __pyx_L2_error)
+        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin___import__, __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 101, __pyx_L2_error)
         __Pyx_GOTREF(__pyx_t_4);
         __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_abc); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 101, __pyx_L2_error)
         __Pyx_GOTREF(__pyx_t_5);
@@ -26672,7 +27165,7 @@ if (!__Pyx_RefNanny) {
  * 
  */
       /*else*/ {
-        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin___import__, __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 103, __pyx_L2_error)
+        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin___import__, __pyx_tuple__15, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 103, __pyx_L2_error)
         __Pyx_GOTREF(__pyx_t_4);
         __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_Sequence); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 103, __pyx_L2_error)
         __Pyx_GOTREF(__pyx_t_5);
@@ -26837,7 +27330,7 @@ if (!__Pyx_RefNanny) {
  * cdef strided = Enum("<strided and direct>") # default
  * cdef indirect = Enum("<strided and indirect>")
  */
-  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__15, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 309, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__16, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 309, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_XGOTREF(generic);
   __Pyx_DECREF_SET(generic, __pyx_t_7);
@@ -26851,7 +27344,7 @@ if (!__Pyx_RefNanny) {
  * cdef indirect = Enum("<strided and indirect>")
  * 
  */
-  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__16, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 310, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__17, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 310, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_XGOTREF(strided);
   __Pyx_DECREF_SET(strided, __pyx_t_7);
@@ -26865,7 +27358,7 @@ if (!__Pyx_RefNanny) {
  * 
  * 
  */
-  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__17, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 311, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__18, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 311, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_XGOTREF(indirect);
   __Pyx_DECREF_SET(indirect, __pyx_t_7);
@@ -26879,7 +27372,7 @@ if (!__Pyx_RefNanny) {
  * cdef indirect_contiguous = Enum("<contiguous and indirect>")
  * 
  */
-  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__18, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 314, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__19, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 314, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_XGOTREF(contiguous);
   __Pyx_DECREF_SET(contiguous, __pyx_t_7);
@@ -26893,7 +27386,7 @@ if (!__Pyx_RefNanny) {
  * 
  * 
  */
-  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__19, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 315, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__20, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 315, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_XGOTREF(indirect_contiguous);
   __Pyx_DECREF_SET(indirect_contiguous, __pyx_t_7);
@@ -27113,41 +27606,41 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_pyx_unpickle_Enum, __pyx_t_7) < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "tabular_data_parser.pyx":43
+  /* "tabular_data_parser.pyx":51
  * 
  * from cython.view cimport array as cvarray
  * import numpy as np             # <<<<<<<<<<<<<<
  * cimport numpy as cnp
  * 
  */
-  __pyx_t_7 = __Pyx_ImportDottedModule(__pyx_n_s_numpy, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_ImportDottedModule(__pyx_n_s_numpy, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 51, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_7) < 0) __PYX_ERR(0, 43, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_7) < 0) __PYX_ERR(0, 51, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "tabular_data_parser.pyx":212
+  /* "tabular_data_parser.pyx":229
  *   return v
  * 
  * def parse_tabular_data(s, dtypes, chunk_size=1000000):             # <<<<<<<<<<<<<<
  *   """Parse tabular data contained in a byte string s, containing columns
  *      with data types given by dtypes.
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_19tabular_data_parser_1parse_tabular_data, 0, __pyx_n_s_parse_tabular_data, NULL, __pyx_n_s_tabular_data_parser, __pyx_d, ((PyObject *)__pyx_codeobj__23)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 212, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_19tabular_data_parser_1parse_tabular_data, 0, __pyx_n_s_parse_tabular_data, NULL, __pyx_n_s_tabular_data_parser, __pyx_d, ((PyObject *)__pyx_codeobj__24)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 229, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_7, __pyx_tuple__24);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_parse_tabular_data, __pyx_t_7) < 0) __PYX_ERR(0, 212, __pyx_L1_error)
+  __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_7, __pyx_tuple__25);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_parse_tabular_data, __pyx_t_7) < 0) __PYX_ERR(0, 229, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "tabular_data_parser.pyx":256
+  /* "tabular_data_parser.pyx":273
  *                 ) for col in data.keys() )
  * 
  * def parse_up_to_chunk_size(s, dtypes, chunk_size):             # <<<<<<<<<<<<<<
  * 
  *   # Allocate output buffers
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_19tabular_data_parser_3parse_up_to_chunk_size, 0, __pyx_n_s_parse_up_to_chunk_size, NULL, __pyx_n_s_tabular_data_parser, __pyx_d, ((PyObject *)__pyx_codeobj__26)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 256, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_19tabular_data_parser_3parse_up_to_chunk_size, 0, __pyx_n_s_parse_up_to_chunk_size, NULL, __pyx_n_s_tabular_data_parser, __pyx_d, ((PyObject *)__pyx_codeobj__27)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_parse_up_to_chunk_size, __pyx_t_7) < 0) __PYX_ERR(0, 256, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_parse_up_to_chunk_size, __pyx_t_7) < 0) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
   /* "tabular_data_parser.pyx":1
@@ -35186,7 +35679,7 @@ __Pyx_PyType_GetName(PyTypeObject* tp)
     if (unlikely(name == NULL) || unlikely(!PyUnicode_Check(name))) {
         PyErr_Clear();
         Py_XDECREF(name);
-        name = __Pyx_NewRef(__pyx_n_s__27);
+        name = __Pyx_NewRef(__pyx_n_s__28);
     }
     return name;
 }

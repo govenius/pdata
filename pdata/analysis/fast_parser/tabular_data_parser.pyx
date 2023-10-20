@@ -113,6 +113,7 @@ cdef inline from_chars_result parse_single_value(const char* p, const char* star
 
   cdef char CHAR_TAB = <char> 9
   cdef char CHAR_NEWLINE = <char> 10
+  cdef char CHAR_CARRRET = <char> 13
   cdef char CHAR_PLUS = <char> 43
   cdef char CHAR_j = <char> 106
 
@@ -139,6 +140,8 @@ cdef inline from_chars_result parse_single_value(const char* p, const char* star
       double_buf[2*row] = 0.
       r.ptr += 1
       return r
+
+    while r.ptr[0]==CHAR_CARRRET: r.ptr += 1 # In case line ends in \r\n
     if r.ptr[0]==CHAR_TAB or r.ptr[0]==CHAR_NEWLINE: # Imag part is (implicitly) zero (e.g. "1.23e4")
       double_buf[2*row+1] = 0.
       return r
@@ -158,6 +161,9 @@ cdef inline from_chars_result parse_single_value(const char* p, const char* star
     while p<end_of_block and p[0]!=CHAR_NEWLINE and p[0]!=CHAR_TAB: p += 1
     longlong_buf[2*row+1] = p-start_of_block # index of end of string, relative to input block
 
+    # Strip possible \r at the end, in case the line ends in \r\n
+    if p-1 >= start_of_block and (p-1)[0]==CHAR_CARRRET: longlong_buf[2*row+1] -= 1
+
     return from_chars_result(p, getSuccessErrc())
 
 cdef from_chars_result parse_up_to_max_rows(bytes block, size_t max_rows, const vector[ColumnSpec] col_specs, size_t &outNrows, ptrdiff_t &parsed_bytes):
@@ -172,6 +178,7 @@ cdef from_chars_result parse_up_to_max_rows(bytes block, size_t max_rows, const 
 
   cdef char CHAR_TAB = <char> 9
   cdef char CHAR_NEWLINE = <char> 10
+  cdef char CHAR_CARRRET = <char> 13
   cdef char CHAR_HASH = <char> 35
 
   cdef errc success = getSuccessErrc()
@@ -180,6 +187,7 @@ cdef from_chars_result parse_up_to_max_rows(bytes block, size_t max_rows, const 
 
   while r.ptr < end_of_block and row < max_rows:
 
+    while r.ptr[0]==CHAR_CARRRET: r.ptr += 1 # In case line ends in \r\n
     if r.ptr[0] == CHAR_NEWLINE: # skip empty lines
       r.ptr += 1
       continue
@@ -191,14 +199,15 @@ cdef from_chars_result parse_up_to_max_rows(bytes block, size_t max_rows, const 
     # Parse all but last column
     for col in range(ncols-1):
       r = parse_single_value(r.ptr, start, end_of_block, col_specs[col], row)
-      if r.ec != success: return r
-      if r.ptr[0] != CHAR_TAB: return from_chars_result(r.ptr, errc.protocol_error) # Expected a tab as column separator
+      if r.ec != success: break
+      if r.ptr[0] != CHAR_TAB: r = from_chars_result(r.ptr, errc.protocol_error); break # Expected a tab as column separator
       r.ptr += 1
 
     # Parse last column
     r = parse_single_value(r.ptr, start, end_of_block, col_specs[ncols-1], row)
-    if r.ec != success: return r
-    if r.ptr[0] != CHAR_NEWLINE: return from_chars_result(r.ptr, errc.protocol_not_supported) # Expected a new line to indicate the end of a row
+    if r.ec != success: break
+    while r.ptr[0]==CHAR_CARRRET: r.ptr += 1 # In case line ends in \r\n
+    if r.ptr[0] != CHAR_NEWLINE: r = from_chars_result(r.ptr, errc.protocol_not_supported); break # Expected a new line to indicate the end of a row
     r.ptr += 1
 
     row += 1

@@ -532,7 +532,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
     d = jsondiff.diff(snap0, snap1, cls=PdataJSONDiffer, marshal=True)
     self.assertEqual(d, {'b': {'$replace': {}}})
 
-def example_tabular_data(version, file_object=False, binary_mode=False):
+def example_tabular_data(version, file_object=False, binary_mode=False, newline="\n"):
   """Examples of contents of tabular_data.dat, useful especially for
      testing that parsing of legacy data sets also works."""
   tabular_data_qcodes_legacy = """
@@ -713,9 +713,15 @@ def example_tabular_data(version, file_object=False, binary_mode=False):
                    "pre-v1": tabular_data_pre_v1,
                    "v1.0.0": tabular_data_v1_0_0 }[version]
 
+  tabular_data = tabular_data.replace("\r", "") # Shouldn't be the case anyway, but just in case
+  if newline!="\n":
+    tabular_data = tabular_data.replace("\n", newline)
+
+  if binary_mode: tabular_data = bytes(tabular_data, "utf-8")
+
   if not file_object: return tabular_data
 
-  return io.BytesIO(bytes(tabular_data, "utf-8")) if binary_mode else io.StringIO(tabular_data)
+  return io.BytesIO(tabular_data) if binary_mode else io.StringIO(tabular_data)
 
 
 class TestFastParser(unittest.TestCase):
@@ -905,6 +911,37 @@ class TestFastParser(unittest.TestCase):
 
     self.assertTrue(np.abs(parsed_vals[f"col2"].real/random_values[:,2] - 1).max() < 100*np.finfo(float).eps)
     self.assertTrue(np.abs(parsed_vals[f"col2"].imag).max() < 100*np.finfo(float).eps)
+
+  def test_full_tabular_data(self):
+
+    # Test older data format versions too
+    for version in [ "qcodes legacy",
+                     "legacy variant 1",
+                     "pre-v1",
+                     "v1.0.0" ]:
+      for newline in ["\n", "\r\n"]:
+
+        tab_data = example_tabular_data(version, file_object=False, binary_mode=True, newline=newline)
+        parsed_vals = tdp.parse_tabular_data(tab_data, dtypes=[float, complex, str, float] if version=="v1.0.0" else [float, float, float])
+
+        self.assert_float_equality(parsed_vals["col0"][0], 5.900e9)
+        self.assert_float_equality(parsed_vals["col0"][1], 5.905e9)
+        self.assert_float_equality(parsed_vals["col0"][2], 5.910e9)
+        self.assert_float_equality(parsed_vals["col0"][3], 5.915e9)
+        self.assert_float_equality(parsed_vals["col0"][4], 5.920e9)
+
+        last_col = "col3" if version=="v1.0.0" else "col2"
+        self.assert_float_equality(parsed_vals[last_col][0], -8.724404509699187e-01)
+        self.assert_float_equality(parsed_vals[last_col][1], -2.716625651538533e-01)
+        self.assert_float_equality(parsed_vals[last_col][2], 4.430024269210494e-02)
+
+        if version=="v1.0.0":
+          self.assertEqual(len(parsed_vals.keys()), 4)
+        else:
+          self.assertEqual(len(parsed_vals.keys()), 3)
+          self.assertEqual(len(parsed_vals["col0"]), 5)
+          self.assertEqual(len(parsed_vals["col1"]), 5)
+          self.assertEqual(len(parsed_vals["col2"]), 5)
 
 if __name__ == '__main__':
   unittest.main(exit=False)
