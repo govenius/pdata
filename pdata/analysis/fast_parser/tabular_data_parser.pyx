@@ -14,6 +14,8 @@ Parsing at a Gigabyte per Second, Software: Practice and Experience 51
 (8), 2021, arXiv:2101.11408.
 """
 
+from libcpp.string cimport string
+
 cdef extern from "<system_error>" namespace "std":
   enum class errc:
     illegal_byte_sequence
@@ -26,8 +28,14 @@ cdef extern from *:
     // Don't know how else to invoke the default constructor for an enum class from Cython,
     // so use this verbatim-docstring-include-trick to define a function that does it.
     std::errc getSuccessErrc() { return std::errc(); }
+
+    // Also define a way of getting a string representation of an
+    // error (even though this wouldn't be too hard with Cython syntax
+    // either).
+    std::string getErrcMessage(std::errc e) { return make_error_code(e).message(); }
     """
     errc getSuccessErrc()
+    string getErrcMessage(errc e)
 
 cdef extern from "fast_float.h" namespace "fast_float":
   ctypedef struct from_chars_result:
@@ -291,10 +299,16 @@ def parse_up_to_chunk_size(s, dtypes, chunk_size):
 
   # Sanity checks and error handling
   if r.ec != getSuccessErrc():
-    error_code = r.ec
     if parsed_bytes >= 0:
       print(f"Parsing error near character {parsed_bytes}: {s[parsed_bytes:min(len(s), parsed_bytes+30)]}")
-    assert False, (f"Got error code {error_code} from parse_up_to_max_rows()")
+
+    error_code = r.ec
+    try:
+      error_message = getErrcMessage(r.ec)
+      error_message_bytes= <bytes> error_message
+      assert False, (f"Got error code {error_code} ({error_message_bytes}) from parse_up_to_max_rows()")
+    finally:
+      del error_message
 
   # Postprocess certain dtypes
   for j in range(len(output_buffers)):
