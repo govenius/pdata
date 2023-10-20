@@ -126,7 +126,7 @@ class PDataSingle():
           # allowed in numpy structured arrays.
           f.seek(0)
 
-          if FAST_PARSER_ENABLED and all(dt in [
+          if FAST_PARSER_ENABLED and len(converters.keys())==0 and all(dt in [
               float, np.float64, np.float32, np.float16,
               int, np.int64, np.int32, np.int16, np.int8, np.intc,
               complex, np.complex128, np.complex64, np.cdouble, np.cfloat,
@@ -368,10 +368,10 @@ class PDataSingle():
           dtypes[i] = eval(dt[len("builtins."):])
         elif dt in ["datetime.datetime", "datetime"]:
           if convert_timestamps:
+            logging.info(f'Column {i} contains timestamps. Converting them to seconds since Unix epoch. (Disable by setting convert_timestamps=False.)')
             dtypes[i] = float
             converters[i] = lambda x: PDataSingle._parse_timestamp(x.decode('utf-8'))
           else:
-            logging.info(f'Column {i} contains timestamps. Converting them to seconds since Unix epoch. (Disable by setting convert_timestamps=False.)')
             dtypes[i] = datetime.datetime
             converters[i] = lambda x: dtypes[i](x.decode('utf-8'))
         else:
