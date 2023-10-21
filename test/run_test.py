@@ -31,7 +31,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
   def setUpClass(cls):
     """ Create some fake data and save it on disk. """
 
-    cls._data_root = tempfile.mkdtemp(prefix='pdata_test_')
+    cls._data_root = tempfile.mkdtemp(prefix=f'pdata_test_{hex(int(np.random.random()*1e8))[2:]}_')
     cls._typical_datadir = None
 
     freqs = np.linspace(5.9e9, 6.1e9, 41)
@@ -159,12 +159,11 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
   @classmethod
   def tearDownClass(cls):
-    pass
     #import sys
     #print ('\nTests finished.\nPress enter to delete the test data dir created '
     #       f'in the process: {cls._data_root}')
     #sys.stdin.read(1)
-    #shutil.rmtree(cls._data_root)
+    shutil.rmtree(cls._data_root)
 
   def test_dataset_files(self):
     original_dir = os.path.abspath('.')
