@@ -186,12 +186,12 @@ class TestSavingAndAnalysis(unittest.TestCase):
     # Test the graphical dataset selector
     sel = dataexplorer.data_selector(self._data_root)
     self.assertEqual(len(sel.options), 4)
-    self.assertTrue(sel.options[0] == os.path.split(self._single_column_datadir)[-1])
-    self.assertTrue(sel.options[1] == os.path.split(self._no_rows_datadir)[-1])
-    self.assertTrue(sel.options[2] == os.path.split(self._single_row_datadir)[-1])
-    self.assertTrue(sel.options[3] == os.path.split(self._typical_datadir)[-1])
+    self.assertEqual(sel.options[0], os.path.split(self._single_column_datadir)[-1])
+    self.assertEqual(sel.options[1], os.path.split(self._no_rows_datadir)[-1])
+    self.assertEqual(sel.options[2], os.path.split(self._single_row_datadir)[-1])
+    self.assertEqual(sel.options[3], os.path.split(self._typical_datadir)[-1])
     self.assertTrue(sel.options[3].endswith("power-sweep"))
-    self.assertTrue(len(sel.value) == 1)
+    self.assertEqual(len(sel.value), 1)
     self.assertTrue(sel.value[0].endswith("single-col"))
 
     # Test age_filter
@@ -199,9 +199,9 @@ class TestSavingAndAnalysis(unittest.TestCase):
                                      age_filter=time.time() - self._timestamp_between_typical_and_single_row_datadirs,
                                      return_widget=False)
     self.assertEqual(len(sel), 3)
-    self.assertTrue(sel[0] == os.path.split(self._single_column_datadir)[-1])
-    self.assertTrue(sel[1] == os.path.split(self._no_rows_datadir)[-1])
-    self.assertTrue(sel[2] == os.path.split(self._single_row_datadir)[-1])
+    self.assertEqual(sel[0], os.path.split(self._single_column_datadir)[-1])
+    self.assertEqual(sel[1], os.path.split(self._no_rows_datadir)[-1])
+    self.assertEqual(sel[2], os.path.split(self._single_row_datadir)[-1])
 
     # Test name_filter
     sel = dataexplorer.data_selector(self._data_root,
@@ -227,43 +227,43 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
     # Check dimensions and units
     self.assertTrue("frequency" in d.dimensions())
-    self.assertTrue(d.units("frequency") == "Hz")
+    self.assertEqual(d.units("frequency"), "Hz")
     self.assertTrue("S21" in d.dimensions())
-    self.assertTrue(d.units("S21") == "")
+    self.assertEqual(d.units("S21"), "")
     self.assertTrue("VNA power" in d.dimensions())
-    self.assertTrue(d.units("VNA power") == "dBm")
+    self.assertEqual(d.units("VNA power"), "dBm")
 
     # Check frequencies
     expected_freqs = np.linspace(5.9e9, 6.1e9, 41)
-    self.assertTrue(len(d["frequency"]) == 3*len(expected_freqs))
+    self.assertEqual(len(d["frequency"]), 3*len(expected_freqs))
     self.assertTrue(max(np.abs( np.unique(d["frequency"]) / expected_freqs - 1 )) < 1e-10)
     self.assertTrue(max(np.abs(d["frequency"][:len(expected_freqs)] / expected_freqs - 1)) < 1e-10)
     self.assertTrue(max(np.abs(d["frequency"][-len(expected_freqs):] / expected_freqs - 1)) < 1e-10)
 
     # Check "col with strings": [ alphabet[i%10::-p//10] for i in range(len(freqs)) ]
     self.assertTrue("col with strings" in d.dimensions())
-    self.assertTrue(d.units("col with strings") == "")
-    self.assertTrue(d["col with strings"][0] == "adgjmpsvy")
-    self.assertTrue(d["col with strings"][1] == "behknqtwz")
-    self.assertTrue(d["col with strings"][13] == "dgjmpsvy")
-    self.assertTrue(d["col with strings"][-2] == "jklmnopqrstuvwxyz")
-    self.assertTrue(d["col with strings"][-1] == "abcdefghijklmnopqrstuvwxyz")
+    self.assertEqual(d.units("col with strings"), "")
+    self.assertEqual(d["col with strings"][0], "adgjmpsvy")
+    self.assertEqual(d["col with strings"][1], "behknqtwz")
+    self.assertEqual(d["col with strings"][13], "dgjmpsvy")
+    self.assertEqual(d["col with strings"][-2], "jklmnopqrstuvwxyz")
+    self.assertEqual(d["col with strings"][-1], "abcdefghijklmnopqrstuvwxyz")
     self.assertTrue(all( alphabet[(i%len(expected_freqs))%10::3 - i//len(expected_freqs)] == s for i,s in enumerate(d["col with strings"]) ))
 
     # Check integer column: [ i*p for i in range(len(freqs)) ]
     self.assertTrue("integer column" in d.dimensions())
-    self.assertTrue(d.units("integer column") == "apples")
+    self.assertEqual(d.units("integer column"), "apples")
     self.assertTrue(d["integer column"].dtype in [ int, np.int64, np.int32 ])
-    self.assertTrue(d["integer column"][0] == 0)
-    self.assertTrue(d["integer column"][1] == -30)
-    self.assertTrue(d["integer column"][2] == -60)
+    self.assertEqual(d["integer column"][0], 0)
+    self.assertEqual(d["integer column"][1], -30)
+    self.assertEqual(d["integer column"][2], -60)
     self.assertTrue(all( (i%len(expected_freqs)) * (-30 + 10*(i//len(expected_freqs))) == v for i,v in enumerate(d["integer column"]) ))
 
     # Check handling of unicode characters
     self.assertTrue(all( x == "∰ ᴥ ❽ ⁂" for x in d["unicode check"] ))
 
     # Check S21
-    self.assertTrue(len(d["S21"]) == len(d["frequency"]))
+    self.assertEqual(len(d["S21"]), len(d["frequency"]))
 
     expected_S21 = resonator_response(expected_freqs, -30)
     self.assertTrue(max(np.abs(d["S21"][:len(expected_freqs)] / expected_S21 - 1)) < 1e-10)
@@ -272,7 +272,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue(max(np.abs(d["S21"][-len(expected_freqs):] / expected_S21 - 1)) < 1e-10)
 
     # Check VNA power virtual column
-    self.assertTrue(len(d["VNA power"]) == len(d["frequency"]))
+    self.assertEqual(len(d["VNA power"]), len(d["frequency"]))
 
     expected_VNA_powers = [-30, -20, -10]
     self.assertTrue(max(np.abs(d["VNA power"][:len(expected_freqs)] / expected_VNA_powers[0] - 1)) < 1e-10)
@@ -282,7 +282,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
     # the initial snapshot that's created when run_measurement() is
     # callled, but is added by the time add_points() is first called.
     d.add_virtual_dimension('key that gets added', dtype=str, from_set=('key_that_gets_added',))
-    self.assertTrue(d['key that gets added'][0] == "value_for_key_that_gets_added")
+    self.assertEqual(d['key that gets added'][0], "value_for_key_that_gets_added")
     self.assertTrue(all(v == d['key that gets added'][0] for v in d['key that gets added'] ))
 
     # Check conversion to xarray
@@ -316,7 +316,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
     # Check frequencies
     expected_freqs = np.linspace(5.9e9, 6.1e9, 41)
-    self.assertTrue(len(d["frequency"]) == 3*len(expected_freqs))
+    self.assertEqual(len(d["frequency"]), 3*len(expected_freqs))
     self.assertTrue(max(np.abs( np.unique(d["frequency"]) / expected_freqs - 1 )) < 1e-10)
     self.assertTrue(max(np.abs(d["frequency"][:len(expected_freqs)] / expected_freqs - 1)) < 1e-10)
     self.assertTrue(max(np.abs(d["frequency"][-len(expected_freqs):] / expected_freqs - 1)) < 1e-10)
@@ -328,7 +328,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
     # Check frequencies
     expected_freqs = np.linspace(5.9e9, 6.1e9, 41)
-    self.assertTrue(len(d["frequency"]) == len(expected_freqs))
+    self.assertEqual(len(d["frequency"]), len(expected_freqs))
     self.assertTrue(max(np.abs( np.unique(d["frequency"]) / expected_freqs - 1 )) < 1e-10)
 
   def test_reading_single_row_data(self):
@@ -338,7 +338,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
     # Check frequencies
     expected_freqs = np.linspace(5.9e9, 6.1e9, 41)[:1]
-    self.assertTrue(len(d["frequency"]) == len(expected_freqs))
+    self.assertEqual(len(d["frequency"]), len(expected_freqs))
     self.assertTrue(max(np.abs( np.unique(d["frequency"]) / expected_freqs - 1 )) < 1e-10)
 
   def test_reading_single_column_data(self):
@@ -348,7 +348,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
     # Check frequencies
     expected_freqs = np.linspace(5.9e9, 6.1e9, 41)
-    self.assertTrue(len(d["frequency"]) == len(expected_freqs))
+    self.assertEqual(len(d["frequency"]), len(expected_freqs))
     self.assertTrue(max(np.abs( np.unique(d["frequency"]) / expected_freqs - 1 )) < 1e-10)
 
   def test_reading_no_rows_data(self):
@@ -372,7 +372,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
     # Check frequencies
     expected_freqs = np.linspace(5.9e9, 6.1e9, 41)
-    self.assertTrue(len(d["frequency"]) == 4*len(expected_freqs))
+    self.assertEqual(len(d["frequency"]), 4*len(expected_freqs))
     self.assertTrue(max(np.abs( np.unique(d["frequency"][:41]) / expected_freqs - 1 )) < 1e-10)
 
   def test_divide_into_sweeps_and_masking(self):
@@ -399,19 +399,19 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
     # Check that the frequencies are also what we expect, after masking
     expected_freqs = np.linspace(5.9e9, 6.1e9, 41)
-    self.assertTrue(len(d["frequency"]) == len(expected_freqs))
+    self.assertEqual(len(d["frequency"]), len(expected_freqs))
     self.assertTrue(max(np.abs(d["frequency"] / expected_freqs - 1)) < 1e-10)
 
     # Test the corner case that we have only one point
     d.mask_rows(slice(0, 1, None), unmask_instead=True)
-    self.assertTrue(len(d["frequency"]) == 1)
+    self.assertEqual(len(d["frequency"]), 1)
     self.assertTrue(max(np.abs(d["frequency"] / expected_freqs[:1] - 1)) < 1e-10)
     check_correctness(d.divide_into_sweeps("frequency"), [ slice(0, 1, None) ])
     check_correctness(d.divide_into_sweeps("VNA power"), [ slice(0, 1, None) ])
 
     # Test removing rows permanently
     d.remove_masked_rows_permanently()
-    self.assertTrue(len(d["frequency"]) == 1)
+    self.assertEqual(len(d["frequency"]), 1)
     self.assertTrue(max(np.abs(d["frequency"] / expected_freqs[:1] - 1)) < 1e-10)
     check_correctness(d.divide_into_sweeps("frequency"), [ slice(0, 1, None) ])
     check_correctness(d.divide_into_sweeps("VNA power"), [ slice(0, 1, None) ])
