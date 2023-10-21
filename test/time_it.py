@@ -16,8 +16,11 @@ import numpy as np
 import numpy.random
 
 from pdata.procedural_data import run_measurement
+import pdata.analysis.dataview
 from pdata.analysis.dataview import DataView, PDataSingle
 from pdata.analysis import dataexplorer
+
+assert pdata.analysis.dataview.FAST_PARSER_ENABLED, "This script assumes that fast_parser is available."
 
 data_root = tempfile.mkdtemp(prefix='pdata_timing_test_')
 
@@ -34,12 +37,12 @@ def get_instrument_snapshot():
     } }
 
 last_dataset = None
-def create_data_set(snapshots=1, inner_repetitions=100000,
+def create_data_set(random_values, snapshots=1,
                     compress=True,
                     formatter=None):
   """ Create a dummy dataset. """
-  random_values = np.random.random((inner_repetitions,2))
-  random_values[:,1] *= 64
+  assert len(random_values.shape) == 2, "random values should be a list of tuples"
+  assert random_values.shape[1] == 2, "random values should be a list of two-element tuples"
 
   cols = [["X",""], ["Y",""]]
   if formatter is not None:
@@ -60,23 +63,36 @@ def create_data_set(snapshots=1, inner_repetitions=100000,
   return m.path()
 
 
+# Pregenerate random values
+n_rows_pretty = "1M"
+n_rows = int(n_rows_pretty[:-1]) * {'M':1000000,'k':1000}[n_rows_pretty[-1]]
+
+random_values = np.random.random((n_rows,2))
+random_values[:,1] *= 64
+
 # Run once to avoid constant overheads like loading imports etc.
-create_data_set(snapshots=1, inner_repetitions=10)
+create_data_set(random_values[:1000,:], snapshots=1)
+last_dataset = None
 
 # Create a large dataset with many rows and few snapshots
-reps = 2
+reps = 1
+last_pdatasingle = None
 for formatter in ['None', 'lambda x: "%.4e"%x']:
   for compress in [False, True]:
-    print(f"Adding 100k rows, with formatter={formatter} and compress={compress}...")
-    t = timeit.timeit(f'create_data_set(compress={compress},formatter={formatter})', number=reps, globals=globals())/reps
+    print(f"Adding {n_rows_pretty} 2-column rows, with format={formatter if formatter!=None else default} and compress={compress}...")
+    t = timeit.timeit(f'create_data_set(random_values, compress={compress}, formatter={formatter})',
+                      number=reps, globals=globals())/reps
     print(f"  {t:.3f} s per repetition.")
 
-    print(f"Reading it to PDataSingle...")
-    t = timeit.timeit(f'PDataSingle(last_dataset)', number=reps, globals=globals())/reps
-    print(f"  {t:.3f} s per repetition.")
+    for fast_parser_enabled in [True, False]:
+      pdata.analysis.dataview.FAST_PARSER_ENABLED = fast_parser_enabled
 
-    print(f"Reading it to PDataSingle and then converting to DataView...")
-    t = timeit.timeit(f'DataView(PDataSingle(last_dataset))', number=reps, globals=globals())/reps
-    print(f"  {t:.3f} s per repetition.")
+      print(f"Reading it to PDataSingle{' using fast_parser' if fast_parser_enabled else ' using np.genfromtxt'}...")
+      t = timeit.timeit(f'global last_pdatasingle; last_pdatasingle = PDataSingle(last_dataset)', number=reps, globals=globals())/reps
+      print(f"  {t:.3f} s per repetition.")
+
+      print(f"Converting it to DataView...")
+      t = timeit.timeit(f'DataView(last_pdatasingle)', number=reps, globals=globals())/reps
+      print(f"  {t:.3f} s per repetition.")
 
     print("")

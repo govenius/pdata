@@ -315,6 +315,7 @@ Content in the rest of this manual
     :maxdepth: 2
 
     Basic usage <self>
+    speed
     install
     dataformat
     api
