@@ -77,7 +77,7 @@ The essential part of running the measurement is::
       m.add_points({'frequency': freqs, 'S21': s21})
 
 
-.. note:: By default, floats and complex numbers will be serialized to
+.. note:: By default, floats and complex numbers are serialized to
           strings with 16 significant figures, corresponding to the
           precision of 64-bit floats. Other data types are converted
           to string by calling :code:`str()`, and replacing tabs and

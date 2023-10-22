@@ -5,6 +5,9 @@ The script :code:`test/time_it.py` contains some rudimentary timing
 tests. You can run it yourself or check out the :ref:`time_it.py
 example` below.
 
+fast_parser
+-----------
+
 The custom C++ :code:`pdata.analysis.fast_parser` **module improves
 read speed by almost an order of magnitude**, compared to versions
 prior to `pdata v2.7.0
@@ -20,6 +23,36 @@ The :code:`fast_parser` module is used by default as long as:
 Otherwise, `numpy.genfromtxt
 <https://numpy.org/doc/stable/reference/generated/numpy.genfromtxt.html>`_
 is used.
+
+Optimizing number of significant figures
+----------------------------------------
+
+By default, floats and complex numbers are serialized to strings with
+16 significant figures, corresponding to the precision of 64-bit
+floats. This is usually overkill. Both speed and dataset size can be
+improved by providing a custom formatter when passing the column
+definition :code:`(<column name>, <unit>, <formatter>, <dtype>)` to
+:code:`run_measurement`.
+
+For example, if the values you're storing originate from a 10 or 12
+bit ADC, you could safely store just four significant figures by using
+:code:`(<column name>, <unit>, lambda x: f"{x:.3e})`
+
+Another example: If the values you're storing originate from a digital
+voltmeter with 10 µV resolution, you could use :code:`(<column name>,
+'muV', str, int)` and store the values in microvolts. In principle,
+you could use 10 uV as units, but it would be less clear and would
+provide very little extra performance gain.
+
+
+.. warning:: Accidentally storing too few significant figures can be
+             extremely annoying if you only notice the problem once
+             it's no longer easy to remeasure. Therefore, you should
+             generally not optimize the number of significant figures
+             if your data sets are small anyway. It's also a good idea
+             to include at least one or two extra digits beyond what
+             you think you need.
+
 
 time_it.py example
 ------------------

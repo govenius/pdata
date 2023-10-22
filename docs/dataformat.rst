@@ -46,8 +46,8 @@ New lines are encoded as :code:`\\n`. However, parsers must also
 tolerate :code:`\\r\\n`, since they can be present in legacy datasets.
 
 Any row starting with :code:`#` is a comment row. A row is considered
-empty if it contains only white space or the :code:`#` character and
-white space. :code:`\\n` is not allowed.
+empty if it contains no characters other than the line termination, or
+the :code:`#` character and white space.
 
 All non-empty non-comment rows are data rows. Each data row contains a
 single data point as a tab-separated (:code:`\\t`) list of values, one
@@ -68,7 +68,7 @@ and imaginary parts must be present.
 
 The last non-empty comment row contains the column names and units as
 a tab-separated (:code:`\\t`) list of strings. Each string is of the
-format (:code:`<column name> (<units>)`), where the column names
+format :code:`<column name> (<units>)`, where the column names
 (units) must match the regular expression :code:`[\\w\\d\\s\\-+%=/*&]+`
 (:code:`[\\w\\d\\s\\-+%=/*&]*`).
 
