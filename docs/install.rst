@@ -11,8 +11,10 @@ For example, you can create a new conda environment including pdata,
 
   conda create -n pdatasandbox --channel conda-forge pdata qcodes jupyterlab
 
-Here, :code:`pdatasandbox` is an arbitrary name for the new coda
-environment.
+Here, :code:`pdatasandbox` is an arbitrary name for the new
+environment. If needed, familiarize yourself with the basics of `Conda
+environments
+<https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_.
 
 You can also activate the `conda-forge channel
 <https://conda-forge.org/docs/user/introduction.html>`_ for an
@@ -30,10 +32,6 @@ environment and specify all the required packages in one go in the
 :code:`create` command, as in the :code:`pdatasandbox` example
 above. In general, you should consider conda environments disposable.
 
-If you're not familiar with Conda already,
-familiarize yourself with `Conda environments
-<https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_.
-
 pip install
 -----------
 
@@ -45,8 +43,8 @@ run this in the root folder where :file:`setup.cfg` is::
 
 Note that you also `need a C++ compiler
 <https://cython.readthedocs.io/en/latest/src/quickstart/install.html>`_.
-Alternatively, you can disable :code:`fast_parser` in
-:code:`setup.py`.
+Alternatively, you can disable :code:`fast_parser` by setting
+:code:`FAST_PARSER_ENABLED=False` in :code:`setup.py`.
 
 Requirements
 ------------
