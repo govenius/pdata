@@ -60,22 +60,27 @@ def data_selector(base_dir, name_filter=".", age_filter=None, max_entries=30, so
   return dataset_selector
 
 def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate=None, preprocessor=lambda x: x, figure=None):
-  """
-  Convenience function for quickly plotting y vs x in each of the pdata data directories.
+  """Convenience function for quickly plotting y vs x in a given set of
+  pdata data directories.
 
   data_dirs should be an array of PDataSingle objects or paths, given as strings relative to base_dir.
-  data_dirs can also be a single string or single PDataSingle object.
+  data_dirs can also be a single string or a single PDataSingle object.
 
-  x, y and slowcoordinate are a column names, specified as strings.
+  x, y and slowcoordinate are column names, specified as strings.
 
-  The data will be plotted as sweeps based on changing value of slowcoordinate, if specified.
+  The data will be plotted as sweeps based on changing value of
+  slowcoordinate, if specified. A legend entry is also added for each
+  slowcoordinate value. If no slowcoordinate is specified, the plot is
+  divided into sweeps based on the direction of x, and no legend is
+  added.
 
-  preprocessor is an optional function applied to the DataView object before plotting.
-  It can be used to, e.g., add virtual columns.
+  preprocessor is an optional function applied to the DataView object
+  before plotting.  It can be used to, e.g., add virtual columns.
 
   An existing pyplot figure can be optionally specified. It is first cleared.
 
-  Returns the create/reused figure object.
+  Returns the created/reused figure object.
+
   """
 
   # Also accept a single path as a string
