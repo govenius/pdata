@@ -26,8 +26,8 @@ the background, **pdata automatically records all changes to
 instrument parameters** each time :code:`add_points` is called.
 
 On the analysis side, the main functionality of pdata is to provide
-correct and fast implementations for reading the traditional data
-table, concatenating multiple data sets, as well as **parsing the
+correct implementations for reading the traditional data table,
+concatenating multiple data sets, as well as **parsing the
 automatically stored instrument parameters** (with :code:`dataview`
 and :code:`add_virtual_dimension()`).
 
@@ -36,10 +36,16 @@ Pdata also provides basic helpers for quick data visualization (with
 :code:`data_selector()`), and live plotting (with
 :code:`monitor_dir()`).
 
-Pdata does *not* aim to be a fully featured plotting and analysis
-library, however. Instead, we implement **easy-to-use export
-capabilities of parsed data to other Python and non-Python tools**
-(see :ref:`Analyzing with other tools <analyzing_with_other_tools>`).
+Pdata does *not* aim to be a fully-featured plotting and analysis
+library. Instead, we implement **easy-to-use export capabilities of
+parsed data to other Python and non-Python tools** (see
+:ref:`Analyzing with other tools <analyzing_with_other_tools>`).
+
+Below you find a short guide to using the most important features of
+pdata. You can find the same content in an interactive Jupyter
+notebook format under the :code:`examples` directory. For more
+detailed documentation of each function, see the :doc:`API page
+</api>`
 
 .. note:: The only requirement for the framework used to control the
           instruments is that the framework needs to be able to return
@@ -127,13 +133,26 @@ Here is how you read the data back from the above example using DataView::
 
   d = DataView([ PDataSingle(data_path), ]) # <-- You can concatenate multiple data dirs by adding multiple PDataSingle's to the array
 
-  # Add a "column" to the data table based on a value from the snapshot.
-  # The path given in the from_set argument depends on the framework
-  # you use for instrument control. You can determine it by
-  # examining snapshot.json.gz, or d.settings()[0][1].
-  d.add_virtual_dimension('VNA power',
+That will read the data table including all of the columns given as
+arguments to :code:`run_measurement()`. In addition, **we can add any
+instrument setting as a virtual dimension** that looks for the rest of
+the analysis just like any other column in the data table::
+
+  d.add_virtual_dimension('VNA power', # <-- name of the new column
                           from_set=('instruments', 'vna',
                                     'parameters', 'power', 'value'))
+
+.. note:: The path given in the :code:`from_set` argument depends on
+          the framework you use for instrument control. You can
+          determine it using the graphical helper
+          :code:`dataexplorer.snapshot_explorer(d)`, or by manually
+          examining :code:`d.settings()[0][1]` or snapshot.json.gz.
+
+Often, you would next use :code:`basic_plot` to plot the data using a
+one-liner, or :ref:`export the parsed data
+<analyzing_with_other_tools>` to e.g. xarray for more involved
+analysis. But here, for pedagogical purposes, let's first take a more
+verbose approach to see what :code:`DataView` can do.
 
 Let's run some print statements to see how to access the data columns::
 
@@ -164,15 +183,16 @@ Which outputs the following::
 
   Sweeps based on a per-sweep-swept parameter: [slice(0, 41, None), slice(41, 82, None), slice(82, 123, None)]
 
-Often, you would next use :code:`divide_into_sweeps` to plot your data
-as sweeps using your favorite plotting library::
+Let's next divide the data into sweeps with
+:code:`divide_into_sweeps`. We can then plot those sweeps with
+matplotlib, as an example::
 
   import matplotlib.pyplot as plt
   fig, ax = plt.subplots()
 
   for s in d.divide_into_sweeps('frequency'):
   #for s in d.divide_into_sweeps('VNA power'):  # <-- This would work equally well.
-    dd = d.copy(); dd.mask_rows(s, unmask_instead=True)
+    dd = d.copy(); dd.mask_rows(s, unmask_instead=True) # Create a copy of d, and mask (i.e. hide) all rows except a single sweep
     power = dd.single_valued_parameter('VNA power')
     ax.plot(dd['frequency'], dd['S21'], label="%s dBm" % power)
 

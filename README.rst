@@ -13,16 +13,23 @@ The main goals are to provide an interface that:
   * Uses standard Python flow-control constructs (for, while, if, etc.) for looping over setpoints.
   * The API aims to be self-explanatory, wherever possible.
 
-In practice, the experimenter calls an explicit :code:`add_points(<new
-data points>)` function to add rows to a traditional table of data
-points, with user-defined columns. In the background, **pdata
-automatically records all changes to instrument parameters** each
-time :code:`add_points` is called.
+In practice, the experimenter starts by defining the columns for a
+traditional table of data points, and then calls an explicit
+:code:`add_points(<new data points>)` to add rows to the table,
+typically inside a few nested for loops that loop over setpoints. In
+the background, **pdata automatically records all changes to
+instrument parameters** each time :code:`add_points` is called.
 
-In addition, pdata provides useful helpers for reading back the data,
-including automatically recorded instrument parameters, basic helpers
-for visualization, and good export capabilities to other tools for
-further analysis.
+On the analysis side, the main functionality of pdata is to provide
+correct implementations for reading the traditional data table,
+concatenating multiple data sets, as well as **parsing the
+automatically stored instrument parameters** (with :code:`dataview`
+and :code:`add_virtual_dimension()`).
+
+Pdata also provides basic helpers for quick data visualization (with
+:code:`basic_plot()`), graphical dataset selection (with
+:code:`data_selector()`), and live plotting (with
+:code:`monitor_dir()`).
 
 Getting started/Full documentation
 ----------------------------------
