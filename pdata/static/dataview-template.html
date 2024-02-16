@@ -1,0 +1,41 @@
+
+<pre class="xr-text-repr-fallback">&lt;pdata.analysis.DataView&gt;
+Summary:
+  * Columns: {{dimension_list|length}}
+  * Rows: {{global_props.nrows}}
+  * Unmasked rows: {{global_props.n_unmasked_rows}}
+  * Settings dicts: {{settings_list|length}}
+  * Concatenated datasets: {{global_props.ndatasets}}
+Dimensions:
+{% for dim in dimension_list %}
+  * {{dim.name}} ({{dim.units}}): {{dim.vals_preview}}
+{% endfor %}
+</pre>
+
+<div class="xr-wrap" style="display:none">
+  <div class="xr-header"><div class="xr-obj-type">pdata.analysis.DataView</div></div>
+  <ul class="xr-sections">
+    <li class="xr-section-item"><input id="section-466a58e9-f148-413d-aa76-12eb9f9c3120" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-466a58e9-f148-413d-aa76-12eb9f9c3120" class="xr-section-summary" title="Expand/collapse section">Rows:</label>
+      <div class="xr-section-inline-details">
+        <ul class="xr-dim-list">
+          <li><span class="xr-has-index">Total</span>: {{global_props.nrows}}</li>
+          <li><span class="xr-has-index">Unmasked</span>: {{global_props.n_unmasked_rows}}</li>
+          <li><span class="xr-has-index">Concatenated datasets</span>: {{global_props.ndatasets}}</li>
+        </ul>
+      </div>
+      <div class="xr-section-details"></div></li>
+
+    <li class="xr-section-item"><input id="section-{{dimlist_uuid}}" class="xr-section-summary-in" type="checkbox" checked=""><label for="section-{{dimlist_uuid}}" class="xr-section-summary">Columns: <span>({{dimension_list|length}})</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list">
+          {% for dim in dimension_list %}
+          <li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">{{dim.name}}</span></div><div class="xr-var-dims">({{dim.units}})</div><div class="xr-var-dtype">{{dim.dtype}}</div><div class="xr-var-preview xr-preview">{{dim.vals_preview}}</div><input id="data-{{dim.uuid}}" class="xr-var-data-in" type="checkbox"><label for="data-{{dim.uuid}}" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use xlink:href="#icon-database"></use></svg></label><div class="xr-var-data"><pre>{{dim.vals}}</pre></div></li>
+          {% endfor %}
+    </ul></div></li>
+
+    <li class="xr-section-item"><input id="section-{{settingslist_uuid}}" class="xr-section-summary-in" type="checkbox"><label for="section-{{settingslist_uuid}}" class="xr-section-summary">Settings: <span>({{settings_list|length}})</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list">
+          {% for settings in settings_list %}
+          <li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">At row {{settings.row}}</span></div><div class="xr-var-dims"></div><div class="xr-var-dtype"></div><div class="xr-var-preview xr-preview">{{settings.preview}}</div><input id="data-{{settings.uuid}}" class="xr-var-data-in" type="checkbox"><label for="data-{{settings.uuid}}" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use xlink:href="#icon-database"></use></svg></label><div class="xr-var-data"><pre>{{settings.full}}</pre></div></li>
+          {% endfor %}
+    </ul></div></li>
+
+  </ul>
+</div>

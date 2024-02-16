@@ -1,5 +1,5 @@
-Contributing
-============
+Contributing and licences
+=========================
 
 Contributions of all kinds are welcome, preferably as pull requests
 through Github.
@@ -32,3 +32,19 @@ test that fails (passes) before (after) your fix.
 
 **Contributions adding automated tests of any kind are highly
 welcome!**
+
+
+Licenses
+--------
+
+pdata code is licensed under the MIT license (see :file:`LICENSE`),
+with the following exceptions:
+
+* :file:`pdata/static/style.css` and
+  :file:`pdata/static/dataview-template.html` contain CSS and HTML
+  from `xarray <https://docs.xarray.dev/en/stable/index.html>`_, which
+  is licensed under Apache License Version 2.0 (see
+  :file:`pdata/static/XARRAY_LICENSE`).
+* xarray in turn uses :file:`pdata/static/icons-svg-inline.html`,
+  which has IcoMoon icons licensed under CC BY 4.0 (see
+  :file:`pdata/static/ICOMOON_LICENSE`).
