@@ -287,7 +287,7 @@ def snapshot_explorer(d, max_depth=10, detect_qcodes_params=True):
   def to_str(x): return f"'{x}'" if isinstance(x, str) else str(x)
 
   def to_virtual_dim_str(keys, name="<name>", units="<units>", first_value=None):
-    x  = f"d.add_virtual_dimension('{name}', units='{units}', from_set=["
+    x  = f"<DataView instance>.add_virtual_dimension('{name}', units='{units}', from_set=["
     x += ", ".join(to_str(k) for k in keys) + "]"
     x += dtype_spec(first_value)
     x += ")"
