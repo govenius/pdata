@@ -16,10 +16,12 @@ import shutil
 import gzip
 import tarfile
 import itertools
+import uuid
 import json
 import jsondiff
 import datetime
 import pytz
+import jinja2
 from dateutil import tz
 from collections import OrderedDict
 
@@ -31,6 +33,12 @@ UNIX_EPOCH = datetime.datetime(1970, 1, 1, 0, 0, tzinfo = pytz.utc)
 
 column_name_regex = r"[\w\d\s\-+%=/*&]+"
 column_unit_regex = r"[\w\d\s\-+%=/*&]*"
+
+html_template_env = jinja2.Environment(
+  loader=jinja2.PackageLoader('pdata', package_path='static'),
+  autoescape=lambda fname: fname.lower().endswith(".html"),
+  trim_blocks=True, keep_trailing_newline=True, auto_reload=False)
+
 
 class PDataSingle():
     ''' Class for reading in the contents of a single pdata data directory.
@@ -1214,3 +1222,87 @@ class DataView():
           arrays[val_name] = xarray.DataArray(value_matrix, coords=coords.values(), dims=dims, attrs=attrs)
 
         return xarray.Dataset(arrays)
+
+    def _repr_html_(self):
+      """Output HTML representation for Jupyter display.
+
+      The HTML representations use CSS and HTML files from `xarray
+      <https://docs.xarray.dev/en/stable/index.html>`_, which is
+      licensed under Apache License Version 2.0 (see
+      licenses/XARRAY_LICENSE file). xarray in turn uses icons from
+      the icomoon package, which is licensed under CC BY 4.0 (see
+      licenses/ICOMOON_LICENSE).
+      """
+      template = html_template_env.get_template('dataview-template.html')
+
+      dimension_list = []
+      for dim_name in self.dimensions():
+        dimension_list.append({
+          'uuid': str(uuid.uuid4()),
+          'name': dim_name,
+          'units': self.units(dim_name),
+          'dtype': self._get_dtype_repr(dim_name),
+          'vals_preview': DataView._array_to_str(self[dim_name], 1),
+          'vals': DataView._array_to_str(self[dim_name], 200),
+        })
+
+      settings_list = []
+      for row,s in self.settings():
+        full = json.dumps(s, indent=2)
+        settings_list.append({
+          'uuid': str(uuid.uuid4()),
+          'row': row,
+          'preview': full[:min(len(full), 50)] + ("..." if len(full)>50 else ""),
+          'full': full,
+        })
+
+      # Generate the HTML
+      html_out = template.render(
+        global_props={
+          'nrows': len(self.mask()),
+          'n_unmasked_rows': sum(1 - self.mask()),
+          'ndatasets': len(np.unique(self["data_source"])) if "data_source" in self.dimensions() else "?" },
+        dimlist_uuid= str(uuid.uuid4()),
+        settingslist_uuid= str(uuid.uuid4()),
+        dimension_list=dimension_list,
+        settings_list=settings_list )
+
+      #with open(os.path.join('.', 'dataview_repr.html'), 'w') as f: f.write(html_out)
+      return f"<div>\n{style_css}\n{html_out}</div>"
+
+    def _get_dtype_repr(self, dim_name):
+      """ Get data type of self[dim_name] in a compact string format. """
+      if len(self.mask())==0: return "?"
+      dt = type(self[dim_name][0])
+      return dt.__name__.rstrip('_') if hasattr(dt, "__name__") else str(dt)
+
+    @staticmethod
+    def _array_to_str(arr, maxrows=7, vals_per_row=4):
+      """ Convert an array to string for visualization purposes. """
+      if maxrows==1:
+        if len(arr) == vals_per_row: return ', '.join(str(x) for x in arr)
+        s = ', '.join(str(x) for x in arr[:min(vals_per_row-1, len(arr))])
+        if len(arr) < vals_per_row: return s
+        return s + ', ..., ' + str(arr[-1])
+
+      rows = []
+      while (len(rows)+1)*vals_per_row < len(arr) and len(rows) < maxrows-1:
+        rows.append(', '.join(str(x) for x in arr[len(rows)*vals_per_row:(len(rows)+1)*vals_per_row]))
+
+      if len(rows)==maxrows-1 and (len(rows)+1)*vals_per_row < len(arr):
+        rows.append('...')
+        rows.append(', '.join(str(x) for x in arr[-min(vals_per_row, len(arr)):]))
+
+      #print(rows[0])
+      return ",\n".join(rows)
+
+# Preload style.css and icons for html output.
+#
+# There are no Jinja statements in them, but the Jinja PackageLoader
+# is convenient for locating the files in a robust way.
+style_css = f"""
+{html_template_env.get_template('icons-svg-inline.html').render()}
+<style>
+{html_template_env.get_template('style.css').render()}
+</style>
+"""
