@@ -2,10 +2,11 @@ API
 ===
 
 Almost all of the measurement-side functionality is implemented in
-procedural_data.py, and the :code:`Measurement` class within it.
+:file:`procedural_data.py`, and the :code:`Measurement` class within
+it.
 
-Analysis side functionality is implemented in dataview.py and
-dataexplorer.py.
+Analysis side functionality is implemented in :file:`dataview.py` and
+:file:`dataexplorer.py`.
 
 :ref:`genindex`
 
