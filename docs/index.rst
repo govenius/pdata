@@ -131,7 +131,13 @@ Here is how you read the data back from the above example using DataView::
 
   from pdata.analysis.dataview import DataView, PDataSingle
 
-  d = DataView([ PDataSingle(data_path), ]) # <-- You can concatenate multiple data dirs by adding multiple PDataSingle's to the array
+  # Read the data from disk into a PDataSingle object
+  # and then feed that into a DataView object for analysis
+  #
+  # PDataSingle and Dataview are separate because you can
+  # concatenate multiple data dirs into one DataView by
+  # adding multiple PDataSingle's to the array below.
+  d = DataView([ PDataSingle(data_path), ])
 
 That will read the data table including all of the columns given as
 arguments to :code:`run_measurement()`. In addition, **we can add any
@@ -147,6 +153,9 @@ the analysis just like any other column in the data table::
           determine it using the graphical helper
           :code:`dataexplorer.snapshot_explorer(d)`, or by manually
           examining :code:`d.settings()[0][1]` or snapshot.json.gz.
+
+If you're using Jupyter, take a look at the HTML-formatted summary of
+the parsed data, by typing :code:`d` in a new cell.
 
 Often, you would next use :code:`basic_plot` to plot the data using a
 one-liner, or :ref:`export the parsed data
