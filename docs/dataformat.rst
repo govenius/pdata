@@ -130,21 +130,47 @@ snapshot.row-<n>.diff<m>.json
 recorded when there were <n> data rows in tabular_data.dat. <m> is a
 simple counter, in case multiple diffs are created for the same row.
 
-The diffs are always in the :code:`compact` format. *TODO:* No clear
-specification of the format seems to exist. Let's specify it here.
-
 Optionally, these files may be combined and compressed into a gzipped
 tarball (tar.gz added to file name).
+
+The diffs are always in the :code:`compact` format, and produced with
+:code:`marshal=True` and :code:`cls=pdata.helpers.PdataJSONDiffer` as
+options. The purpose of the custom JsonDiffer class is to handle Numpy
+ndarrays and lists of only scalars as complete blocks, which is
+important for maintaining reasonable speed.
+
+`jsondiff <https://pypi.org/project/jsondiff/>`_ documentation does
+not seem to include a clear specification of the format. We therefore
+specify it here.
+
+Compact jsondiff format with marshal=True
+*****************************************
+
+The diff between a source dict and a target dict consists of a
+structure of nested dictionaries and lists. Let us call a sequence of
+keys specifying a leaf node or a subset of nodes in that diff a
+"path".
+
+If the path does not contain :code:`$delete`, the target dict is
+obtained from the source dict by following the path up to the point where the source and
+target
 
 log.txt
 +++++++
 
 A copy of log messages recorded during the measurement (from the logging module).
 
-A copy of the Jupyter notebook (.ipynb) or other measurement script
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+input-history
++++++++++++++
 
-A copy of the main measurement script is stored if possible.
+A copy of input given to IPython/Jupyter in the current session, up to
+500 most recent cells. Optional.
+
+A copy of the Jupyter notebook (.ipynb)
++++++++++++++++++++++++++++++++++++++++
+
+A copy of the main measurement script. Optional and disabled by
+default. Only available in Jupyter Notebook, not in Jupyter Lab.
 
 
 Changelog

@@ -33,6 +33,7 @@ def run_measurement(get_snapshot,
                     data_base_dir='.',
                     dir_name_generator=lambda n: datetime.datetime.now().strftime(f"%Y-%m-%d_%H-%M-%S_{int(1e3*random.random())}") + f"_{n}",
                     autosnap=True, snap_diff_filter=preprocess_snapshot,
+                    omit_readme=False, omit_input_history=False, omit_notebook_copy=True,
                     compress=True, log_level="inherit"):
   '''
   A simple context manager that runs begin() and end()
@@ -59,7 +60,11 @@ def run_measurement(get_snapshot,
                   target_dir=target_dir,
                   get_snapshot=get_snapshot,
                   snap_diff_filter=snap_diff_filter,
-                  autosnap=autosnap, compress=compress)
+                  autosnap=autosnap,
+                  omit_readme=omit_readme,
+                  omit_input_history=omit_input_history,
+                  omit_notebook_copy=omit_notebook_copy,
+                  compress=compress)
 
   m.begin()
   try:     yield m
@@ -77,19 +82,21 @@ class Measurement():
     * :file:`snapshot.json` -- Instrument parameter snapshot when :code:`run_measurement` started.
     * :file:`snapshot.row-<n>.diff<m>.json` -- `jsondiff <https://pypi.org/project/jsondiff/>`_ of parameter changes, recorded when the there were <n> data rows in tabular_data.dat. <m> is a simple counter, in case multiple diffs are created for the same row.
     * :file:`log.txt` -- copy of messages from the logging module.
-    * A copy of the Jupyter notebook (.ipynb) or other measurement script, if possible.
+    * :file:`input-history` -- copy of input given to IPython/Jupyter in the current session, up to 500 most recent cells. (optional)
+    * A copy of the Jupyter notebook (optional and disabled by default; only in Jupyter Notebook not Lab)
 
   Optionally, the files may be compressed (.gz or .tar.gz).
 
   Although the format is human-readable in the simplest cases, it is
-  meant to be parsed programmatically, i.e., by the dataview module
-  (analysis/dataview.py).
+  meant to be parsed programmatically by the dataview module
+  (:file:`analysis/dataview.py`).
 
   For more information, see https://pdata.readthedocs.io/en/latest/
   '''
 
   def __init__(self, columns, target_dir=None, get_snapshot=None,
-               autosnap=True, snap_diff_filter=None, omit_readme=False,
+               autosnap=True, snap_diff_filter=None,
+               omit_readme=False, omit_input_history=False, omit_notebook_copy=True,
                compress=True, log_level="inherit"):
     '''Args:
 
@@ -112,6 +119,8 @@ class Measurement():
                         useful for filtering things out (e.g. timestamps).
 
       omit_readme: don't create a README file in the data directory.
+      omit_input_history: don't create an input-history file in the data directory.
+      omit_notebook_copy: don't attempt to copy Jupyter notebook into the data directory.
 
       compress: compress data files when measurement ends
 
@@ -124,6 +133,8 @@ class Measurement():
     self._autosnap = True
     self._snap_diff_filter = snap_diff_filter
     self._omit_readme = omit_readme
+    self._omit_input_history = omit_input_history
+    self._omit_notebook_copy = omit_notebook_copy
     self._compress = compress
     self._log_level = log_level
 
@@ -198,6 +209,7 @@ class Measurement():
 
     self._write_readme()
     self._open_log_file()
+    self._save_ipython_input_history()
     self._copy_jupyter_notebook()
     self.write_snapshot()
 
@@ -375,7 +387,8 @@ class Measurement():
 
     if self._compress:
 
-      def gzip_file(fname):
+      def gzip_file(fname, ignore_nonexistent=False):
+        if ignore_nonexistent and not os.path.isfile(fname): return
         with open(fname, 'rb') as f_in:
           with gzip.open(fname + '.gz', 'wb') as f_out:
             shutil.copyfileobj(f_in, f_out)
@@ -400,14 +413,33 @@ class Measurement():
                   if f.startswith('snapshot.row-') ],
                 'snapshot_diffs')
 
+      # Compress input-history, if it exists
+      gzip_file( os.path.join(self._target_dir, 'input-history'), ignore_nonexistent=True )
 
   def _close_log_file(self):
     logging.getLogger().removeHandler(self._log_file_handler)
     self._log_file_handler.close()
     self._log_file_handler = None
 
+  def _save_ipython_input_history(self, max_cells=500):
+    '''Saves the IPython/Jupyter input history from the current session,
+       up to max_cells most recent input cells.'''
+    if self._omit_input_history: return
+    try:
+      hist = get_ipython().history_manager.input_hist_parsed
+    except NameError:
+      logging.info(f"Not running in IPython --> Input history not copied to data dir.")
+      return
+
+    with open(os.path.join(self._target_dir, "input-history"), 'w') as f_out:
+      for l in hist[-min(max_cells, len(hist)):]:
+        f_out.write(l)
+        f_out.write("\n\n")
+
   def _copy_jupyter_notebook(self):
-    ''' Saves the current notebook (if any) and copies it to the data directory. '''
+    '''Saves the current Jupyter notebook (if any) and copies it to the
+       data directory. This works only in Jupyter Notebook, not in JupyterLab'''
+    if self._omit_notebook_copy: return
     try:
       fname = pdata.jupyter_helpers.get_notebook_name()
       if fname == None: return # Not running within Jupyter
@@ -416,6 +448,7 @@ class Measurement():
       shutil.copyfile(fname, os.path.join(self._target_dir, os.path.split(fname)[1]))
     except:
       logging.exception(f"Failed to copy measurement Jupyter notebook to {self.path()}. Starting experiment anyway.")
+      return
 
   def _write_readme(self):
     '''
