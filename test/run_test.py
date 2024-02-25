@@ -6,6 +6,7 @@ import tempfile
 import time
 import io
 import datetime
+import re
 
 import unittest
 
@@ -284,6 +285,36 @@ class TestSavingAndAnalysis(unittest.TestCase):
     d.add_virtual_dimension('key that gets added', dtype=str, from_set=('key_that_gets_added',))
     self.assertEqual(d['key that gets added'][0], "value_for_key_that_gets_added")
     self.assertTrue(all(v == d['key that gets added'][0] for v in d['key that gets added'] ))
+
+    # Check DataView HTML representation
+    html = d._repr_html_()
+    self.assertGreater(len(html), 1000)
+    self.assertLess(len(html), 1e6)
+
+    # For the rest of the checks of the HTML, ignore all whitespace
+    html = re.sub(r"\s+", "", html, flags=re.UNICODE)
+
+    self.assertTrue(html.startswith(re.sub(r"\s+", "", """<div>
+<svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+ """, flags=re.UNICODE)))
+
+    self.assertTrue(html.endswith(re.sub(r"\s+", "", """},
+  &#34;list&#34;: [
+    &#34;list_value0&#34;,
+    {
+      &#34;key&#34;: &#34;value&#34;
+    }
+  ],
+  &#34;key_that_gets_added&#34;: &#34;value_for_key_that_gets_added&#34;
+}</pre></div></li>
+              </ul></div></li>
+  </ul>
+</div>
+</div>
+""", flags=re.UNICODE)))
 
     # Check conversion to xarray
     xa = d.to_xarray("S21", coords=[ "frequency", "VNA power" ])
