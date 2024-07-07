@@ -79,7 +79,7 @@ reps = 1
 last_pdatasingle = None
 for formatter in ['None', 'lambda x: "%.4e"%x']:
   for compress in [False, True]:
-    print(f"Adding {n_rows_pretty} 2-column rows, with format={formatter if formatter!=None else default} and compress={compress}...")
+    print(f"Adding {n_rows_pretty} 2-column rows, with format={formatter if formatter!=None else 'default'} and compress={compress}...")
     t = timeit.timeit(f'create_data_set(random_values, compress={compress}, formatter={formatter})',
                       number=reps, globals=globals())/reps
     print(f"  {t:.3f} s per repetition.")

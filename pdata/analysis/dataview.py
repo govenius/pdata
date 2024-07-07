@@ -1077,7 +1077,7 @@ class DataView():
 
                 if len(m.groups()) != 1:
                   logging.warning('Did not get a unique match (%s) in comment (%d): %s'
-                               % (str(groups), rowno, commentstr))
+                               % (str(m.groups()), rowno, commentstr))
                 new_val = m.group(1)
 
               set_vals(up_to_row=rowno, new_val=new_val)
