@@ -116,7 +116,7 @@ def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate
 
 def monitor_dir(base_dir, x, y,
                 name_filter='.', age_filter=None,
-                xlog=False, ylog=False, slowcoordinate=None, preprocessor=lambda x: x,
+                xlog=False, ylog=False, slowcoordinate=None, preprocessor=None,
                 selector=data_selector, plotter=basic_plot,
                 ref_data_dirs=[],
                 poll_period=3):
@@ -140,9 +140,28 @@ def monitor_dir(base_dir, x, y,
   """
   fig = plt.figure()
 
+  def check_columns(dd):
+    '''Check that PDataSingle object dd has the columns x, y, and
+       slowcoordinate.'''
+    # We can't check anything if custom plotter or preprocessor is used.
+    if plotter!=basic_plot or preprocessor!=None: return True
+
+    if x not in dd.dimension_names():
+      logging.warning(f"{x} is not a column in {dd.filename()}")
+      return False
+    if y not in dd.dimension_names():
+      logging.warning(f"{y} is not a column in {dd.filename()}")
+      return False
+    if slowcoordinate is not None and slowcoordinate not in dd.dimension_names():
+      logging.warning(f"{slowcoordinate} is not a column in {dd.filename()}")
+      return False
+
+    return True
+
   try:
     # Convert all reference data dirs to PDataSingle objects
     ref_data_dirs = [ PDataSingle(n) if isinstance(n, str) else n for n in ref_data_dirs ]
+    ref_data_dirs = list(filter(check_columns, ref_data_dirs))
 
     print(f"Monitoring {base_dir} for data directories.")
     print(f"Stop by sending a KeybordInterrupt (in Jupyter, Kernel --> Interrupt kernel).")
@@ -169,19 +188,23 @@ def monitor_dir(base_dir, x, y,
 
       # Replot
       if latest_mtime > 0:
-        display.clear_output(wait=True)
-        fig.clear()
+        all_data = list(itertools.chain(ref_data_dirs,
+                                        [ pdata_objects[dd] for dd in data_dirs ] ))
+        all_data = list(filter(check_columns, all_data)) # check that x and y exist
 
-        all_data = list(itertools.chain(ref_data_dirs, [ pdata_objects[dd] for dd in data_dirs ] ))
-        plotter(None, all_data, x, y, xlog=xlog, ylog=ylog,
-                         slowcoordinate=slowcoordinate,
-                         preprocessor=preprocessor, figure=fig)
+        if len(all_data) > 0:
+          display.clear_output(wait=True)
+          fig.clear()
 
-        display.display(fig)
+          plotter(None, all_data, x, y, xlog=xlog, ylog=ylog,
+                           slowcoordinate=slowcoordinate,
+                           preprocessor=preprocessor, figure=fig)
 
-        print(f"Monitoring {base_dir} for data directories.")
-        print(f"Stop by sending a KeybordInterrupt (in Jupyter, Kernel --> Interrupt kernel).")
-        print(f"Last dataset change @ {datetime.datetime.fromtimestamp(latest_mtime)}")
+          display.display(fig)
+
+          print(f"Monitoring {base_dir} for data directories.")
+          print(f"Stop by sending a KeybordInterrupt (in Jupyter, Kernel --> Interrupt kernel).")
+          print(f"Last dataset change @ {datetime.datetime.fromtimestamp(latest_mtime)}")
 
       time.sleep(poll_period)
 
