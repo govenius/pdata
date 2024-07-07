@@ -93,7 +93,7 @@ class PDataSingle():
         #time.sleep(0.1)
 
         # Now parse the stored header
-        if not "table_header" in header.keys():
+        if "table_header" not in header.keys():
           logging.warning(f"No header found in tabular data of {self._path}")
           self._column_names, self._units, dtypes = [], [], []
         else:
@@ -382,7 +382,7 @@ class PDataSingle():
             dtypes[i] = datetime.datetime
             converters[i] = lambda x: dtypes[i](x.decode('utf-8'))
         else:
-          if not dt in [ "None" ]:
+          if dt not in [ "None" ]:
             logging.warning(f"Column {i} dtype = {dt} unrecognized. Falling back to string.")
           dtypes[i] = str
 
@@ -1022,7 +1022,7 @@ class DataView():
               vals = np.zeros(len(self._mask), dtype=dtype)
               if dtype == float: vals += np.nan # initialize to NaN instead of zeros
             except:
-              if not name in self.non_numpy_array_warning_given:
+              if name not in self.non_numpy_array_warning_given:
                 logging.info("%s does not seem to be a numpy data type. The virtual column '%s' will be a native python array instead, which may be slow." % (str(dtype), name))
                 self.non_numpy_array_warning_given.append(name)
               vals = [None for jjj in range(len(self._mask))]
