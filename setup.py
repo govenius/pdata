@@ -25,7 +25,7 @@ import numpy
 # dependencies are specified here (probably more elegant ways exist).
 
 if USE_PREGENERATED_C_SOURCES:
-  cythonize = lambda x: x # i.e. do nothing
+  def cythonize(x): return x # i.e. do nothing
 else:
   from Cython.Build import cythonize
 
