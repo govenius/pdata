@@ -4,7 +4,7 @@ Module for quick data visualization helpers.
 Note that pdata is **not** meant to be a fully-featured plotting utility.
 '''
 
-from pdata._metadata import __version__
+from pdata._metadata import __version__ # noqa: F401
 
 import os
 import re
@@ -110,7 +110,7 @@ def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate
   if xlog: ax.set_xscale('log')
   if ylog: ax.set_yscale('log')
 
-  if slowcoordinate!=None: ax.legend();
+  if slowcoordinate!=None: ax.legend()
 
   return fig
 

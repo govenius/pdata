@@ -2,7 +2,7 @@
 Class for storing measurement data.
 """
 
-from pdata._metadata import __version__
+from pdata._metadata import __version__ # noqa: F401
 
 import os
 import sys
@@ -446,7 +446,7 @@ class Measurement():
 
       pdata.jupyter_helpers.save_notebook()
       shutil.copyfile(fname, os.path.join(self._target_dir, os.path.split(fname)[1]))
-    except:
+    except: # noqa: E722
       logging.exception(f"Failed to copy measurement Jupyter notebook to {self.path()}. Starting experiment anyway.")
       return
 

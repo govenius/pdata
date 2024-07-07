@@ -6,4 +6,4 @@ analysing data sets stored by pdata.procedural_data.
 See https://pdata.readthedocs.io/ for documentation and examples.
 """
 
-from pdata._metadata import __version__
+from pdata._metadata import __version__ # noqa: F401

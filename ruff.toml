@@ -1,0 +1,18 @@
+[lint]
+ignore = [
+  "E701", # single-line if's etc.
+  "E702", # multiple statements using semicolon
+  "E402", # import not at the top
+  "E741", # variables like l
+  "F821",
+  "E731",
+  "E713",
+  "E721",
+  "F841",
+  "F401",
+  "F541",
+  "E711",
+  "E722",
+  ]
+
+#allowed-confusables = ["l"]

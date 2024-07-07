@@ -4,7 +4,8 @@ Joonas Govenius, 2019-2022
 Helper functions related to interacting with Jupyter.
 '''
 
-from pdata._metadata import __version__
+from pdata._metadata import __version__ # noqa: F401
+
 import time
 
 def in_jupyterlab():

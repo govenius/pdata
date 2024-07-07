@@ -2,7 +2,7 @@
 Class for post-processing measurement data.
 '''
 
-from pdata._metadata import __version__
+from pdata._metadata import __version__ # noqa: F401
 
 import os
 import io
@@ -11,7 +11,6 @@ import numpy as np
 import types
 import re
 import logging
-import copy
 import shutil
 import gzip
 import tarfile
