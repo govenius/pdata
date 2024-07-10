@@ -4,7 +4,6 @@ ignore = [
   "E702", # multiple statements using semicolon
   "E402", # import not at the top
   "E741", # variables like l
-  "E721",
   "F841",
   "F401",
   "F541",

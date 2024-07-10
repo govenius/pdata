@@ -151,7 +151,7 @@ class PDataSingle():
             # In numpy arrays, arbitrary length strings should have type object instead.
             # Also decode the byte strings.
             for j in range(len(dtypes)):
-              if dtypes[j]==str and j not in converters.keys():
+              if dtypes[j] is str and j not in converters.keys():
                 dtypes[j] = object
                 converters[j] = lambda x: x.decode('utf-8')
 
@@ -1020,7 +1020,7 @@ class DataView():
               if issubclass(dtype, str):
                 raise Exception('Do not store strings in numpy arrays (because it "works" but the behavior is unintuitive, i.e. only the first character is stored if you just specify dtype=str).')
               vals = np.zeros(len(self._mask), dtype=dtype)
-              if dtype == float: vals += np.nan # initialize to NaN instead of zeros
+              if dtype is float: vals += np.nan # initialize to NaN instead of zeros
             except:
               if name not in self.non_numpy_array_warning_given:
                 logging.info("%s does not seem to be a numpy data type. The virtual column '%s' will be a native python array instead, which may be slow." % (str(dtype), name))
