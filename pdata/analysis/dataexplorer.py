@@ -20,7 +20,6 @@ from pdata.helpers import get_keys, get_subdict
 
 from IPython import display
 
-import matplotlib
 import matplotlib.pyplot as plt
 
 def data_selector(base_dir, name_filter=".", age_filter=None, max_entries=30, sort_order='chronological', return_widget=True):
@@ -244,7 +243,7 @@ def snapshot_explorer(d, max_depth=10, detect_qcodes_params=True):
      properly. This is due to use of snapshot_explorer_globals
      effectively as a static variable (see code for details).
   """
-  from ipywidgets import interactive, Output, VBox, Dropdown
+  from ipywidgets import Output, VBox, Dropdown
   from IPython.display import clear_output
 
   assert max_depth >= 2

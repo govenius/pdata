@@ -6,12 +6,9 @@ from pdata._metadata import __version__ # noqa: F401
 
 import os
 import io
-import time
 import numpy as np
-import types
 import re
 import logging
-import shutil
 import gzip
 import tarfile
 import itertools
@@ -21,7 +18,6 @@ import jsondiff
 import datetime
 import pytz
 import jinja2
-from dateutil import tz
 from collections import OrderedDict
 
 FAST_PARSER_ENABLED = True

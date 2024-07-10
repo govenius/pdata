@@ -2,13 +2,7 @@
 Timing tests for qualitatively checking performance.
 """
 
-import logging
-import os
-import shutil
 import tempfile
-import time
-import io
-import datetime
 
 import timeit
 
@@ -17,8 +11,6 @@ import numpy.random
 
 from pdata.procedural_data import run_measurement
 import pdata.analysis.dataview
-from pdata.analysis.dataview import DataView, PDataSingle
-from pdata.analysis import dataexplorer
 
 assert pdata.analysis.dataview.FAST_PARSER_ENABLED, "This script assumes that fast_parser is available."
 

@@ -7,7 +7,6 @@ from pdata._metadata import __version__ # noqa: F401
 import os
 import sys
 import numpy as np
-import time
 import datetime
 import logging
 import shutil
