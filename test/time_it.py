@@ -70,7 +70,7 @@ reps = 1
 last_pdatasingle = None
 for formatter in ['None', 'lambda x: "%.4e"%x']:
   for compress in [False, True]:
-    print(f"Adding {n_rows_pretty} 2-column rows, with format={formatter if formatter!=None else 'default'} and compress={compress}...")
+    print(f"Adding {n_rows_pretty} 2-column rows, with format={formatter if formatter is not None else 'default'} and compress={compress}...")
     t = timeit.timeit(f'create_data_set(random_values, compress={compress}, formatter={formatter})',
                       number=reps, globals=globals())/reps
     print(f"  {t:.3f} s per repetition.")
@@ -79,11 +79,11 @@ for formatter in ['None', 'lambda x: "%.4e"%x']:
       pdata.analysis.dataview.FAST_PARSER_ENABLED = fast_parser_enabled
 
       print(f"Reading it to PDataSingle{' using fast_parser' if fast_parser_enabled else ' using np.genfromtxt'}...")
-      t = timeit.timeit('global last_pdatasingle; last_pdatasingle = PDataSingle(last_dataset)', number=reps, globals=globals())/reps
+      t = timeit.timeit('global last_pdatasingle; last_pdatasingle = pdata.analysis.dataview.PDataSingle(last_dataset)', number=reps, globals=globals())/reps
       print(f"  {t:.3f} s per repetition.")
 
       print("Converting it to DataView...")
-      t = timeit.timeit('DataView(last_pdatasingle)', number=reps, globals=globals())/reps
+      t = timeit.timeit('pdata.analysis.dataview.DataView(last_pdatasingle)', number=reps, globals=globals())/reps
       print(f"  {t:.3f} s per repetition.")
 
     print("")
