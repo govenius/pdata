@@ -475,14 +475,14 @@ class PDataSingle():
           r["snapshot_diffs_preceding_rows"] = np.array([ int(i) for i in m.group(1).split(",") ]
                                                         if m.group(1).strip() != "" else [],
                                                         dtype=int)
-        except:
+        except: # noqa: E722
           logging.exception(f"Failed to parse snapshot diff row spec '{m.group(1)}' into a list of ints.")
 
       m = re.search(r'(?m)^\s*Measurement ended at\s+(.*?)?$', raw_footer)
       if m!=None and len(m.groups()) == 1:
         try:
           r["measurement_ended_at"] = datetime.datetime.strptime(m.group(1), '%Y-%m-%d %H:%M:%S.%f')
-        except:
+        except: # noqa: E722
           logging.exception(f"Failed to parse measurement end time '{m.group(1)}' into a datetime object.")
 
       m = re.search(r'(?m)^\s*Number of data rows:\s*(\d+)$', raw_footer)
@@ -577,7 +577,7 @@ class DataView():
 
           try:
             self._settings = data.settings()
-          except:
+          except: # noqa: E722
             logging.exception("Could not parse the instrument settings file. Doesn't matter if you were not planning to add virtual columns based on values in the snapshot files.")
             self._settings = None
 
@@ -748,12 +748,11 @@ class DataView():
 
         See also mask_rows().
         '''
-        try:
-          if mask:
-            self._mask[:] = True
-          else:
-            self._mask[:] = False
-        except:
+        if mask is True:
+          self._mask[:] = True
+        elif mask is False:
+          self._mask[:] = False
+        else:
           m = np.zeros(len(self._mask), dtype=bool)
           m[mask] = True
           self._mask = m
@@ -857,7 +856,7 @@ class DataView():
         params = OrderedDict()
         for p in self.dimensions():
           try: params[p] = self.single_valued_parameter(p)
-          except: pass
+          except: pass # noqa: E722
         return params
 
     def divide_into_sweeps(self, sweep_dimension, use_sweep_direction = None):
@@ -962,7 +961,7 @@ class DataView():
               # The function returned unmasked data so apply the mask
               try:
                 d = d[~(self._mask)] # This works for ndarrays
-              except:
+              except: # noqa: E722
                 # workaround to mask native python arrays
                 d = [ x for i,x in enumerate(d) if not self._mask[i] ]
             return d
@@ -1017,7 +1016,7 @@ class DataView():
                 raise Exception('Do not store strings in numpy arrays (because it "works" but the behavior is unintuitive, i.e. only the first character is stored if you just specify dtype=str).')
               vals = np.zeros(len(self._mask), dtype=dtype)
               if dtype is float: vals += np.nan # initialize to NaN instead of zeros
-            except:
+            except: # noqa: E722
               if name not in self.non_numpy_array_warning_given:
                 logging.info("%s does not seem to be a numpy data type. The virtual column '%s' will be a native python array instead, which may be slow." % (str(dtype), name))
                 self.non_numpy_array_warning_given.append(name)
