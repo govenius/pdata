@@ -1,9 +1,9 @@
 [lint]
 ignore = [
-  "E701", # single-line if's etc.
+  "E701", # multiple statements using colon (single-line if's etc.)
   "E702", # multiple statements using semicolon
   "E402", # import not at the top
-  "E741", # variables like l
+  "E741", # typographically easy to mix variables like l
   ]
 
 #allowed-confusables = ["l"]
