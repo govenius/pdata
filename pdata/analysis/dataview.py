@@ -399,7 +399,7 @@ class PDataSingle():
         cols = []
         units = []
         for c in column_names_and_units[-1].split('\t'):
-          m = re.match(f'({column_name_regex})\s+\(({column_unit_regex})\)', c.strip())
+          m = re.match(f'({column_name_regex})\\s+\\(({column_unit_regex})\\)', c.strip())
           cols.append(m.group(1))
           units.append(m.group(2))
 
