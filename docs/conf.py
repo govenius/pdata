@@ -63,7 +63,7 @@ copyright = f'2016-{datetime.datetime.now().year}, {__author__}'
 # built documents.
 #
 # The short X.Y version.
-version = f'".".join(__version__.split(".")[:2])'
+version = '".".join(__version__.split(".")[:2])'
 # The full version, including alpha/beta/rc tags.
 release = __version__
 
