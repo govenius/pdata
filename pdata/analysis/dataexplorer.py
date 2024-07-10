@@ -169,7 +169,6 @@ def monitor_dir(base_dir, x, y,
 
     pdata_objects = {}
     last_mtimes = {}
-    first_plot = True
     while True:
       data_dirs = selector(base_dir, name_filter=name_filter, age_filter=age_filter, return_widget=False)[::-1]
 

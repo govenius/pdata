@@ -54,7 +54,6 @@ def create_data_set(random_values, snapshots=1,
                        data_base_dir=data_root,
                        compress=compress) as m:
 
-    start_time = time.time()
     for s in range(snapshots):
       m.add_points({'X': random_values[:,0], 'Y': random_values[:,1]})
 

@@ -156,7 +156,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
       cls._empty_tabulardat_datadir = m.path()
 
-    with open(os.path.join(cls._empty_tabulardat_datadir, 'tabular_data.dat'), 'w') as f: pass
+    with open(os.path.join(cls._empty_tabulardat_datadir, 'tabular_data.dat'), 'w') as f: pass # noqa: F841
 
   @classmethod
   def tearDownClass(cls):
