@@ -168,8 +168,8 @@ class Measurement():
         raise Exception('Did not understand column specification: %s' % x)
 
       from pdata.analysis.dataview import column_name_regex, column_unit_regex
-      assert re.match(f"^{column_name_regex}$", c) != None, f"Column name '{c}' contains unexpected characters. It does not match the regular expression '^{column_name_regex}$'."
-      assert re.match(f"^{column_unit_regex}$", u) != None, f"Unit '{u}' for column '{c}' contains unexpected characters. It does not match the regular expression '^{column_unit_regex}$'."
+      assert re.match(f"^{column_name_regex}$", c) is not None, f"Column name '{c}' contains unexpected characters. It does not match the regular expression '^{column_name_regex}$'."
+      assert re.match(f"^{column_unit_regex}$", u) is not None, f"Unit '{u}' for column '{c}' contains unexpected characters. It does not match the regular expression '^{column_unit_regex}$'."
 
       self._columns.append(c)
       self._units.append(u)
@@ -188,7 +188,7 @@ class Measurement():
     '''
     assert not hasattr(self, "_start_time"), "begin() must be called only once."
 
-    if self._target_dir == None:
+    if self._target_dir is None:
       self._target_dir = str(datetime.datetime.now()).replace(".", "_").replace(":", "-").replace(" ", "_")
 
     parent_dir, target = os.path.split(self._target_dir)
@@ -284,7 +284,7 @@ class Measurement():
       self._guess_missing_formatters(data)
       self._write_tabular_data_header()
 
-    if snap or (snap == None and self._autosnap): self.write_snapshot()
+    if snap or (snap is None and self._autosnap): self.write_snapshot()
 
     # Prepare in memory
     rows = "\n".join(
@@ -312,19 +312,19 @@ class Measurement():
        automatically whenever you call add_points(), unless you
        disabled autosnapping.
     '''
-    if snap==None:
+    if snap is None:
       snap = self._get_snapshot()
 
-    if self._last_snapshot == None:
+    if self._last_snapshot is None:
       with open(os.path.join(self._target_dir, 'snapshot.json'), 'w') as fsnap:
         Measurement._dump_json(snap, fsnap)
 
       # Filter _after_ writing initial snapshot.
-      if self._snap_diff_filter != None: snap = self._snap_diff_filter(snap)
+      if self._snap_diff_filter is not None: snap = self._snap_diff_filter(snap)
 
     else:
 
-      if self._snap_diff_filter != None: snap = self._snap_diff_filter(snap)
+      if self._snap_diff_filter is not None: snap = self._snap_diff_filter(snap)
       d = jsondiff.diff(self._last_snapshot, snap, cls=PdataJSONDiffer, marshal=True)
 
       if len(d.keys()) == 0: return
@@ -347,7 +347,7 @@ class Measurement():
        Also record original data type of each column.
     '''
     for i,c in enumerate(self._columns):
-      if self._dtypes[i] == None:
+      if self._dtypes[i] is None:
         self._dtypes[i] = type(data[c][0])
 
         if self._dtypes[i] in [ np.ndarray, list ]:
@@ -355,7 +355,7 @@ class Measurement():
                           f"It may work while saving data but is not supported and likely causes issues when reading the data. "
                           f"[*] Value: {data[c][0]}")
 
-      if self._formatters[i] == None:
+      if self._formatters[i] is None:
         # Infer appropriate formatter
         if isinstance(data[c][0], float):
           self._formatters[i] = lambda x: f"{x:.15e}"
@@ -441,7 +441,7 @@ class Measurement():
     if self._omit_notebook_copy: return
     try:
       fname = pdata.jupyter_helpers.get_notebook_name()
-      if fname == None: return # Not running within Jupyter
+      if fname is None: return # Not running within Jupyter
 
       pdata.jupyter_helpers.save_notebook()
       shutil.copyfile(fname, os.path.join(self._target_dir, os.path.split(fname)[1]))

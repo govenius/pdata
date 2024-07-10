@@ -72,7 +72,7 @@ class PDataSingle():
 
         for f in fnames:
           m = re.match(r'snapshot\.row-(\d+)\.diff(\d+)\.json', f)
-          if m != None:
+          if m is not None:
             diff_names.append((int(m.group(1)), int(m.group(2)), m.group(0)))
             continue
         diff_names.sort(key=lambda x: x[1]) # secondary sort on .diff<n>
@@ -103,7 +103,7 @@ class PDataSingle():
           # Analyze first data row
           inferred_dtypes, inferred_converters = PDataSingle._infer_dtypes_from_first_data_row(
               header["first_data_row"],
-              convert_timestamps=(dtypes==None and convert_timestamps))
+              convert_timestamps=(dtypes is None and convert_timestamps))
         else:
           inferred_dtypes, inferred_converters = dict( (i, float) for i in range(len(self._column_names)) ), {}
 
@@ -354,7 +354,7 @@ class PDataSingle():
       """Check for dtype specification in the
          "Column dtypes: float\tfloat\tint\t..." format. """
       m = re.search(r'(?m)^\s*Column dtypes:\s*(.*?)?$', s)
-      if m==None or len(m.groups()) != 1: return None, None
+      if m is None or len(m.groups()) != 1: return None, None
 
       dtypes = {}
       converters = {}
@@ -470,7 +470,7 @@ class PDataSingle():
 
       # Parse information from standard rows in the footer.
       m = re.search(r'(?m)^\s*Snapshot diffs preceding rows \(0-based index\):\s*(.*?)?$', raw_footer)
-      if m!=None and len(m.groups()) == 1:
+      if m is not None and len(m.groups()) == 1:
         try:
           r["snapshot_diffs_preceding_rows"] = np.array([ int(i) for i in m.group(1).split(",") ]
                                                         if m.group(1).strip() != "" else [],
@@ -479,14 +479,14 @@ class PDataSingle():
           logging.exception(f"Failed to parse snapshot diff row spec '{m.group(1)}' into a list of ints.")
 
       m = re.search(r'(?m)^\s*Measurement ended at\s+(.*?)?$', raw_footer)
-      if m!=None and len(m.groups()) == 1:
+      if m is not None and len(m.groups()) == 1:
         try:
           r["measurement_ended_at"] = datetime.datetime.strptime(m.group(1), '%Y-%m-%d %H:%M:%S.%f')
         except: # noqa: E722
           logging.exception(f"Failed to parse measurement end time '{m.group(1)}' into a datetime object.")
 
       m = re.search(r'(?m)^\s*Number of data rows:\s*(\d+)$', raw_footer)
-      if m!=None and len(m.groups()) == 1:
+      if m is not None and len(m.groups()) == 1:
         r["number_of_data_rows"] = int(m.group(1))
 
       return r
@@ -567,7 +567,7 @@ class DataView():
           self._units = dict(zip(data.dimension_names(), data.dimension_units()))
           unmasked = dict( (dim, data[dim]) for dim in data.dimension_names() )
 
-          if source_column_name != None:
+          if source_column_name is not None:
             n = get_source_column_name(data)
             self._source_col = [n for i in range(data.npoints())]
           else:
@@ -612,7 +612,7 @@ class DataView():
 
           # add a column that specifies the source data file
           lens = [ dat.npoints() for dat in data ]
-          if source_column_name != None:
+          if source_column_name is not None:
             names = [ get_source_column_name(dat) for dat in data ]
             self._source_col = [ [n for jj in range(l)] for n,l in zip(names,lens) ]
             #self._source_col = [ jj for jj in itertools.chain.from_iterable(self._source_col) ] # flatten
@@ -655,7 +655,7 @@ class DataView():
 
         self.set_mask(False)
 
-        if source_column_name != None:
+        if source_column_name is not None:
           self.add_virtual_dimension(source_column_name, arr=np.array(self._source_col))
 
     def __getitem__(self, index):
@@ -838,7 +838,7 @@ class DataView():
           cached_arr = dim['cached_array']
           if isinstance(cached_arr, np.ndarray):
             cached_arr = cached_arr[~(self._mask)]
-          elif cached_arr != None:
+          elif cached_arr is not None:
             cached_arr = [ val for i,val in enumerate(cached_arr) if not self._mask[i] ]
           self._virtual_dims[name] = { 'fn': dim['fn'], 'cached_array': cached_arr }
 
@@ -887,7 +887,7 @@ class DataView():
         else:
           dx = np.sign(sdim[1:] - sdim[:-1])
 
-        if use_sweep_direction == None:
+        if use_sweep_direction is None:
           use_sweep_direction = ( np.abs(dx).astype(int).sum() > len(dx)/4. )
 
         if use_sweep_direction:
@@ -998,17 +998,17 @@ class DataView():
         '''
         logging.debug('adding virtual dimension "%s"' % name)
 
-        assert (fn != None) + (arr is not None) + (comment_regex != None) + (from_set != None) == 1, 'You must specify exactly one of "fn", "arr", or "comment_regex".'
+        assert (fn is not None) + (arr is not None) + (comment_regex is not None) + (from_set is not None) == 1, 'You must specify exactly one of "fn", "arr", or "comment_regex".'
 
         if arr is not None:
           assert len(arr) == len(self._mask), f'len(arr)={len(arr)} must be the same as the length of the existing data columns ({len(self._mask)}).'
 
-        if from_set != None:
-            assert self._settings != None, 'snapshot files were not successfully parsed during dataview initialization.'
+        if from_set is not None:
+            assert self._settings is not None, 'snapshot files were not successfully parsed during dataview initialization.'
 
-        if comment_regex != None or from_set != None:
+        if comment_regex is not None or from_set is not None:
             # construct the column by parsing the comments or snapshots
-            use_set = (from_set != None) # shorthand for convenience
+            use_set = (from_set is not None) # shorthand for convenience
 
             # pre-allocate an array for the values
             try:
@@ -1040,7 +1040,7 @@ class DataView():
                 # so it's best to only parse the one that matters (the last one).
                 v = set_vals.prev_val
                 try:
-                  if preparser != None: v = preparser(v)
+                  if preparser is not None: v = preparser(v)
                   v = dtype(v)
                 except:
                   #logging.exception('Could not convert the parsed value (%s) to the specifed data type (%s).'
@@ -1067,7 +1067,7 @@ class DataView():
               else:
                 # see if the comment matches the specified regex
                 m = re.search(comment_regex, commentstr)
-                if m == None: continue
+                if m is None: continue
                 #logging.debug('Match on row %d: "%s"' % (rowno, commentstr))
 
                 if len(m.groups()) != 1:

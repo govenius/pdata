@@ -39,7 +39,7 @@ def data_selector(base_dir, name_filter=".", age_filter=None, max_entries=30, so
   """
 
   # Get list of data dirs
-  datadirs = [ n for n in os.listdir(base_dir) if re.search(name_filter, n)!=None and is_valid_pdata_dir(base_dir, n) ]
+  datadirs = [ n for n in os.listdir(base_dir) if re.search(name_filter, n) is not None and is_valid_pdata_dir(base_dir, n) ]
 
   # Exclude data dirs that were not recently modified
   if age_filter is not None: datadirs = [ n for n in datadirs if time.time() - get_data_mtime(base_dir, n) < age_filter ]
@@ -94,22 +94,22 @@ def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate
 
   assert x in d.dimensions(), f"{x} is not a column in the data: {data_dirs}"
   assert y in d.dimensions(), f"{y} is not a column in the data: {data_dirs}"
-  if slowcoordinate!=None: assert slowcoordinate in d.dimensions(), f"{slowcoordinate} is not a column in the data: {data_dirs}"
+  if slowcoordinate is not None: assert slowcoordinate in d.dimensions(), f"{slowcoordinate} is not a column in the data: {data_dirs}"
 
   # Plot the results
   fig, ax = plt.subplots(num=figure, clear=True)
 
-  for s in d.divide_into_sweeps(x if slowcoordinate==None else slowcoordinate):
+  for s in d.divide_into_sweeps(x if slowcoordinate is None else slowcoordinate):
     dd = d.copy(); dd.mask_rows(s, unmask_instead=True)
     ax.plot(dd[x], dd[y],
-            label = None if slowcoordinate==None else f"{dd.single_valued_parameter(slowcoordinate)} {dd.units(slowcoordinate)}" )
+            label = None if slowcoordinate is None else f"{dd.single_valued_parameter(slowcoordinate)} {dd.units(slowcoordinate)}" )
 
   ax.set(xlabel=f'{x} ({dd.units(x)})', ylabel=f'{y} ({dd.units(y)})')
 
   if xlog: ax.set_xscale('log')
   if ylog: ax.set_yscale('log')
 
-  if slowcoordinate!=None: ax.legend()
+  if slowcoordinate is not None: ax.legend()
 
   return fig
 
@@ -143,7 +143,7 @@ def monitor_dir(base_dir, x, y,
     '''Check that PDataSingle object dd has the columns x, y, and
        slowcoordinate.'''
     # We can't check anything if custom plotter or preprocessor is used.
-    if plotter!=basic_plot or preprocessor!=None: return True
+    if plotter!=basic_plot or preprocessor is not None: return True
 
     if x not in dd.dimension_names():
       logging.warning(f"{x} is not a column in {dd.filename()}")
