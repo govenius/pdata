@@ -79,11 +79,11 @@ for formatter in ['None', 'lambda x: "%.4e"%x']:
       pdata.analysis.dataview.FAST_PARSER_ENABLED = fast_parser_enabled
 
       print(f"Reading it to PDataSingle{' using fast_parser' if fast_parser_enabled else ' using np.genfromtxt'}...")
-      t = timeit.timeit(f'global last_pdatasingle; last_pdatasingle = PDataSingle(last_dataset)', number=reps, globals=globals())/reps
+      t = timeit.timeit('global last_pdatasingle; last_pdatasingle = PDataSingle(last_dataset)', number=reps, globals=globals())/reps
       print(f"  {t:.3f} s per repetition.")
 
-      print(f"Converting it to DataView...")
-      t = timeit.timeit(f'DataView(last_pdatasingle)', number=reps, globals=globals())/reps
+      print("Converting it to DataView...")
+      t = timeit.timeit('DataView(last_pdatasingle)', number=reps, globals=globals())/reps
       print(f"  {t:.3f} s per repetition.")
 
     print("")

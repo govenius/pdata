@@ -427,7 +427,7 @@ class Measurement():
     try:
       hist = get_ipython().history_manager.input_hist_parsed
     except NameError:
-      logging.info(f"Not running in IPython --> Input history not copied to data dir.")
+      logging.info("Not running in IPython --> Input history not copied to data dir.")
       return
 
     with open(os.path.join(self._target_dir, "input-history"), 'w') as f_out:

@@ -163,8 +163,8 @@ def monitor_dir(base_dir, x, y,
     ref_data_dirs = list(filter(check_columns, ref_data_dirs))
 
     print(f"Monitoring {base_dir} for data directories.")
-    print(f"Stop by sending a KeybordInterrupt (in Jupyter, Kernel --> Interrupt kernel).")
-    print(f"Waiting for first data set matching filter(s).")
+    print("Stop by sending a KeybordInterrupt (in Jupyter, Kernel --> Interrupt kernel).")
+    print("Waiting for first data set matching filter(s).")
 
     pdata_objects = {}
     last_mtimes = {}
@@ -201,7 +201,7 @@ def monitor_dir(base_dir, x, y,
           display.display(fig)
 
           print(f"Monitoring {base_dir} for data directories.")
-          print(f"Stop by sending a KeybordInterrupt (in Jupyter, Kernel --> Interrupt kernel).")
+          print("Stop by sending a KeybordInterrupt (in Jupyter, Kernel --> Interrupt kernel).")
           print(f"Last dataset change @ {datetime.datetime.fromtimestamp(latest_mtime)}")
 
       time.sleep(poll_period)

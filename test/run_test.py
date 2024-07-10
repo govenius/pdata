@@ -939,8 +939,8 @@ class TestFastParser(unittest.TestCase):
     for col in [0,1,3]:
       self.assertTrue(np.abs(parsed_vals[f"col{col}"]/random_values[:,col] - 1).max() < 100*np.finfo(float).eps)
 
-    self.assertTrue(np.abs(parsed_vals[f"col2"].real/random_values[:,2] - 1).max() < 100*np.finfo(float).eps)
-    self.assertTrue(np.abs(parsed_vals[f"col2"].imag).max() < 100*np.finfo(float).eps)
+    self.assertTrue(np.abs(parsed_vals["col2"].real/random_values[:,2] - 1).max() < 100*np.finfo(float).eps)
+    self.assertTrue(np.abs(parsed_vals["col2"].imag).max() < 100*np.finfo(float).eps)
 
   def test_full_tabular_data(self):
 
