@@ -243,7 +243,7 @@ def parse_tabular_data(s, dtypes, chunk_size=1000000):
   for i in range(len(dtypes)):
     if dtypes[i] in [ np.float64, np.float32, np.float16 ]: dtypes[i] = float
     if dtypes[i] in [ np.int64, np.int32, np.int16, np.int8, np.intc ]: dtypes[i] = int
-    if dtypes[i] in [ np.complex128, np.complex64, np.cdouble, np.cfloat ]: dtypes[i] = complex
+    if dtypes[i] in [ np.complex128, np.complex64, np.cdouble ]: dtypes[i] = complex
 
   assert all(dt in [ float, int, complex, str ] for dt in dtypes ), f"One or more unsupported datatypes: {dtypes}"
 

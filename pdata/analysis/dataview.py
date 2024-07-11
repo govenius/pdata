@@ -132,7 +132,7 @@ class PDataSingle():
           if FAST_PARSER_ENABLED and len(converters.keys())==0 and all(dt in [
               float, np.float64, np.float32, np.float16,
               int, np.int64, np.int32, np.int16, np.int8, np.intc,
-              complex, np.complex128, np.complex64, np.cdouble, np.cfloat,
+              complex, np.complex128, np.complex64, np.cdouble,
               str ] for dt in dtypes):
 
             try: chunk_size = max(2, self._footer["number_of_data_rows"])
