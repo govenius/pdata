@@ -10,10 +10,12 @@
 # for more information.
 FAST_PARSER_ENABLED = True
 
-# You can keep this as True if you didn't make any changes relevant to
-# the fast_parser extension. It removes the risk that your version of
-# Cython generates something different from what's been tested.
-USE_PREGENERATED_C_SOURCES = True
+# If you're having trouble setting up Cython, you can try using the
+# pregenerated sources by setting this to True. It has the benefit
+# that your version of Cython doesn't affect things, but you may run
+# into other issues (for example in the case of a major Numpy version
+# upgrade).
+USE_PREGENERATED_C_SOURCES = False
 
 ###########################
 

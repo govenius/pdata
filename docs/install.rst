@@ -59,4 +59,4 @@ Required packages are listed in :file:`setup.cfg`. Here are some of them:
   * `ipywidgets <https://ipywidgets.readthedocs.io/en/latest/>`_ (for dataexplorer)
   * `matplotlib <https://matplotlib.org/>`_ (for dataexplorer)
   * `Setuptools <https://setuptools.readthedocs.io/en/latest/>`_ (for installation)
-  * `Cython <https://cython.readthedocs.io/>`_ (if you modify fast_parser)
+  * `Cython <https://cython.readthedocs.io/>`_ (for fast_parser)
