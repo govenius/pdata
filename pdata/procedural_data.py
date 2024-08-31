@@ -18,6 +18,7 @@ import jsondiff
 import tempfile
 import random
 import re
+import time
 
 from pdata.helpers import NumpyJSONEncoder, preprocess_snapshot, PdataJSONDiffer
 import pdata.jupyter_helpers
@@ -391,14 +392,14 @@ class Measurement():
         with open(fname, 'rb') as f_in:
           with gzip.open(fname + '.gz', 'wb') as f_out:
             shutil.copyfileobj(f_in, f_out)
-        os.remove(fname) # Remove original
+        Measurement._delete_files([fname]) # Remove original
 
       def tar_files(data_files, tar_name):
         with tarfile.open(os.path.join(self._target_dir, tar_name + '.tar.gz'),
                           'w:gz') as tar:
           for f in data_files:
             tar.add(f, arcname=os.path.split(f)[-1])
-        for f in data_files: os.remove(f) # Remove originals
+        Measurement._delete_files(data_files) # Remove originals
 
       # Compress tabular_data.dat
       gzip_file( os.path.join(self._target_dir, 'tabular_data.dat') )
@@ -497,6 +498,21 @@ class Measurement():
     return Measurement._replace_disallowed_tabular_data_chars(
       f"{dt.__module__}.{dt.__name__}" if hasattr(dt, "__module__") and hasattr(dt, "__name__") else str(dt) )
 
+  @staticmethod
+  def _delete_files(paths, attempts=5):
+    """Delete files specified by paths. Attempt several times, in case of
+       file-in-use or other permission errors."""
+    not_yet_deleted = set(paths)
+    for attempt in range(attempts):
+      if len(not_yet_deleted)==0: return
+      for p in random.sample(tuple(not_yet_deleted), k=len(not_yet_deleted)): # randomize deletion order
+        try:
+          os.remove(p)
+          not_yet_deleted.remove(p)
+        except PermissionError: # <-- This can happen on Windows if another process has the file open
+          time.sleep(0.1 + attempt)
+
+    if len(not_yet_deleted)>0: logging.warning(f"Could not delete the following files: {not_yet_deleted}")
 
 # A bit of a hack allowing controllably aborting a measurement
 # from another process on the same machine.
