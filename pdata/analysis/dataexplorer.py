@@ -58,7 +58,10 @@ def data_selector(base_dir, name_filter=".", age_filter=None, max_entries=30, so
   dataset_selector.layout.width = "90%"
   return dataset_selector
 
-def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate=None, preprocessor=lambda x: x, figure=None):
+def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate=None,
+               preprocessor=lambda x: x,
+               trace_processor=lambda x,y: (x,y),
+               figure=None):
   """Convenience function for quickly plotting y vs x in a given set of
   pdata data directories.
 
@@ -76,6 +79,10 @@ def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate
 
   preprocessor is an optional function applied to the DataView object
   before plotting.  It can be used to, e.g., add virtual columns.
+
+  trace_processor is an optional function applied to the x and y
+  values just before each plotted trace. It can be used to e.g. plot
+  only the magnitude of a complex y by specifying lambda x,y: (x,np.abs(y))
 
   An existing pyplot figure can be optionally specified. It is first cleared.
 
@@ -98,19 +105,28 @@ def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate
   assert y in d.dimensions(), f"{y} is not a column in the data: {data_dirs}"
   if slowcoordinate is not None: assert slowcoordinate in d.dimensions(), f"{slowcoordinate} is not a column in the data: {data_dirs}"
 
+  # Construct the individual traces corresponding to each slow value
+  traces = []
+  slowvals = []
+  for dd in d.sweeps(x if slowcoordinate is None else slowcoordinate):
+    traces.append( trace_processor(dd[x], dd[y]) )
+    slowvals.append( None if slowcoordinate is None else dd.single_valued_parameter(slowcoordinate) )
+
   # Plot the results
-  y_is_complex = d[y].dtype in [ complex, np.complex128, np.complex64, np.cdouble ]
+  y_is_complex = any( t[1].dtype in [ complex, np.complex128, np.complex64, np.cdouble ] for t in traces )
 
   fig, ax = plt.subplots(1 + y_is_complex, sharex=True, num=figure, clear=True)
   if not y_is_complex: ax = [ ax ]
 
-  for dd in d.sweeps(x if slowcoordinate is None else slowcoordinate):
-    label = None if slowcoordinate is None else f"{dd.single_valued_parameter(slowcoordinate)} {dd.units(slowcoordinate)}"
+  for trace, slowval in zip(traces, slowvals):
+    label = None if slowcoordinate is None else f"{slowval} {dd.units(slowcoordinate)}"
+    xvals, yvals = trace
+
     if y_is_complex:
-      ax[0].plot(dd[x], np.abs(dd[y]), label=label)
-      ax[1].plot(dd[x], np.angle(dd[y]))
+      ax[0].plot(xvals, np.abs(yvals), label=label)
+      ax[1].plot(xvals, np.angle(yvals))
     else:
-      ax[0].plot(dd[x], dd[y], label=label)
+      ax[0].plot(xvals, yvals, label=label)
 
   ax[0 + y_is_complex].set(xlabel=f'{x} ({dd.units(x)})')
 
