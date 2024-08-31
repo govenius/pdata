@@ -199,9 +199,7 @@ matplotlib, as an example::
   import matplotlib.pyplot as plt
   fig, ax = plt.subplots()
 
-  for s in d.divide_into_sweeps('frequency'):
-  #for s in d.divide_into_sweeps('VNA power'):  # <-- This would work equally well.
-    dd = d.copy(); dd.mask_rows(s, unmask_instead=True) # Create a copy of d, and mask (i.e. hide) all rows except a single sweep
+  for dd in d.sweeps('frequency'): # <-- split data rows into monotonously increasing/decreasing sweeps
     power = dd.single_valued_parameter('VNA power')
     ax.plot(dd['frequency'], dd['S21'], label="%s dBm" % power)
 

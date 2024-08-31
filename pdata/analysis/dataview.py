@@ -859,6 +859,17 @@ class DataView():
           except: pass # noqa: E722
         return params
 
+    def sweeps(self, sweep_dimension, use_sweep_direction = None):
+        '''Generator that returns shallow copies of this DataView with
+           unmasked rows corresponding to sweeps. For more details on
+           the arguments and how the rows are divided into sweeps, see
+           divide_into_sweeps()
+        '''
+        for s in self.divide_into_sweeps(sweep_dimension=sweep_dimension,
+                                         use_sweep_direction=use_sweep_direction):
+          dd = self.copy(); dd.mask_rows(s, unmask_instead=True)
+          yield dd
+
     def divide_into_sweeps(self, sweep_dimension, use_sweep_direction = None):
         '''Divide the rows into "sweeps" based on a monotonously increasing
         or decreasing value of column "sweep_dimension", if use_sweep_direction==True.
