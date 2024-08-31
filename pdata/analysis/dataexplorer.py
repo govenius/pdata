@@ -99,19 +99,31 @@ def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate
   if slowcoordinate is not None: assert slowcoordinate in d.dimensions(), f"{slowcoordinate} is not a column in the data: {data_dirs}"
 
   # Plot the results
-  fig, ax = plt.subplots(num=figure, clear=True)
+  y_is_complex = d[y].dtype in [ complex, np.complex128, np.complex64, np.cdouble ]
 
-  for s in d.divide_into_sweeps(x if slowcoordinate is None else slowcoordinate):
-    dd = d.copy(); dd.mask_rows(s, unmask_instead=True)
-    ax.plot(dd[x], dd[y],
-            label = None if slowcoordinate is None else f"{dd.single_valued_parameter(slowcoordinate)} {dd.units(slowcoordinate)}" )
+  fig, ax = plt.subplots(1 + y_is_complex, sharex=True, num=figure, clear=True)
+  if not y_is_complex: ax = [ ax ]
 
-  ax.set(xlabel=f'{x} ({dd.units(x)})', ylabel=f'{y} ({dd.units(y)})')
+  for dd in d.sweeps(x if slowcoordinate is None else slowcoordinate):
+    label = None if slowcoordinate is None else f"{dd.single_valued_parameter(slowcoordinate)} {dd.units(slowcoordinate)}"
+    if y_is_complex:
+      ax[0].plot(dd[x], np.abs(dd[y]), label=label)
+      ax[1].plot(dd[x], np.angle(dd[y]))
+    else:
+      ax[0].plot(dd[x], dd[y], label=label)
 
-  if xlog: ax.set_xscale('log')
-  if ylog: ax.set_yscale('log')
+  ax[0 + y_is_complex].set(xlabel=f'{x} ({dd.units(x)})')
 
-  if slowcoordinate is not None: ax.legend()
+  if y_is_complex:
+    ax[0].set(ylabel=f'|{y}| ({dd.units(y)})')
+    ax[1].set(ylabel=f'angle ∠{y} (rad)')
+  else:
+    ax[0].set(ylabel=f'{y} ({dd.units(y)})')
+
+  if xlog: ax[0].set_xscale('log')
+  if ylog: ax[0].set_yscale('log')
+
+  if slowcoordinate is not None: ax[0].legend()
 
   return fig
 
