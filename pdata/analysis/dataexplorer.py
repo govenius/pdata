@@ -64,6 +64,7 @@ def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate
 
   data_dirs should be an array of PDataSingle objects or paths, given as strings relative to base_dir.
   data_dirs can also be a single string or a single PDataSingle object.
+  If base_dir is None, it is ignored.
 
   x, y and slowcoordinate are column names, specified as strings.
 
@@ -87,7 +88,8 @@ def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate
     data_dirs = [ data_dirs ]
 
   # Concatenate all specified data dirs into one DataView
-  d = DataView([ PDataSingle(os.path.join(base_dir, n)) if isinstance(n, str) else n for n in data_dirs ])
+  d = DataView([ PDataSingle(os.path.join(base_dir, n) if base_dir is not None else n)
+                 if isinstance(n, str) else n for n in data_dirs ])
 
   # Preprocess data (e.g. add virtual dimensions)
   if preprocessor is not None: d = preprocessor(d)
