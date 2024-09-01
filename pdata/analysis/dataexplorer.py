@@ -50,11 +50,12 @@ def data_selector(base_dir, name_filter=".", age_filter=None, max_entries=30, so
   if sort_order=='alphabetical': datadirs = sorted(datadirs)[::-1]
   if sort_order=='chronological': datadirs = sorted(datadirs, key=lambda n: get_data_mtime(base_dir, n))[::-1]
 
-  if not return_widget: return datadirs # Return simple list
+  nrows = min(max_entries, len(datadirs))
+  if not return_widget: return datadirs[:nrows] # Return simple list
 
   # create the selector widget (to be shown in a Jupyter notebook)
   import ipywidgets
-  dataset_selector = ipywidgets.SelectMultiple(options=datadirs, value=datadirs[:1], rows=min(max_entries, len(datadirs)), description="data set")
+  dataset_selector = ipywidgets.SelectMultiple(options=datadirs, value=datadirs[:1], rows=nrows, description="data set")
   dataset_selector.layout.width = "90%"
   return dataset_selector
 
