@@ -16,11 +16,13 @@ import numbers
 import datetime
 
 from pdata.analysis.dataview import DataView, PDataSingle
+from pdata.analysis.heatmap import heatmap
 from pdata.helpers import get_keys, get_subdict
 
 from IPython import display
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
 
 def data_selector(base_dir, name_filter=".", age_filter=None, max_entries=30, sort_order='chronological', return_widget=True):
   """Create an interactive Jupyter selector widget listing at most
@@ -59,9 +61,12 @@ def data_selector(base_dir, name_filter=".", age_filter=None, max_entries=30, so
   dataset_selector.layout.width = "90%"
   return dataset_selector
 
-def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate=None,
+def basic_plot(base_dir, data_dirs, x, y,
+               xlog=False, ylog=False, zlog=False,
+               slowcoordinate=None,
                preprocessor=lambda x: x,
                trace_processor=lambda x,y: (x,y),
+               plot_type="line plot",
                figure=None):
   """Convenience function for quickly plotting y vs x in a given set of
   pdata data directories.
@@ -85,11 +90,17 @@ def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate
   values just before each plotted trace. It can be used to e.g. plot
   only the magnitude of a complex y by specifying lambda x,y: (x,np.abs(y))
 
+  Supported values for plot_type:
+    * "line plot" --> Plot each trace as a line, with slow value in legend
+    * "heatmap" --> Plot a heat map with y in each trace as the color, and slow value as the vertical coordinate
+    * None --> Instead of a plot, return { "traces": [ (xvals, yvals), ... ], "slow values", [ slow value, ... ] }
+
   An existing pyplot figure can be optionally specified. It is first cleared.
 
   Returns the created/reused figure object.
 
   """
+  assert plot_type in [ "line plot", "heatmap", None ]
 
   # Also accept a single path as a string
   if isinstance(data_dirs, str) or isinstance(data_dirs, PDataSingle):
@@ -113,34 +124,76 @@ def basic_plot(base_dir, data_dirs, x, y, xlog=False, ylog=False, slowcoordinate
     traces.append( trace_processor(dd[x], dd[y]) )
     slowvals.append( None if slowcoordinate is None else dd.single_valued_parameter(slowcoordinate) )
 
+  if plot_type is None: return { "traces": traces, "slow values": slowvals }
+
   # Plot the results
   y_is_complex = any( t[1].dtype in [ complex, np.complex128, np.complex64, np.cdouble ] for t in traces )
 
   fig, ax = plt.subplots(1 + y_is_complex, sharex=True, num=figure, clear=True)
   if not y_is_complex: ax = [ ax ]
 
-  for trace, slowval in zip(traces, slowvals):
-    label = None if slowcoordinate is None else f"{slowval} {dd.units(slowcoordinate)}"
-    xvals, yvals = trace
+  # Common to all plot types:
+  ax[0 + y_is_complex].set(xlabel=f'{x} ({dd.units(x)})')
+  if xlog:
+    for xx in ax: xx.set_xscale('log')
+  if ylog:
+    for xx in ax: xx.set_yscale('log')
+
+  if plot_type == "line plot":
+    for trace, slowval in zip(traces, slowvals):
+      label = None if slowcoordinate is None else f"{slowval} {dd.units(slowcoordinate)}"
+      xvals, yvals = trace
+
+      if y_is_complex:
+        ax[0].plot(xvals, np.abs(yvals), label=label)
+        ax[1].plot(xvals, np.angle(yvals))
+      else:
+        ax[0].plot(xvals, yvals, label=label)
 
     if y_is_complex:
-      ax[0].plot(xvals, np.abs(yvals), label=label)
-      ax[1].plot(xvals, np.angle(yvals))
+      ax[0].set(ylabel=f'|{y}| ({dd.units(y)})')
+      ax[1].set(ylabel=f'∠{y} (rad)')
     else:
-      ax[0].plot(xvals, yvals, label=label)
+      ax[0].set(ylabel=f'{y} ({dd.units(y)})')
 
-  ax[0 + y_is_complex].set(xlabel=f'{x} ({dd.units(x)})')
+    if slowcoordinate is not None: ax[0].legend()
 
-  if y_is_complex:
-    ax[0].set(ylabel=f'|{y}| ({dd.units(y)})')
-    ax[1].set(ylabel=f'angle ∠{y} (rad)')
-  else:
-    ax[0].set(ylabel=f'{y} ({dd.units(y)})')
+  elif plot_type == "heatmap":
 
-  if xlog: ax[0].set_xscale('log')
-  if ylog: ax[0].set_yscale('log')
+    if slowcoordinate is not None:
+      for xx in ax: xx.set(ylabel=f"{slowcoordinate} ({dd.units(slowcoordinate)})")
 
-  if slowcoordinate is not None: ax[0].legend()
+    if any(s is None or np.isnan(s) for s in slowvals):
+      logging.warning("Slow value parsing was unsuccesful. Parsed values: {slowvals}")
+      slowvals = np.arange(len(slowvals))
+
+    if y_is_complex:
+      heat = heatmap([(t[0], np.abs(t[1])) for t in traces],
+                      slowvals)
+      mesh = ax[0].pcolormesh(heat["horizontal_axis_edges"],
+                              heat["vertical_axis_edges"],
+                              heat["img"],
+                              norm=LogNorm() if zlog else None)
+      cb = fig.colorbar(mesh)
+      cb.set_label(f'|{y}| ({dd.units(y)})')
+
+      heat = heatmap([(t[0], np.angle(t[1])) for t in traces],
+                      slowvals)
+      mesh = ax[1].pcolormesh(heat["horizontal_axis_edges"],
+                              heat["vertical_axis_edges"],
+                              heat["img"])
+      cb = fig.colorbar(mesh)
+      cb.set_label(f'∠{y} (rad)')
+
+    else:
+      heat = heatmap(traces, slowvals)
+      mesh = ax[0].pcolormesh(heat["horizontal_axis_edges"],
+                              heat["vertical_axis_edges"],
+                              heat["img"],
+                              norm=LogNorm() if zlog else None)
+
+      cb = fig.colorbar(mesh)
+      cb.set_label(f'{y} ({dd.units(y)})')
 
   return fig
 
