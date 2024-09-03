@@ -118,10 +118,11 @@ def interp1d(x, xp, fp):
      interp1d is marked as "legacy", so not adding the scipy
      dependency (or not yet at least).
   """
+  assert len(xp)==len(fp)
   result = np.zeros(len(x)) + np.nan
   within_bounds = (x >= xp.min()) * (x <= xp.max())
   if within_bounds.max() == False: return result
   result[within_bounds] = fp[np.abs(
     x[within_bounds] - np.broadcast_to(xp, (within_bounds.sum(), len(xp))).transpose()
-  ).argmin(axis=1)]
+  ).argmin(axis=0)]
   return result
