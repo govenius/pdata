@@ -1,6 +1,5 @@
 import logging
 import numpy as np
-import xarray
 
 def heatmap(traces, slowvals, min_col_width=None):
   """Given a list of y vs x traces specified as a list of (xvals, yvals)
@@ -121,7 +120,7 @@ def interp1d(x, xp, fp):
   assert len(xp)==len(fp)
   result = np.zeros(len(x)) + np.nan
   within_bounds = (x >= xp.min()) * (x <= xp.max())
-  if within_bounds.max() == False: return result
+  if not within_bounds.max(): return result
   result[within_bounds] = fp[np.abs(
     x[within_bounds] - np.broadcast_to(xp, (within_bounds.sum(), len(xp))).transpose()
   ).argmin(axis=0)]

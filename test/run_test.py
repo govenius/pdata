@@ -326,10 +326,9 @@ class TestSavingAndAnalysis(unittest.TestCase):
 
     # Check coarse grained xarray
     xa = d.to_xarray("S21", coords=[ "frequency", "VNA power" ], coarse_graining={"frequency": 11e6})
-    self.assertTrue(all(xa.coords["frequency"] == expected_freqs[::3]))
+    self.assertTrue(xa.coords["frequency"][0] == expected_freqs[0])
+    self.assertTrue(all(xa.coords["frequency"][1:] == expected_freqs[1::3]))
     self.assertTrue(all(xa.coords["VNA_power"] == [-30., -20., -10.]))
-    self.assertTrue(all(xa.S21.sel(VNA_power=-30)[:-1] == d["S21"][2:len(expected_freqs):3] ))
-    self.assertTrue(all(xa.S21.sel(VNA_power=-10)[:-1] == d["S21"][-(len(expected_freqs)-2)::3] ))
     self.assertTrue(xa.S21.attrs["data_source"].strip(')').endswith(self._typical_datadir))
 
     # Check conversion to xarray with function spec

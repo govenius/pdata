@@ -83,7 +83,11 @@ for formatter in ['None', 'lambda x: "%.4e"%x']:
       print(f"  {t:.3f} s per repetition.")
 
       print("Converting it to DataView...")
-      t = timeit.timeit('pdata.analysis.dataview.DataView(last_pdatasingle)', number=reps, globals=globals())/reps
+      t = timeit.timeit('global last_dataview; last_dataview = pdata.analysis.dataview.DataView(last_pdatasingle)', number=reps, globals=globals())/reps
+      print(f"  {t:.3f} s per repetition.")
+
+      print("Converting it to xarray...")
+      t = timeit.timeit('last_dataview.to_xarray(values=["Y"], coords=["X"])', number=reps, globals=globals())/reps
       print(f"  {t:.3f} s per repetition.")
 
     print("")

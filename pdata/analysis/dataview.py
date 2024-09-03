@@ -19,6 +19,7 @@ import datetime
 import pytz
 import jinja2
 from collections import OrderedDict
+from pdata.analysis.heatmap import interp1d
 
 FAST_PARSER_ENABLED = True
 try: from pdata.analysis.fast_parser import tabular_data_parser
@@ -1158,75 +1159,86 @@ class DataView():
         """
         # Get unique coordinate values for each coordinate
         coords = OrderedDict((c, np.unique(self[c])) for c in coords )
-
-        # Mappings from unique coordinate values to coordinate index
-        coord_to_i = dict( (c, dict( (cc,i) for i,cc in enumerate(coords[c]) ))
-                           for c in coords.keys() )
+        coord_values = OrderedDict((c, self[c]) for c in coords )
 
         # Merge similar coordinates
         for c,delta in coarse_graining.items():
-          coords[c] = list(coords[c]) # since ndarray elements cannot be deleted
-          i = 1
-          while i < len(coords[c]):
-            if coords[c][i] - coords[c][i-1] <= delta:
-              # Map the two coordinates to the same index
-              coord_to_i[c][coords[c][i]] = coord_to_i[c][coords[c][i-1]]
+          m = np.ones(len(coords[c]), dtype=bool) # indices to keep
+          rng = np.arange(len(m), dtype=int)
 
-              # Must also decrement all larger index mappings by one
-              for cc in coord_to_i[c].keys():
-                if cc > coords[c][i]: coord_to_i[c][cc] -= 1
+          while m.sum()>1:
+            dx_too_small = rng[:m.sum()-1][np.abs(np.diff(coords[c][m])) < delta]
+            if len(dx_too_small) == 0: break
 
-              # Delete the nearly identical coordinate
-              del coords[c][i]
-            else:
-              i +=1
-          coords[c] = np.array(coords[c])
+            # If there are consecutive small deltas, only drop the last one.
+            dx_too_small = np.append( dx_too_small[:-1][np.diff(dx_too_small)>1], dx_too_small[-1] )
 
-        # Special characters to underscores in coordinate names
-        special_chars = r"[\s\-+%=/*&]"
-        dims = list(coords.keys())
-        for i,c in enumerate(dims):
-          if re.search(special_chars, c) is not None:
-            new_c = re.sub(special_chars, "_", c, count=len(c))
-            assert new_c not in dims, f"{new_c} already exists in coords: {dims}"
-            dims[i] = new_c
+            m[rng[m][dx_too_small]] = False
+
+          # Never drop the smallest or largest coordinate
+          m[0]=True; m[-1]=True
+
+          # Overwrite the coord axis (i.e. ordered unique values)
+          coords[c] =  coords[c][m]
+
+          # Replace the actual coordinate values in the data by the coarse grained ones
+          coord_values[c] = interp1d(coord_values[c], coords[c], coords[c]) # <-- "nearest" interpolation
 
         # Create the xarrays
 
-        # Also accept a single dimension name as input
+        # Preprocess 'values' argument into a uniform format:
+        #  { <data variable name>: (<data points>, <units>)) }
+
+        # Accept a single dimension name as input
         if isinstance(values, str): values = [ values ]
 
-        import xarray
-        arrays = OrderedDict()
+        # Accept <dimension name> as well as (<data variablename>, f, <units>)
+        values = dict(
+          (v, (self[v], self.units(v))) if isinstance(v, str) else (v[0], (v[1](self), v[2]))
+          for v in values
+        )
+
+        # Replace special characters by underscores in dimension names
+        special_chars = r"[\s\-+%=/*&]"
+        sanitized_name = dict((k, k) for k in itertools.chain(coords.keys(), values.keys()))
+        for i,c in enumerate(coords.keys()):
+          if re.search(special_chars, c) is not None:
+            new_c = re.sub(special_chars, "_", c, count=len(c))
+            assert new_c not in sanitized_name.values(), f"{new_c} already exists in coords: {sanitized_name.values()}"
+            sanitized_name[c] = new_c
+
         if include_single_valued_params: single_valued_params = self.all_single_valued_parameters()
 
-        for value in values:
-          if isinstance(value, str):
-            val_name = value
-            val_vector = self[value]
-            units = self.units(value)
-          else:
-            val_name = value[0]
-            val_vector = value[1](self)
-            units = value[2]
+        # Convert to a DataFrame containing the data as one row per
+        # datapoint (same as in DataView)
+        import pandas
+        frame = pandas.DataFrame(dict(itertools.chain(
+          ( (sanitized_name[c], coord_values[c]) for c in coords.keys() ),
+          ( (sanitized_name[n], v[0]) for n,v in values.items() )
+        )))
 
-          # Initialize all values as fill_value
-          value_matrix = np.zeros(tuple(len(v) for v in coords.values()), dtype=val_vector.dtype) + fill_value
+        # Use pivot to efficiently "unstack" the data into an
+        # xarray-style n-dimensional array
+        pvt = frame.pivot_table(index=[sanitized_name[c] for c in coords.keys()],
+                                columns=[], fill_value=fill_value)
 
-          # Copy values from self[value] to the correct index in the value_matrix.
-          for i,v in enumerate(val_vector):
-            value_matrix[tuple(coord_to_i[c][self[c][i]] for c in coords.keys())] = v
+        # Check for duplicate values
+        if np.any(pvt.index.duplicated()):
+          logging.warning("Multiple values in the Dataview data map to the same coordinates in the xarray.")
+        pvt = pvt[~pvt.index.duplicated(keep='last')] # Drop duplicates, if any
 
-          # Attributes
-          attrs = { "units": units,
-                    "coord_units": dict((c, self.units(c)) for c in coords.keys()) }
+        # Convert to xarray and add metadata
+        #dataset = xarray.Dataset.from_dataframe(pvt)
+        dataset = pvt.to_xarray()
+        coord_units = dict( (sanitized_name[c], self.units(c)) for c in coords.keys() )
+        for n,v in values.items():
+          dataset[sanitized_name[n]].attrs["units"] = v[1]
+          dataset[sanitized_name[n]].attrs["coord_units"] = coord_units
 
           if include_single_valued_params:
-            for p,v in single_valued_params.items(): attrs[p] = v
+            for p,v in single_valued_params.items(): dataset[n].attrs[p] = v
 
-          arrays[val_name] = xarray.DataArray(value_matrix, coords=coords.values(), dims=dims, attrs=attrs)
-
-        return xarray.Dataset(arrays)
+        return dataset
 
     def _repr_html_(self):
       """Output HTML representation for Jupyter display.
