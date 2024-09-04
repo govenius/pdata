@@ -14,6 +14,7 @@ import logging
 import numpy as np
 import numbers
 import datetime
+from inspect import signature
 
 from pdata.analysis.dataview import DataView, PDataSingle
 from pdata.analysis.heatmap import heatmap
@@ -199,7 +200,11 @@ def basic_plot(base_dir, data_dirs, x, y,
 
 def monitor_dir(base_dir, x, y,
                 name_filter='.', age_filter=None,
-                xlog=False, ylog=False, slowcoordinate=None, preprocessor=None,
+                xlog=False, ylog=False,
+                slowcoordinate=None,
+                preprocessor=None,
+                trace_processor=lambda x,y: (x,y),
+                plot_type="line plot",
                 selector=data_selector, plotter=basic_plot,
                 ref_data_dirs=[],
                 poll_period=3):
@@ -207,12 +212,12 @@ def monitor_dir(base_dir, x, y,
      name_filter, age_filter), until interrupted by
      KeyboardInterrupt.
 
-     If new data is found, plot y vs x using plotter(<array of
-     PDataSingle>, x, y, xlog, ylog, slowcoordinate, preprocessor).
+     If new data is found, plot y vs x using plotter(base_dir=None,
+     data_dirs=<array of PDataSingle>, x=x, y=y, ...).
 
      The default selector and plotter functions can be overriden. They
-     should accept the same arguments as data_selector() and
-     basic_plot(), respectively.
+     should accept a subset of the keyword arguments of
+     data_selector() and basic_plot(), respectively.
 
      ref_data_dirs can be used to specify data sets that are always
      plotted. These should be given as full paths (not relative to
@@ -253,7 +258,12 @@ def monitor_dir(base_dir, x, y,
     pdata_objects = {}
     last_mtimes = {}
     while True:
-      data_dirs = selector(base_dir, name_filter=name_filter, age_filter=age_filter, return_widget=False)[::-1]
+      data_dirs = call_with_extra_kwargs(selector,
+                                         base_dir= base_dir,
+                                         name_filter= name_filter,
+                                         age_filter= age_filter,
+                                         return_widget= False
+                                         )[::-1]
 
       # Load data from modified data dirs to PDataSingle objects
       latest_mtime = 0
@@ -278,9 +288,17 @@ def monitor_dir(base_dir, x, y,
           display.clear_output(wait=True)
           fig.clear()
 
-          plotter(None, all_data, x, y, xlog=xlog, ylog=ylog,
-                           slowcoordinate=slowcoordinate,
-                           preprocessor=preprocessor, figure=fig)
+          plotter_args = {  }
+
+          call_with_extra_kwargs(plotter,
+                                 base_dir= None, data_dirs=all_data,
+                                 x=x, y=y,
+                                 xlog=xlog, ylog=ylog,
+                                 slowcoordinate=slowcoordinate,
+                                 preprocessor=preprocessor,
+                                 trace_processor=trace_processor,
+                                 plot_type=plot_type,
+                                 figure=fig)
 
           display.display(fig)
 
@@ -433,3 +451,13 @@ def snapshot_explorer(d, max_depth=10, detect_qcodes_params=True):
   for dd in snapshot_explorer_globals["dropdowns"]: dd.observe(construct_vdim_spec)
 
   return VBox([ VBox(snapshot_explorer_globals["dropdowns"]), snapshot_explorer_globals["out"] ])
+
+def call_with_extra_kwargs(f, **kwargs):
+  """Returns results of f(**kwargs), after filtering out parameters from
+     kwargs that f doesn't accept.
+  """
+  sig = signature(f)
+  for a in list(kwargs.keys()):
+    if a not in sig.parameters: del kwargs[a]
+
+  return f(**kwargs)
