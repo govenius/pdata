@@ -288,8 +288,6 @@ def monitor_dir(base_dir, x, y,
           display.clear_output(wait=True)
           fig.clear()
 
-          plotter_args = {  }
-
           call_with_extra_kwargs(plotter,
                                  base_dir= None, data_dirs=all_data,
                                  x=x, y=y,
