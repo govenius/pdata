@@ -137,7 +137,7 @@ def basic_plot(base_dir, data_dirs, x, y,
   if xlog:
     for xx in ax: xx.set_xscale('log')
   if ylog:
-    for xx in ax: xx.set_yscale('log')
+    ax[0].set_yscale('log')
 
   if plot_type == "line plot":
     for trace, slowval in zip(traces, slowvals):
