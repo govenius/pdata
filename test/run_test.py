@@ -53,7 +53,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
                     "random_list": np.random.randn(10).tolist(),
                     "random_ndarray": np.random.randn(10)
                    },
-          "voltage_source1": { "V": -1.234 },
+          "voltage_source1": { "V": -1.234, "on": True },
           "voltage_source2": { "V": -5.678, "strange unicode characters": "∰ ᴥ ❽ ⁂" },
         },
         "list": [ "list_value0", {"key": "value"} ]}
@@ -224,6 +224,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
     self.assertTrue("voltage_source2" in d.settings()[0][1]['instruments'].keys())
 
     d.add_virtual_dimension('VNA power', units="dBm", from_set=('instruments', 'VNA1', 'power'))
+    d.add_virtual_dimension('voltage source 1 on', dtype=bool, from_set=('instruments', 'voltage_source1', 'on'))
     d.add_virtual_dimension('unicode check', dtype=str, from_set=('instruments', 'voltage_source2', 'strange unicode characters'))
 
     # Check dimensions and units
@@ -411,6 +412,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
     # Test reading the data using DataView
     d = DataView([ PDataSingle(self._typical_datadir), ])
     d.add_virtual_dimension('VNA power', units="dBm", from_set=('instruments', 'VNA1', 'power'))
+    d.add_virtual_dimension('voltage source 1 on', dtype=bool, from_set=('instruments', 'voltage_source1', 'on'))
 
     def check_correctness(s, correct_sweeps=[slice(0, 41, None), slice(41, 82, None), slice(82, 123, None)]):
       self.assertEqual(len(s), len(correct_sweeps))
@@ -419,9 +421,17 @@ class TestSavingAndAnalysis(unittest.TestCase):
     check_correctness(d.divide_into_sweeps("frequency", use_sweep_direction=True))
     check_correctness(d.divide_into_sweeps("VNA power", use_sweep_direction=False))
 
-    # Also test autodetection of use_sweep_direction
+    # Test autodetection of use_sweep_direction
     check_correctness(d.divide_into_sweeps("frequency"))
     check_correctness(d.divide_into_sweeps("VNA power"))
+
+    # Test using a string column
+    check_correctness(d.divide_into_sweeps("data_source"),
+                      correct_sweeps=[slice(0, 123, None)])
+
+    # Test using a boolean column
+    check_correctness(d.divide_into_sweeps("voltage source 1 on"),
+                      correct_sweeps=[slice(0, 123, None)])
 
     # Test the corner case that we have only one sweep
     d.mask_rows(slice(0, 41, None), unmask_instead=True)

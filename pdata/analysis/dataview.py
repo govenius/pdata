@@ -893,10 +893,13 @@ class DataView():
         '''
         sdim = self[sweep_dimension]
 
-        if isinstance(sdim[0], str):
+        if isinstance(sdim, np.ndarray) and isinstance(sdim[0], (np.str_, np.bool_)):
+          use_sweep_direction = False
+          dx = sdim[1:] != sdim[:-1]
+        elif isinstance(sdim[0], (str, bool)): # as above but native Python list
           use_sweep_direction = False
           dx = np.array([ sdim[i+1] != sdim[i] for i in range(len(sdim)-1) ])
-        else:
+        else: # The usual case
           dx = np.sign(sdim[1:] - sdim[:-1])
 
         if use_sweep_direction is None:
