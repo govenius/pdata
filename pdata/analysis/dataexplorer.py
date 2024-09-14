@@ -107,9 +107,12 @@ def basic_plot(base_dir, data_dirs, x, y,
   if isinstance(data_dirs, str) or isinstance(data_dirs, PDataSingle):
     data_dirs = [ data_dirs ]
 
-  # Concatenate all specified data dirs into one DataView
-  d = DataView([ PDataSingle(os.path.join(base_dir, n) if base_dir is not None else n)
-                 if isinstance(n, str) else n for n in data_dirs ])
+  if isinstance(data_dirs, DataView):
+    d = data_dirs
+  else:
+    # Concatenate all specified data dirs into one DataView
+    d = DataView([ PDataSingle(os.path.join(base_dir, n) if base_dir is not None else n)
+                   if isinstance(n, str) else n for n in data_dirs ])
 
   # Preprocess data (e.g. add virtual dimensions)
   if preprocessor is not None: d = preprocessor(d)
