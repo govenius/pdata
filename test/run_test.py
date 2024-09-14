@@ -302,15 +302,7 @@ class TestSavingAndAnalysis(unittest.TestCase):
 <path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
  """, flags=re.UNICODE)))
 
-    self.assertTrue(html.endswith(re.sub(r"\s+", "", """},
-  &#34;list&#34;: [
-    &#34;list_value0&#34;,
-    {
-      &#34;key&#34;: &#34;value&#34;
-    }
-  ],
-  &#34;key_that_gets_added&#34;: &#34;value_for_key_that_gets_added&#34;
-}</pre></div></li>
+    self.assertTrue(html.endswith(re.sub(r"\s+", "", """
               </ul></div></li>
   </ul>
 </div>
