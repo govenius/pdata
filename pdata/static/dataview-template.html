@@ -32,9 +32,12 @@ Dimensions:
     </ul></div></li>
 
     <li class="xr-section-item"><input id="section-{{settingslist_uuid}}" class="xr-section-summary-in" type="checkbox"><label for="section-{{settingslist_uuid}}" class="xr-section-summary">Settings: <span>({{settings_list|length}})</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list">
-          {% for settings in settings_list %}
+          {% for settings in settings_list[:settings_to_display] %}
           <li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">At row {{settings.row}}</span></div><div class="xr-var-dims"></div><div class="xr-var-dtype"></div><div class="xr-var-preview xr-preview">{{settings.preview}}</div><input id="data-{{settings.uuid}}" class="xr-var-data-in" type="checkbox"><label for="data-{{settings.uuid}}" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use xlink:href="#icon-database"></use></svg></label><div class="xr-var-data"><pre>{{settings.full}}</pre></div></li>
           {% endfor %}
+          {% if settings_list|length > settings_to_display %}
+          <li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">...</span></div><div class="xr-var-dims"></div><div class="xr-var-dtype"></div><div class="xr-var-preview xr-preview"></div><input id="data-empty" class="xr-var-data-in" type="checkbox"><label for="data-empty" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use xlink:href="#icon-database"></use></svg></label><div class="xr-var-data"><pre></pre></div></li>
+          {% endif %}
     </ul></div></li>
 
   </ul>

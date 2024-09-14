@@ -1275,7 +1275,7 @@ class DataView():
           'uuid': str(uuid.uuid4()),
           'row': row,
           'preview': full[:min(len(full), 50)] + ("..." if len(full)>50 else ""),
-          'full': full,
+          'full': full[:min(len(full), 900)] + ("..." if len(full)>900 else ""),
         })
 
       # Generate the HTML
@@ -1287,7 +1287,8 @@ class DataView():
         dimlist_uuid= str(uuid.uuid4()),
         settingslist_uuid= str(uuid.uuid4()),
         dimension_list=dimension_list,
-        settings_list=settings_list )
+        settings_list=settings_list,
+        settings_to_display=min(20, len(settings_list)))
 
       #with open(os.path.join('.', 'dataview_repr.html'), 'w') as f: f.write(html_out)
       return f"<div>\n{style_css}\n{html_out}</div>"
