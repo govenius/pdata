@@ -317,11 +317,12 @@ class TestSavingAndAnalysis(unittest.TestCase):
 """, flags=re.UNICODE)))
 
     # Check conversion to xarray
-    xa = d.to_xarray("S21", coords=[ "frequency", "VNA power" ])
+    xa = d.to_xarray([ "S21", "data_source" ], coords=[ "frequency", "VNA power" ])
     self.assertTrue(all(xa.coords["frequency"] == expected_freqs))
     self.assertTrue(all(xa.coords["VNA_power"] == [-30., -20., -10.]))
     self.assertTrue(all(xa.sel(VNA_power=-30) == d["S21"][:len(expected_freqs)] ))
     self.assertTrue(all(xa.sel(VNA_power=-10) == d["S21"][-len(expected_freqs):] ))
+    self.assertTrue(all(s.strip(')').endswith(self._typical_datadir) for s in xa.data_source.to_numpy().reshape((-1,)) ))
     self.assertTrue(xa.S21.attrs["data_source"].strip(')').endswith(self._typical_datadir))
 
     # Check coarse grained xarray

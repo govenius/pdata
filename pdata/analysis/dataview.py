@@ -1157,6 +1157,8 @@ class DataView():
            names are replaced automatically by underscores, as these
            don't work well with xarray syntax.
         """
+        assert np.isnan(fill_value), "Specifying any fill value other than np.nan is unsupported."
+
         # Get unique coordinate values for each coordinate
         coords = OrderedDict((c, np.unique(self[c])) for c in coords )
         coord_values = OrderedDict((c, self[c]) for c in coords )
@@ -1219,8 +1221,8 @@ class DataView():
 
         # Use pivot to efficiently "unstack" the data into an
         # xarray-style n-dimensional array
-        pvt = frame.pivot_table(index=[sanitized_name[c] for c in coords.keys()],
-                                columns=[], fill_value=fill_value)
+        pvt = frame.pivot(index=[sanitized_name[c] for c in coords.keys()],
+                          columns=[])
 
         # Check for duplicate values
         if np.any(pvt.index.duplicated()):
