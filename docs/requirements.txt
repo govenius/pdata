@@ -3,6 +3,7 @@
 # (not sure if there's a more elegant way to read these directly from there)
 numpy
 jsondiff
+jsondiffr
 pytz
 python-dateutil
 requests

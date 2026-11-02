@@ -14,7 +14,7 @@ import tarfile
 import itertools
 import uuid
 import json
-import jsondiff
+import jsondiffr
 import datetime
 import pytz
 import jinja2
@@ -56,16 +56,16 @@ class PDataSingle():
         self._snapshots = []
         if os.path.exists(os.path.join(path, 'snapshot.json')):
           with open(os.path.join(path, 'snapshot.json'), 'r') as f:
-            self._snapshots.append((0, json.load(f)))
+            self._snapshots.append((0, jsondiffr.patch(f.read(), "{}")))
         else:
           with gzip.open(os.path.join(path, 'snapshot.json.gz'), 'rt') as f:
-            self._snapshots.append((0, json.load(f)))
+            self._snapshots.append((0, jsondiffr.patch(f.read(), "{}")))
 
       def add_snapshot_diff(row, f):
-        # Deep copy the last snapshot -> VERY inefficient but easy & safe
-        snap = json.loads(json.dumps(self._snapshots[-1][-1]))
-        # Add the new copy with the changes
-        self._snapshots.append((row, jsondiff.patch(snap, json.load(f), marshal=True)))
+        # JsonValue's returned by jsondiffr are immutable so no need to (deep) copy when patching
+        diff_as_str = f.read()
+        if isinstance(diff_as_str, bytes): diff_as_str = diff_as_str.decode('utf-8')
+        self._snapshots.append((row, jsondiffr.patch(self._snapshots[-1][-1], diff_as_str)))
 
       def parse_snapshot_diff_names(fnames):
         """ Given a list of filenames, filter and sort the snapshot diffs. """
@@ -247,8 +247,8 @@ class PDataSingle():
     def comments(self):
       return self._comments
 
-    def settings(self):
-      return self._snapshots
+    def settings(self, as_jsondiffr_values=False):
+      return self._snapshots if as_jsondiffr_values else [ (s[0], s[1].to_python()) for s in self._snapshots ]
 
     def __getitem__(self, key):
       return self._data[f"col{self._column_name_to_index[key]}"]
@@ -577,7 +577,7 @@ class DataView():
           self._comments = data.comments()
 
           try:
-            self._settings = data.settings()
+            self._settings = data.settings(as_jsondiffr_values=True)
           except: # noqa: E722
             logging.exception("Could not parse the instrument settings file. Doesn't matter if you were not planning to add virtual columns based on values in the snapshot files.")
             self._settings = None
@@ -637,7 +637,7 @@ class DataView():
           self._comments = list(itertools.chain.from_iterable(all_comments)) # flatten by one level
 
           # concatenate settings (snapshot) files in the same way
-          self._settings = [ dat.settings() for dat in data ]
+          self._settings = [ dat.settings(as_jsondiffr_values=True) for dat in data ]
           all_settings = []
           for jj,settings in enumerate(self._settings):
               all_settings.append([ (rowno + lens[:jj].sum(), sett) for rowno,sett in settings ])
@@ -715,14 +715,14 @@ class DataView():
         '''
         return self._comments
 
-    def settings(self):
+    def settings(self, as_jsondiffr_values=False):
         '''
         Return the settings parsed from the settings files.
 
         Returns tuples where the first item is an index to the
         first datarow that the settings apply to.
         '''
-        return self._settings
+        return self._settings if as_jsondiffr_values else [ (s[0], s[1].to_python()) for s in self._settings ]
 
     def continuous_ranges(self, masked_ranges=False):
         '''
@@ -1076,9 +1076,7 @@ class DataView():
             for rowno,commentstr in (self._settings if use_set else self._comments):
               if use_set:
                 # simply use the value from the snapshot file
-                assert from_set[0] in commentstr.keys(), '"%s" not found in settings.' % from_set[0]
-                new_val = commentstr
-                for k in from_set: new_val = new_val[k]
+                new_val = commentstr.to_python(from_set)
               else:
                 # see if the comment matches the specified regex
                 m = re.search(comment_regex, commentstr)
@@ -1269,8 +1267,8 @@ class DataView():
         })
 
       settings_list = []
-      for row,s in self.settings():
-        full = json.dumps(s, indent=2)
+      for row,s in self.settings(as_jsondiffr_values=True):
+        full = json.dumps(s.to_python(), indent=2)
         settings_list.append({
           'uuid': str(uuid.uuid4()),
           'row': row,
