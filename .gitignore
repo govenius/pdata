@@ -9,4 +9,5 @@ dist
 *.egg-info
 Pipfile.lock
 *.so
+tabular_data_parser.cpp
 tabular_data_parser.html
