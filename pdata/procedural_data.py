@@ -1,9 +1,6 @@
 """
 Class for storing measurement data.
 """
-
-from pdata._metadata import __version__ # noqa: F401
-
 import os
 import sys
 import numpy as np
@@ -13,14 +10,15 @@ import shutil
 import gzip
 import tarfile
 import contextlib
+from importlib.metadata import version
 import json
-import jsondiff
+import jsondiffr
 import tempfile
 import random
 import re
 import time
 
-from pdata.helpers import NumpyJSONEncoder, preprocess_snapshot, PdataJSONDiffer
+from pdata.helpers import NumpyJSONEncoder, preprocess_snapshot
 import pdata.jupyter_helpers
 
 # Version number of the data format written to disk, following Semantic Versioning (https://semver.org/).
@@ -80,7 +78,7 @@ class Measurement():
 
     * :file:`tabular_data.dat` -- Data table with rows added using :code:`add_points`, and columns defined as arguments of :code:`run_measurement`.
     * :file:`snapshot.json` -- Instrument parameter snapshot when :code:`run_measurement` started.
-    * :file:`snapshot.row-<n>.diff<m>.json` -- `jsondiff <https://pypi.org/project/jsondiff/>`_ of parameter changes, recorded when the there were <n> data rows in tabular_data.dat. <m> is a simple counter, in case multiple diffs are created for the same row.
+    * :file:`snapshot.row-<n>.diff<m>.json` -- `jsondiffr <https://pypi.org/project/jsondiffr/>`_ diff of parameter changes, recorded when the there were <n> data rows in tabular_data.dat. <m> is a simple counter, in case multiple diffs are created for the same row.
     * :file:`log.txt` -- copy of messages from the logging module.
     * :file:`input-history` -- copy of input given to IPython/Jupyter in the current session, up to 500 most recent cells. (optional)
     * A copy of the Jupyter notebook (optional and disabled by default; only in Jupyter Notebook not Lab)
@@ -230,9 +228,9 @@ class Measurement():
     """
     header =  "#\n"
     header += f"# ondisk_format_version = {'.'.join(map(str, ondisk_format_version))}\n"
-    header += f"# pdata_version = {pdata.__version__}\n"
-    header += f"# jsondiff_version = {jsondiff.__version__}\n"
-    header += f"# numpy_version = {np.__version__}\n"
+    header += f"# pdata_version = {version('pdata')}\n"
+    header += f"# jsondiffr_version = {version('jsondiffr')}\n"
+    header += f"# numpy_version = {version('numpy')}\n"
     header += f"# python_version = {sys.version}\n"
     header += "# Measurement started at " + self._start_time.strftime("%Y-%m-%d %H:%M:%S.%f\n")
     header += "# Column dtypes: " + "\t".join(Measurement._dtype_to_str(dt)
@@ -323,12 +321,16 @@ class Measurement():
       # Filter _after_ writing initial snapshot.
       if self._snap_diff_filter is not None: snap = self._snap_diff_filter(snap)
 
+      snap = Measurement._dumps_json(snap) # Serialize
+
     else:
 
       if self._snap_diff_filter is not None: snap = self._snap_diff_filter(snap)
-      d = jsondiff.diff(self._last_snapshot, snap, cls=PdataJSONDiffer, marshal=True)
 
-      if len(d.keys()) == 0: return
+      snap = Measurement._dumps_json(snap) # Serialize
+      d = jsondiffr.diff(self._last_snapshot, snap)
+
+      if d.strip() in ['{}', '']: return
 
       i = 0
       while True:
@@ -337,9 +339,9 @@ class Measurement():
         if not os.path.exists(fname): break
 
       self._snapshot_diff_rows.append(self._npoints_total)
-      with open(fname, 'w') as fsnap: Measurement._dump_json(d, fsnap)
+      with open(fname, 'w') as fsnap: fsnap.write(d)
 
-    self._last_snapshot = snap
+    self._last_snapshot = snap # Already serialized above
 
   def _guess_missing_formatters(self, data):
     '''Given the first points added to the data file, assign reasonable
@@ -482,6 +484,11 @@ class Measurement():
   @staticmethod
   def _dump_json(snap, fhandle):
     json.dump(snap, fhandle, sort_keys=False,
+              indent=2, ensure_ascii=True, cls=NumpyJSONEncoder)
+
+  @staticmethod
+  def _dumps_json(snap):
+    return json.dumps(snap, sort_keys=False,
               indent=2, ensure_ascii=True, cls=NumpyJSONEncoder)
 
   @staticmethod
