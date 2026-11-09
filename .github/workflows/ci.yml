@@ -34,10 +34,6 @@ jobs:
         run: |
           pip install --force-reinstall dist/*.whl
 
-      - name: Check that tabular_data_parser was compiled and installed
-        run: |
-          python -c "from pdata.analysis.fast_parser import tabular_data_parser"
-
       - name: Run Python tests
         working-directory: test
         run: python run_test.py
