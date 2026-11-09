@@ -32,9 +32,9 @@ jobs:
 
       - name: Install wheel
         run: |
-          pip install --force-reinstall --no-deps dist/*.whl
+          pip install --force-reinstall dist/*.whl
 
-      - name: Check that tabular_data_parser was compiled
+      - name: Check that tabular_data_parser was compiled and installed
         run: |
           python -c "from pdata.analysis.fast_parser import tabular_data_parser"
 
