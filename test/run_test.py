@@ -974,6 +974,23 @@ class TestFastParser(unittest.TestCase):
           self.assertEqual(len(parsed_vals["col0"]), 5)
           self.assertEqual(len(parsed_vals["col1"]), 5)
           self.assertEqual(len(parsed_vals["col2"]), 5)
+  
+  def test_long_footer(self):
+    f = example_tabular_data("v1.0.0", file_object=False)
+    
+    # Add a long comment line to the footer
+    footer_str = "#" + 10000 * " Very long comment" + "\n\n\n\n"
+    f += footer_str
+
+    f = io.BytesIO(bytes(f, "utf-8"))
+ 
+    # parse the footer
+    f.seek(0, io.SEEK_END)
+    footer = PDataSingle._parse_footer(PDataSingle._extract_footer(f))
+
+    self.assertEqual(footer["measurement_ended_at"], datetime.datetime(2023, 1, 22, 13, 7, 44, 551944))
+    self.assertIsNone(np.testing.assert_array_equal(footer["snapshot_diffs_preceding_rows"], [0, 41, 82]))
+    
 
 if __name__ == '__main__':
   unittest.main(exit=False)
