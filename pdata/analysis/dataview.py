@@ -451,8 +451,10 @@ class PDataSingle():
         # If so, we must have read the entire footer already
         # Ignore the first line of the current tail because it may be
         # only partially read.
+        rows = tail.split(b"\n" if b else "\n")
+        if len(rows) < 2: continue
         if any( not (l.strip().startswith(b"#" if b else "#") or len(l.strip())==0)
-               for l in tail.split(b"\n" if b else "\n")[1:] ):
+               for l in rows[1:] ):
           break
 
       # Remove non-comment rows:
